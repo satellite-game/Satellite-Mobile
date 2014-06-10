@@ -35,17 +35,15 @@ s.SatelliteGame = new Class({
       game: this
     });
 
-    /*
     // Add spacestation
     this.spaceStation = new s.SpaceStation({
       game: this
     });
 
     // Add tall moon base
-    this.moonBaseTall = new s.MoonBaseTall({
+    this.moonBase = new s.MoonBaseTall({
       game: this
     });
-    */
 
     // // Add a hud
     // this.HUD = new s.HUD({
@@ -56,15 +54,21 @@ s.SatelliteGame = new Class({
       HUD: this.HUD,
       game: this,
       shipClass: 'human_ship_heavy',
-      position: new THREE.Vector3(this.startingPosition[0], this.startingPosition[1], this.startingPosition[2]),
+      position: this.startingPosition.clone(),
       name: 'Player',
       rotation: new THREE.Vector3(0, Math.PI/2, 0),
       alliance: 'alliance',
       camera: this.camera
     });
 
-    // Moon facing initilization
+    // Moon facing
     this.player.root.lookAt(this.moon.root.position);
+
+    // Space station facing
+    // this.player.root.lookAt(this.spaceStation.root.position);
+    
+    // Moon base facing
+    // this.player.root.lookAt(this.moonBase.root.position);
     
     s.game.start();
     // this.player.root.addEventListener('ready', function(){
@@ -197,6 +201,6 @@ s.SatelliteGame = new Class({
   },
 
   getStartPosition: function() {
-    return [this.getRandomCoordinate(), this.getRandomCoordinate(), this.getRandomCoordinate()];
+    return new THREE.Vector3(this.getRandomCoordinate(), this.getRandomCoordinate(), this.getRandomCoordinate());
   }
 });

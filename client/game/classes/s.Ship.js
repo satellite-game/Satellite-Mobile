@@ -9,7 +9,7 @@ s.Ship = new Class({
     this.materials = s.models[options.shipClass].materials[0];
     this.materials.emissive = new THREE.Color('rgb(255,255,255)');
 
-    this.root = new THREE.Mesh(geometry, this.materials, 100);
+    this.root = new THREE.Mesh(geometry, this.materials);
     this.root.position.copy(options.position);
     this.root.rotation.copy(options.rotation);
 

@@ -11,7 +11,7 @@ s.SpaceStation = new Class({
     var geometry = s.models.human_space_station.geometry;
     var materials = s.models.human_space_station.materials;
 
-    this.root = new Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 
     this.root.name = "spaceStation";
     this.root.team = 'alliance';

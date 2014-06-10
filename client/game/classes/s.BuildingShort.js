@@ -11,7 +11,7 @@ s.BuildingShort = new Class({
     var geometry = s.models.human_building_short.geometry;
     var materials = s.models.human_building_short.materials;
 
-    this.root = new Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 
     this.root.name = "building_short";
     this.root.position.copy(options.position);
