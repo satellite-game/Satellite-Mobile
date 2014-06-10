@@ -9,7 +9,15 @@ s.Ship = new Class({
     this.materials = s.models[options.shipClass].materials[0];
     this.materials.emissive = new THREE.Color('rgb(255,255,255)');
 
-    this.root = new THREE.Mesh(geometry, this.materials);
+    {
+      // this.root = new THREE.Mesh(geometry, this.materials);
+    }
+
+    {
+      var physiMaterial = Physijs.createMaterial(this.materials);
+      this.root = new Physijs.ConvexMesh(geometry, physiMaterial, 100);
+    }
+
     this.root.position.copy(options.position);
     this.root.rotation.copy(options.rotation);
 

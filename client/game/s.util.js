@@ -151,6 +151,17 @@ s.util.createRay = function(pointA, pointB) {
 };
 
 /**
+	Create a ray between two points
+
+	@param {Number} value  Value to clamp
+	@param {Number} min    Lowest value
+	@param {Number} max    Highest value
+*/
+s.util.clamp = function(value, min, max) {
+	return Math.max(Math.min(value, max), min)
+};
+
+/**
 	Get the normalized device coordinate
 
 	@param {Number} x  2D x coordinate

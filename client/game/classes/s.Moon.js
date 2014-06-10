@@ -14,7 +14,20 @@ s.Moon = new Class({
     // Make the moon a bit red
     materials[0].color.setHex(0x704030);
 
-    this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    {
+      // this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+    }
+
+    {
+      // Setup physical properties
+      materials[0] = Physijs.createMaterial(
+        materials[0],
+        1, // high friction
+        0.4 // low restitution
+      );
+
+      this.root = new Physijs.ConvexMesh(geometry, new THREE.MeshFaceMaterial(materials), 0);
+    }
 
     this.root.name = 'moon';
     // this.root.scale.set(2, 2, 2);

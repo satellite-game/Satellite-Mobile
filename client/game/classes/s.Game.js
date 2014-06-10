@@ -32,7 +32,9 @@ s.Game = new Class({
     this.renderer.shadowMapCullFrontFaces = false;
 
     // Create the scene
-    this.scene = scene = new THREE.Scene();
+    // this.scene = scene = new THREE.Scene();
+    Physijs.scripts.worker = '/lib/physijs_worker.js';
+    this.scene = scene = new Physijs.Scene();
 
     // Add the camera to the scene
     // this.scene.add(this.camera);
@@ -201,6 +203,9 @@ s.Game = new Class({
    // Perform render
    render: function(now) {
      if (this.doRender) {
+       // Simulate physics
+       this.scene.simulate();
+
        // Calculate the time since the last frame was rendered
        var delta = now - this.lastRender;
        this.lastRender = now;
