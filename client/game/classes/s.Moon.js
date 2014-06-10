@@ -1,0 +1,25 @@
+s.Moon = new Class({
+  extend: s.GameObject,
+
+  construct: function(options) {
+    // handle parameters
+    this.options = options = jQuery.extend({
+      position: new THREE.Vector3(0, 0, 0),
+      rotation: new THREE.Vector3(0, 0, 0)
+    }, options);
+
+    var geometry = s.models.phobos_hifi.geometry;
+    var materials = s.models.phobos_hifi.materials;
+
+    // Make the moon a bit red
+    materials[0].color.setHex(0x704030);
+
+    this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+
+    this.root.name = 'moon';
+    // this.root.scale.set(2, 2, 2);
+    this.root.position.copy(options.position);
+    this.root.rotation.copy(options.rotation);
+    // this.root.receiveShadow = true; // Causes shader error
+  }
+});
