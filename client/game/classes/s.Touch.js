@@ -32,7 +32,11 @@ s.Touch = new Class({
     this._startX = evt.touches[0].screenX;
     this._startY = evt.touches[0].screenY;
 
-    this.throttle = true;
+    this.firing = true;
+
+    if (evt.touches.length > 1) {
+      this.throttle = true;
+    }
   },
 
   handleTouchMove: function(evt) {
@@ -64,6 +68,7 @@ s.Touch = new Class({
     this.y = 0;
 
     this.throttle = false;
+    this.firing = false;
   },
 });
 

@@ -53,16 +53,35 @@ s.SatelliteGame = new Class({
     //     game: this
     // });
 
-    this.player = new s.Player({
+    var player = this.player = new s.Player({
       HUD: this.HUD,
       game: this,
       name: 'Player',
       position: this.startingPosition.clone(),
-      rotation: new THREE.Vector3(0, Math.PI/2, 0),
       shipClass: 'human_ship_heavy',
-      alliance: 'alliance',
+      team: 'alliance',
       camera: this.camera
     });
+
+    this.player.on('fire', s.util.throttle(function() {
+      player.root.updateMatrixWorld();
+
+      var instance = new s.WeaponPlasma({
+        game: s.game,
+        velocity: player.body.velocity,
+        position: new THREE.Vector3(50, -10, 300).applyMatrix4(player.root.matrixWorld),
+        rotation: player.root.quaternion,
+        team: player.team
+      });
+
+      var instance = new s.WeaponPlasma({
+        game: s.game,
+        velocity: player.body.velocity,
+        position: new THREE.Vector3(-50, -10, 300).applyMatrix4(player.root.matrixWorld),
+        rotation: player.root.quaternion,
+        team: player.team
+      });
+    }, 100));
 
     // Moon facing
     this.player.lookAt(this.moon.root.position);

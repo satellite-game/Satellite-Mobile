@@ -71,7 +71,11 @@ s.Controls = new Class({
     // var gamepadThrust = 0.5;
     // this.thrustImpulse = gamepadThrust * s.config.ship.maxSpeed;
     if (this.touch.throttle) {
-        thrust = 1;
+      thrust = 1;
+    }
+
+    if (this.touch.firing) {
+      this.player.trigger('fire');
     }
 
     ///////////////////////
@@ -108,8 +112,8 @@ s.Controls = new Class({
       roll = -1*this.options.rotationSpeed;
     }
 
-    if (this.game.gameFire && this.keyboard.pressed('space') || this.firing){
-      this.player.fire('turret');
+    if (this.keyboard.pressed('space')) {
+      this.player.trigger('fire');
     }
 
     //////////////////////////////
@@ -163,6 +167,5 @@ s.Controls = new Class({
     var cannonVector = new CANNON.Vec3(forceVector.x, forceVector.y, forceVector.z);
     body.applyImpulse(cannonVector, body.position);
     // body.applyForce(forceVector, new CANNON.Vec3(0,0,0));
-    this.lastTime = now;
   }
 });
