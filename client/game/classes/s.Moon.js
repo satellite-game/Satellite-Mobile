@@ -5,7 +5,7 @@ s.Moon = new Class({
     // handle parameters
     this.options = options = jQuery.extend({
       position: new THREE.Vector3(0, 0, 0),
-      rotation: new THREE.Vector3(0, 0, 0)
+      rotation: new THREE.Quaternion(0, 0, 0, 0)
     }, options);
 
     var geometry = s.models.phobos_hifi.geometry;
@@ -23,8 +23,6 @@ s.Moon = new Class({
 
     this.root.name = 'moon';
     // this.root.scale.set(2, 2, 2);
-    this.root.position.copy(options.position);
-    this.root.rotation.copy(options.rotation);
     // this.root.receiveShadow = true; // Causes shader error
   }
 });
