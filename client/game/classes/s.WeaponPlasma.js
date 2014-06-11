@@ -18,9 +18,28 @@ s.WeaponPlasma = new Class({
     this.color = this.colors[options.team];
 
     // Cannon.js
-    var shape = new CANNON.Sphere(10);
+    var shape = new CANNON.Sphere(5);
     var mass = 1;
     var body = this.body = new CANNON.RigidBody(mass, shape);
+
+    var self = this;
+    var handleCollision = function(evt) {
+      // Explosion animation
+      new s.Explosion({
+        game: self.game,
+        position: self.body.position
+      });
+
+      self.trigger('collide', evt);
+
+      // Die after some time
+      // @todo why does this break?
+      setTimeout(function() {
+        self.destruct();
+      }, 0);
+    };
+
+    this.body.addEventListener('collide', handleCollision);
 
     // A 3D root object
     this.root = new THREE.Object3D();
@@ -37,5 +56,10 @@ s.WeaponPlasma = new Class({
     // Scale appropriately
     // Does not affect hit area
     sprite.scale.copy(this.scale);
+  },
+
+  init: function() {
+    this._super.call(this);
+    this.game.sound.play('laser', 0.050);
   }
 });

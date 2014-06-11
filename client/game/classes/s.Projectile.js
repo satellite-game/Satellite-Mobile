@@ -8,9 +8,13 @@ s.Projectile = new Class({
         var self = this;
 
         // Destory projectile after 4 secs
-        setTimeout(function(){
+        this._flightTimeout = setTimeout(function(){
             self.destruct();
         }, this.flightTime);
+    },
+
+    destruct: function() {
+        clearTimeout(this._flightTimeout);
     },
 
 	init: function(){

@@ -19,10 +19,15 @@ s.SatelliteGame = new Class({
   ],
 
   initialize: function() {
-    // this.startingPosition = this.getStartPosition();
+    // Create sound object
+    this.sound = new s.Sound({
+        enabled: s.config.sound.enabled,
+        sounds: s.config.sound.sounds
+    });
 
+    // this.startingPosition = this.getStartPosition();
     // Start looking at the space station
-    this.startingPosition = new THREE.Vector3(26889, 28673, 26087);
+    this.startingPosition = new THREE.Vector3(20969.368762656006, 21203.296709545128, 21156.31191586029);
 
     // Ambient light
     this.ambientLight = new THREE.AmbientLight(0x382828);
@@ -32,6 +37,14 @@ s.SatelliteGame = new Class({
     this.light = new THREE.DirectionalLight(0xEEEEEE, 2);
     this.light.position.set(-100000, 0, 0);
     this.scene.add(this.light);
+
+    // Explosion lights
+    this.lightPool = [];
+    while (this.lightPool.length < 20) {
+      var light = new THREE.PointLight(0xF16718, 0.5, 1000);
+      scene.add(light);
+      this.lightPool.push(light);
+    }
 
     // Add moon
     this.moon = new s.Moon({
@@ -81,7 +94,7 @@ s.SatelliteGame = new Class({
         rotation: player.root.quaternion,
         team: player.team
       });
-    }, 100));
+    }, 125));
 
     // Moon facing
     this.player.lookAt(this.moon.root.position);
