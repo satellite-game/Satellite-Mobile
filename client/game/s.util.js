@@ -215,3 +215,12 @@ s.util.largerThan = function(vector, value){
 	if(Math.abs(vector.x) > value || Math.abs(vector.y) > value || Math.abs(vector.z) > value) return true;
 	return false;
 };
+
+// Get a random coordinate
+s.util.getRandomCoordinate = function(){
+	var coefficient = 1;
+	if (Math.random() > 0.5){
+		coefficient = -1;
+	}
+	return Math.floor(Math.random()* 15000 + 15000) * coefficient;
+};

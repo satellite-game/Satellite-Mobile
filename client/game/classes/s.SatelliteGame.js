@@ -19,7 +19,10 @@ s.SatelliteGame = new Class({
   ],
 
   initialize: function() {
-    this.startingPosition = this.getStartPosition();
+    // this.startingPosition = this.getStartPosition();
+
+    // Start looking at the space station
+    this.startingPosition = new THREE.Vector3(26889, 28673, 26087);
 
     // Ambient light
     this.ambientLight = new THREE.AmbientLight(0x382828);
@@ -53,10 +56,10 @@ s.SatelliteGame = new Class({
     this.player = new s.Player({
       HUD: this.HUD,
       game: this,
-      shipClass: 'human_ship_heavy',
-      position: this.startingPosition.clone(),
       name: 'Player',
+      position: this.startingPosition.clone(),
       rotation: new THREE.Vector3(0, Math.PI/2, 0),
+      shipClass: 'human_ship_heavy',
       alliance: 'alliance',
       camera: this.camera
     });
@@ -64,12 +67,6 @@ s.SatelliteGame = new Class({
     // Moon facing
     this.player.lookAt(this.moon.root.position);
 
-    // Space station facing
-    // this.player.root.lookAt(this.spaceStation.root.position);
-    
-    // Moon base facing
-    // this.player.root.lookAt(this.moonBase.root.position);
-    
     // this.player.root.addEventListener('ready', function(){
     // s.game.start();
     // });
@@ -78,7 +75,6 @@ s.SatelliteGame = new Class({
     this.addSkybox();
     this.addDust();
 
-    /*
     // Engine glow
     this.flames = [];
 
@@ -100,7 +96,6 @@ s.SatelliteGame = new Class({
     this.trailGlow = new THREE.PointLight(0x00FFFF, 5, 20);
     this.player.root.add(this.trailGlow);
     this.trailGlow.position.set(0, 0, 35);
-    */
 
     // Fly controls
     this.controls = new s.Controls({
@@ -110,12 +105,11 @@ s.SatelliteGame = new Class({
     });
   },
 
-  /*
   render: function(time) {
     this._super.call(this, time);
 
     // Adjusts engine glow based on linear velocity
-    this.trailGlow.intensity = this.player.root.getLinearVelocity().length()/100;
+    this.trailGlow.intensity = this.controls.thrustImpulse / 5;
 
     var flameScaler = (Math.random()*0.1 + 1);
     this.flames[0].scale.set(this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler);
@@ -124,7 +118,6 @@ s.SatelliteGame = new Class({
     this.flames[3].scale.set(this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler);
     this.flames[4].scale.set(this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler);
   },
-  */
 
   addSkybox: function() {
     var urlPrefix = "game/textures/skybox/Purple_Nebula_";
@@ -199,15 +192,7 @@ s.SatelliteGame = new Class({
     this.scene.add(this.dust);
   },
 
-  getRandomCoordinate: function(){
-    var coefficient = 1;
-    if (Math.random() > 0.5){
-      coefficient = -1;
-    }
-    return Math.floor(Math.random()* 15000 + 15000) * coefficient;
-  },
-
   getStartPosition: function() {
-    return new THREE.Vector3(this.getRandomCoordinate(), this.getRandomCoordinate(), this.getRandomCoordinate());
+    return new THREE.Vector3(s.util.getRandomCoordinate(), s.util.getRandomCoordinate(), s.util.getRandomCoordinate());
   }
 });
