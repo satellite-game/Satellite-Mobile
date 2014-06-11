@@ -17,7 +17,7 @@ window.s = {
             enabled: true,
             silentDistance: 10000,
             sounds: {
-                laser: "/game/sounds/laser.mp3"
+                laser: 'game/sounds/laser.mp3'
             }
         }
     },
