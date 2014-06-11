@@ -41,7 +41,7 @@ s.SatelliteGame = new Class({
     // Explosion lights
     this.lightPool = [];
     while (this.lightPool.length < 20) {
-      var light = new THREE.PointLight(0xF16718, 0.5, 1000);
+      var light = new THREE.PointLight(0xF16718, 0.45, 2500);
       scene.add(light);
       this.lightPool.push(light);
     }

@@ -12,7 +12,7 @@ s.SpaceStation = new Class({
     var materials = s.models.human_space_station.materials;
 
     // Cannon.js
-    var shape = new CANNON.Box(new CANNON.Vec3(800, 400, 500));
+    var shape = new CANNON.Box(new CANNON.Vec3(400, 200, 800));
     var mass = 0; // Fixed body
     var body = this.body = new CANNON.RigidBody(mass, shape);
 

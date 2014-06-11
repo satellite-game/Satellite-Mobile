@@ -17,7 +17,7 @@ s.Moon = new Class({
     this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 
     // Cannon.js
-    var shape = new CANNON.Sphere(7250);
+    var shape = new CANNON.Sphere(7000);
     var mass = 0; // Fixed body
     var body = this.body = new CANNON.RigidBody(mass, shape);
 
