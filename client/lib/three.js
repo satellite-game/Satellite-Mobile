@@ -3208,7 +3208,7 @@ THREE.Euler.prototype = {
 
 		} else {
 
-			console.warn( 'WARNING: Euler.setFromQuaternion() given unsupported order: ' + order )
+			// console.warn( 'WARNING: Euler.setFromQuaternion() given unsupported order: ' + order )
 
 		}
 

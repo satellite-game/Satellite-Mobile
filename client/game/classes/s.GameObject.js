@@ -33,8 +33,13 @@ s.GameObject = new Class({
 
   add: function() {
     // Add mesh to world
-    if (this.root)
+    if (this.root) {
       this.game.scene.add(this.root);
+    }
+
+    if (this.body) {
+      this.game.world.add(this.body);
+    }
 
     // Hook to the rendering loop
     if (this.update && !this.hooked) {
@@ -43,6 +48,14 @@ s.GameObject = new Class({
     }
 
     return this;
+  },
+
+  update: function() {
+    if (this.body) {
+      // Copy coordinates from Cannon.js to Three.js
+      this.body.position.copy(this.root.position);
+      this.body.quaternion.copy(this.root.quaternion);
+    }
   },
 
   getRoot: function() {

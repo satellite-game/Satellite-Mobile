@@ -62,7 +62,7 @@ s.SatelliteGame = new Class({
     });
 
     // Moon facing
-    this.player.root.lookAt(this.moon.root.position);
+    this.player.lookAt(this.moon.root.position);
 
     // Space station facing
     // this.player.root.lookAt(this.spaceStation.root.position);
@@ -70,14 +70,15 @@ s.SatelliteGame = new Class({
     // Moon base facing
     // this.player.root.lookAt(this.moonBase.root.position);
     
-    s.game.start();
     // this.player.root.addEventListener('ready', function(){
     // s.game.start();
     // });
+    s.game.start();
 
     this.addSkybox();
     this.addDust();
 
+    /*
     // Engine glow
     this.flames = [];
 
@@ -99,6 +100,7 @@ s.SatelliteGame = new Class({
     this.trailGlow = new THREE.PointLight(0x00FFFF, 5, 20);
     this.player.root.add(this.trailGlow);
     this.trailGlow.position.set(0, 0, 35);
+    */
 
     // Fly controls
     this.controls = new s.Controls({
@@ -108,6 +110,7 @@ s.SatelliteGame = new Class({
     });
   },
 
+  /*
   render: function(time) {
     this._super.call(this, time);
 
@@ -121,7 +124,7 @@ s.SatelliteGame = new Class({
     this.flames[3].scale.set(this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler);
     this.flames[4].scale.set(this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler);
   },
-
+  */
 
   addSkybox: function() {
     var urlPrefix = "game/textures/skybox/Purple_Nebula_";

@@ -2,6 +2,7 @@ s.Touch = new Class({
   toString: 'Touch',
 
   _steerSize: 100,
+  _deadZone: 0.15,
 
   construct: function(game, player) {
     var self = this;
@@ -30,6 +31,8 @@ s.Touch = new Class({
     // Store start X/Y
     this._startX = evt.touches[0].screenX;
     this._startY = evt.touches[0].screenY;
+
+    this.throttle = true;
   },
 
   handleTouchMove: function(evt) {
@@ -40,14 +43,27 @@ s.Touch = new Class({
     var deltaY = s.util.clamp((this._startY/this._steerSize - evt.touches[0].screenY/this._steerSize), -1, 1)
 
     // Store steer values
-    this.x = deltaX;
-    this.y = deltaY;
+    if (Math.abs(deltaX) > this._deadZone) {
+      this.x = deltaX;
+    }
+    else {
+      this.x = 0;
+    }
+
+    if (Math.abs(deltaY) > this._deadZone) {
+      this.y = deltaY;
+    }
+    else {
+      this.y = 0;
+    }
   },
 
   handleTouchEnd: function(evt) {
     // Clear steer values
     this.x = 0;
     this.y = 0;
+
+    this.throttle = false;
   },
 });
 

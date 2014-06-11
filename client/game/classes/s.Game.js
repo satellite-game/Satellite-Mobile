@@ -32,9 +32,12 @@ s.Game = new Class({
     this.renderer.shadowMapCullFrontFaces = false;
 
     // Create the scene
-    // this.scene = scene = new THREE.Scene();
-    Physijs.scripts.worker = '/lib/physijs_worker.js';
-    this.scene = scene = new Physijs.Scene();
+    this.scene = scene = new THREE.Scene();
+
+    this.world = world = new CANNON.World();
+    world.gravity.set(0,0,0);
+    world.broadphase = new CANNON.NaiveBroadphase();
+    world.solver.iterations = 10;
 
     // Add the camera to the scene
     // this.scene.add(this.camera);
@@ -203,24 +206,24 @@ s.Game = new Class({
    // Perform render
    render: function(now) {
      if (this.doRender) {
-       // Simulate physics
-       this.scene.simulate();
+        // Step the physics world
+        this.world.step(1/60);
 
-       // Calculate the time since the last frame was rendered
-       var delta = now - this.lastRender;
-       this.lastRender = now;
+        // Calculate the time since the last frame was rendered
+        var delta = now - this.lastRender;
+        this.lastRender = now;
 
-       // Run each hooked function before rendering
-       this.hookedFuncs.forEach(function(func) {
-         func(now, delta);
-       });
+        // Run each hooked function before rendering
+        this.hookedFuncs.forEach(function(func) {
+          func(now, delta);
+        });
 
-       this.renderer.render( this.scene, this.camera );
+        this.renderer.render(this.scene, this.camera);
 
-       // Request the next frame to be rendered
-       requestAnimationFrame(this.render);
+        // Request the next frame to be rendered
+        requestAnimationFrame(this.render);
 
-       this.render_stats.update();
+        this.render_stats.update();
      }
    }
 });

@@ -3,10 +3,9 @@ s.Controls = new Class({
   toString: 'Controls',
 
   options: {
-    rotationSpeed: Math.PI/2,
-    pitchSpeed: Math.PI/4,
-    yawSpeed: Math.PI/4,
-    thrustImpulse: 0,
+    rotationSpeed: Math.PI/8,
+    pitchSpeed: Math.PI/32,
+    yawSpeed: Math.PI/32,
     brakePower: 0.85,
     velocityFadeFactor: 16,
     rotationFadeFactor: 4,
@@ -30,6 +29,8 @@ s.Controls = new Class({
     this.firing = false;
 
     this.lastTime = new Date().getTime();
+
+    this.thrustImpulse = 0; 
   },
 
   destruct: function() {
@@ -41,6 +42,7 @@ s.Controls = new Class({
     var difference = now - this.lastTime;
 
     var root = this.player.root;
+    var body = this.player.body;
 
     var pitch = 0;
     var roll = 0;
@@ -48,7 +50,7 @@ s.Controls = new Class({
 
     var thrust = 0;
     var brakes = 0;
-    var thrustScalar = this.options.thrustImpulse/s.config.ship.maxSpeed + 1;
+    var thrustScalar = this.thrustImpulse/s.config.ship.maxSpeed + 1;
 
     ///////////////////////
     // RADIAL SUBRETICLE //
@@ -57,21 +59,20 @@ s.Controls = new Class({
     var yawSpeed = this.options.yawSpeed;
     var pitchSpeed = this.options.pitchSpeed;
 
-    // Touch
-
-
     ///////////////////////
-    // GAMEPAD CONTROLS  //
+    // TOUCH CONTROLS  //
     ///////////////////////
 
-    pitch = this.touch.y;
+    pitch = this.touch.y * this.options.pitchSpeed;
     roll = this.touch.x*-1 * this.options.rotationSpeed;
     yaw = 0;
 
     // @todo don't hardcode
-    var gamepadThrust = 0.5;
-
-    this.options.thrustImpulse = gamepadThrust * s.config.ship.maxSpeed;
+    // var gamepadThrust = 0.5;
+    // this.thrustImpulse = gamepadThrust * s.config.ship.maxSpeed;
+    if (this.touch.throttle) {
+        thrust = 1;
+    }
 
     ///////////////////////
     // KEYBOARD COMMANDS //
@@ -115,24 +116,18 @@ s.Controls = new Class({
     // MOTION AND PHYSICS LOGIC //
     //////////////////////////////
 
-    var linearVelocity = root.getLinearVelocity().clone();
-    var angularVelocity = root.getAngularVelocity().clone();
+    var linearVelocity = body.velocity;
+    var angularVelocity = body.angularVelocity;
     var rotationMatrix = new THREE.Matrix4();
     rotationMatrix.extractRotation(root.matrix);
 
-    // Apply rotation
-    // Bleed off angular velocity towards zero
-    angularVelocity = angularVelocity.clone().divideScalar(this.options.rotationFadeFactor);
-    root.setAngularVelocity(angularVelocity);
-
     // If ship position is greater then x apply thrust in opposite direction
     // If ship position is not greater then x allow to apply thrust
-    var playerPosition = this.player.root.position;
-    var boundryLimit = 30000;
-
+    // var playerPosition = this.player.root.position;
+    // var boundryLimit = 30000;
     // If the ship is beyound the boundary limit steer it back into the map
     // if(s.util.largerThan(playerPosition, boundryLimit)){
-    //   var boundryPush = new THREE.Vector3(-2*this.options.boundaryPushback*this.options.thrustImpulse, 0, 2*this.options.boundaryPushback*this.options.thrustImpulse).applyMatrix4(rotationMatrix);
+    //   var boundryPush = new THREE.Vector3(-2*this.options.boundaryPushback*this.thrustImpulse, 0, 2*this.options.boundaryPushback*this.thrustImpulse).applyMatrix4(rotationMatrix);
     //   yaw = this.options.boundaryPushback;
     //   if (this.options.boundaryPushback < 2) this.options.boundaryPushback += 0.01;
     //   root.applyCentralImpulse(boundryPush);
@@ -143,25 +138,31 @@ s.Controls = new Class({
 
     // Add to the existing angular velocity,
     var newAngularVelocity = new THREE.Vector3(pitch, yaw, roll).applyMatrix4(rotationMatrix).add(angularVelocity);
-    root.setAngularVelocity(newAngularVelocity);
+    body.angularVelocity.set(newAngularVelocity.x, newAngularVelocity.y, newAngularVelocity.z);
 
     // Apply thrust
     // Invert existing linear velocity
     // Fractionally apply the opposite impulse
     // Then apply forward impulse
-    if (thrust && this.options.thrustImpulse < s.config.ship.maxSpeed){
-      this.options.thrustImpulse += (difference > s.config.ship.maxSpeed) ? s.config.ship.maxSpeed : difference;
+    // if (thrust && this.thrustImpulse < s.config.ship.maxSpeed){
+    //   this.thrustImpulse += (difference > s.config.ship.maxSpeed) ? s.config.ship.maxSpeed : difference;
+    // }
+
+    // if (brakes && this.thrustImpulse > 0){
+    //   this.thrustImpulse -= difference;
+    // }
+
+    if (thrust) {
+        this.thrustImpulse = s.config.ship.maxSpeed;
+    }
+    else {
+        this.thrustImpulse = 0;
     }
 
-    if (brakes && this.options.thrustImpulse > 0){
-      this.options.thrustImpulse -= difference;
-    }
-
-    var impulse = linearVelocity.clone().negate();
-    root.applyCentralImpulse(impulse);
-
-    var forceVector = new THREE.Vector3(0, 0, this.options.thrustImpulse).applyMatrix4(rotationMatrix);
-    root.applyCentralImpulse(forceVector);
+    var forceVector = new THREE.Vector3(0, 0, this.thrustImpulse).applyMatrix4(rotationMatrix);
+    var cannonVector = new CANNON.Vec3(forceVector.x, forceVector.y, forceVector.z);
+    body.applyImpulse(cannonVector, body.position);
+    // body.applyForce(forceVector, new CANNON.Vec3(0,0,0));
     this.lastTime = now;
   }
 });
