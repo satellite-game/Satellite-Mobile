@@ -33,19 +33,9 @@
       this.animationTime = 1000;
     },
 
-    destruct: function() {
-      if (this.light) {
-        this.light.position.set(0,0,0);
-        this.game.lightPool.push(this.light);
-      }
-    },
-
     init: function() {
       this._super();
-      var light = this.light = this.game.lightPool.pop();
-      if (light) {
-        light.position.copy(this.root.position);
-      }
+      this.game.putLightAt(this.root.position);
     },
  
     update: function(){
@@ -57,9 +47,6 @@
       var proportionalProgress = progress/this.animationTime;
       var scale = 8 * proportionalProgress;
       this.particles.scale.set(scale,scale,scale);
-      if (this.light) {
-        this.light.intensity = 1 - proportionalProgress;
-      }
       this.particles.material.opacity = 1 - proportionalProgress;
 
       // Destroy after animation complete

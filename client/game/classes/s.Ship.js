@@ -27,6 +27,40 @@ s.Ship = new Class({
 
     this.lastTime = new Date().getTime();
     this.alternateFire = false;
+
+    // Engine glow
+    this.flames = [];
+    this.flameMultiplier = [2, 3, 2, 1, 0.75];
+    for (var i = this.flameMultiplier.length - 1; i >= 0; i--) {
+      var sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: s.textures.particle,
+        useScreenCoordinates: false,
+        blending: THREE.AdditiveBlending,
+        color: 0x00FFFF
+      }));
+
+      this.flames.push(sprite);
+      this.root.add(sprite);
+      sprite.position.set(0, 0, (i+1) * 10 - 100);
+    }
+
+    this.trailGlow = new THREE.PointLight(0x002525, 1, 250);
+    this.root.add(this.trailGlow);
+    this.trailGlow.position.set(0, 0, 35);
+  },
+
+  update: function() {
+    this._super.apply(this, arguments);
+
+    // Adjusts engine glow based on linear velocity
+    this.trailGlow.intensity = this.game.controls.thrustImpulse / 5;
+
+    var flameScaler = (Math.random()*0.1 + 1);
+    this.flames[0].scale.set(this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler);
+    this.flames[1].scale.set(this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler);
+    this.flames[2].scale.set(this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler);
+    this.flames[3].scale.set(this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler);
+    this.flames[4].scale.set(this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler);
   },
 
   lookAt: function(worldPosVec3) {

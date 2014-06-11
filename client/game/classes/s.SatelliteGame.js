@@ -18,6 +18,11 @@ s.SatelliteGame = new Class({
     'crosshairs.png'
   ],
 
+  construct: function() {
+    this.curExplosionLight = 0;
+    this.explosionLights = [];
+  },
+
   initialize: function() {
     // Create sound object
     this.sound = new s.Sound({
@@ -39,11 +44,11 @@ s.SatelliteGame = new Class({
     this.scene.add(this.light);
 
     // Explosion lights
-    this.lightPool = [];
-    while (this.lightPool.length < 20) {
+    // @perf: iOS: 5 lights makes the framerate drop to 40, whereas 20 lights halves it
+    while (this.explosionLights.length < 3) {
       var light = new THREE.PointLight(0xF16718, 0.45, 2500);
       scene.add(light);
-      this.lightPool.push(light);
+      this.explosionLights.push(light);
     }
 
     // Add moon
@@ -107,48 +112,38 @@ s.SatelliteGame = new Class({
     this.addSkybox();
     this.addDust();
 
-    // Engine glow
-    this.flames = [];
-
-    this.flameMultiplier = [2, 3, 2, 1, 0.75];
-
-    for (var i = this.flameMultiplier.length - 1; i >= 0; i--) {
-      var sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: s.textures.particle,
-        useScreenCoordinates: false,
-        blending: THREE.AdditiveBlending,
-        color: 0x00FFFF
-      }));
-
-      this.flames.push(sprite);
-      this.player.root.add(sprite);
-      sprite.position.set(0, 0, (i+1) * 10 - 100);
-    }
-
-    this.trailGlow = new THREE.PointLight(0x00FFFF, 5, 20);
-    this.player.root.add(this.trailGlow);
-    this.trailGlow.position.set(0, 0, 35);
-
     // Fly controls
     this.controls = new s.Controls({
         game: this,
         player: this.player,
         camera: this.camera
     });
+
+    this.hook(this.fadeLights.bind(this));
   },
 
-  render: function(time) {
-    this._super.call(this, time);
+  fadeLights: function(x, delta) {
+    this.explosionLights.forEach(function(light) {
+      if (light.intensity > 0) {
+        light.intensity -= 0.001 * delta;
+      }
+    });
+  },
 
-    // Adjusts engine glow based on linear velocity
-    this.trailGlow.intensity = this.controls.thrustImpulse / 5;
+  putLightAt: function(position) {
+    this.curExplosionLight++;
+    if (this.curExplosionLight >= this.explosionLights.length) {
+      this.curExplosionLight = 0;
+    }
 
-    var flameScaler = (Math.random()*0.1 + 1);
-    this.flames[0].scale.set(this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler);
-    this.flames[1].scale.set(this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler);
-    this.flames[2].scale.set(this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler);
-    this.flames[3].scale.set(this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler);
-    this.flames[4].scale.set(this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler);
+    // Get the light
+    var light = this.explosionLights[this.curExplosionLight];
+
+    // Place the light
+    light.position.copy(position);
+
+    // Reset fade
+    light.intensity = 1;
   },
 
   addSkybox: function() {

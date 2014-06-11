@@ -56,10 +56,11 @@ s.WeaponPlasma = new Class({
     // Scale appropriately
     // Does not affect hit area
     sprite.scale.copy(this.scale);
-  },
-
-  init: function() {
-    this._super.call(this);
-    this.game.sound.play('laser', 0.050);
   }
+
+  // @perf: Extremely slow on iOS
+  // ,init: function() {
+  //   this._super.call(this);
+  //   this.game.sound.play('laser', 0.050);
+  // }
 });
