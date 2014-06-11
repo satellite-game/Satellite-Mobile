@@ -8,7 +8,7 @@ window.s = {
         ship: {
             hull: 120,
             shields: 80,
-            maxSpeed: 50
+            maxSpeed: 25
         },
         base: {
             shields: 400

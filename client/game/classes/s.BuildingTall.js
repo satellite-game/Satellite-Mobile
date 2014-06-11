@@ -1,11 +1,11 @@
 s.BuildingTall = new Class({
   extend: s.GameObject,
 
-  construct: function(options){
+  construct: function(options) {
     // handle parameters
     this.options = options = jQuery.extend({
-      position: options.position,
-      rotation: options.rotation
+      position: new THREE.Vector3(-6516.61181640625, 334.5599060058594, -99.58238220214844),
+      rotation: new THREE.Quaternion()
     }, options);
 
     var geometry = s.models.human_building_tall.geometry;
@@ -13,9 +13,6 @@ s.BuildingTall = new Class({
 
     this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 
-    this.root.name = "building_tall";
-    this.root.position.copy(options.position);
-    this.root.rotation.copy(options.rotation);
-    // this.root.receiveShadow = true; // Causes shader error
+    this.root.name = 'building_tall';
   }
 });

@@ -3,22 +3,23 @@
     extend: s.GameObject,
 
     construct: function(options){
-      var size = options.size || 20;
+      var size = options.size || 300;
+      var spread = options.spread || 20;
       var geometry = new THREE.Geometry();
 
       // @perf: iOS: More than 3 halves framerate up close
       for (var i = 0; i < 3; i++){
         var vertex = new THREE.Vector3();
-        vertex.x = Math.random() * size - 10;
-        vertex.y = Math.random() * size - 10;
-        vertex.z = Math.random() * size - 10;
+        vertex.x = Math.random() * spread - 10;
+        vertex.y = Math.random() * spread - 10;
+        vertex.z = Math.random() * spread - 10;
         geometry.vertices.push(vertex);
       }
 
       // Re-use material
       var material = new THREE.ParticleBasicMaterial({
         color: 0xFFFFFF,
-        size: 300,
+        size: size,
         map: s.textures.explosion,
         blending: THREE.AdditiveBlending,
         depthTest: false,
@@ -54,9 +55,7 @@
       // Destroy after animation complete
       if (progress > this.animationTime) {
         var self = this;
-        setTimeout(function() {
-          self.destruct();
-        }, 0);
+        this.destructOnNextTick();
       }
     }
   });

@@ -6,7 +6,8 @@ s.Controls = new Class({
     rotationSpeed: Math.PI/8,
     pitchSpeed: Math.PI/32,
     yawSpeed: Math.PI/32,
-    brakePower: 0.85,
+    forwardThrust: 25,
+    backwardThrust: 15,
     velocityFadeFactor: 16,
     rotationFadeFactor: 4,
     boundaryPushback: 0
@@ -50,7 +51,7 @@ s.Controls = new Class({
 
     var thrust = 0;
     var brakes = 0;
-    var thrustScalar = this.thrustImpulse/s.config.ship.maxSpeed + 1;
+    var thrustScalar = Math.abs(this.thrustImpulse)/s.config.ship.maxSpeed + 1;
 
     ///////////////////////
     // RADIAL SUBRETICLE //
@@ -157,7 +158,10 @@ s.Controls = new Class({
     // }
 
     if (thrust) {
-        this.thrustImpulse = s.config.ship.maxSpeed;
+        this.thrustImpulse = this.options.forwardThrust;
+    }
+    else if (brakes) {
+        this.thrustImpulse = -this.options.backwardThrust;
     }
     else {
         this.thrustImpulse = 0;

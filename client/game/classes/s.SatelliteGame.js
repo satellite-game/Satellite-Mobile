@@ -58,12 +58,14 @@ s.SatelliteGame = new Class({
 
     // Add spacestation
     this.spaceStation = new s.SpaceStation({
-      game: this
+      game: this,
+      team: 'alliance'
     });
 
     // Add tall moon base
-    this.moonBase = new s.MoonBaseTall({
-      game: this
+    this.moonBase = new s.BuildingTall({
+      game: this,
+      team: 'rebel'
     });
 
     // // Add a hud
@@ -87,7 +89,7 @@ s.SatelliteGame = new Class({
       var instance = new s.WeaponPlasma({
         game: s.game,
         velocity: player.body.velocity,
-        position: new THREE.Vector3(50, -10, 300).applyMatrix4(player.root.matrixWorld),
+        position: player.offsetGunLeft.clone().add(player.offsetBullet).applyMatrix4(player.root.matrixWorld),
         rotation: player.root.quaternion,
         team: player.team
       });
@@ -95,7 +97,7 @@ s.SatelliteGame = new Class({
       var instance = new s.WeaponPlasma({
         game: s.game,
         velocity: player.body.velocity,
-        position: new THREE.Vector3(-50, -10, 300).applyMatrix4(player.root.matrixWorld),
+        position: player.offsetGunRight.clone().add(player.offsetBullet).applyMatrix4(player.root.matrixWorld),
         rotation: player.root.quaternion,
         team: player.team
       });

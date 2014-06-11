@@ -4,7 +4,9 @@ s.Ship = new Class({
   construct: function(options) {
     var geometry = s.models[options.shipClass].geometry;
     this.materials = s.models[options.shipClass].materials[0];
-    this.materials.emissive = new THREE.Color('rgb(255,255,255)');
+
+    // Be very lit up by default
+    this.materials.emissive = new THREE.Color(0x111111);
 
     this.root = new THREE.Mesh(geometry, this.materials);
     this.root.castShadow = true;
@@ -18,49 +20,93 @@ s.Ship = new Class({
     body.angularDamping = 0.99;
     body.linearDamping = 0.5;
 
-    this.lastTurretFire = 0;
-    this.lastMissileFire = 0;
-    this.team = options.team;
-
-    this.hull = s.config.ship.hull;
-    this.shields = s.config.ship.shields;
-
-    this.lastTime = new Date().getTime();
-    this.alternateFire = false;
+    this.forwardGlowMaterial = new THREE.SpriteMaterial({
+      map: s.textures.particle,
+      useScreenCoordinates: false,
+      blending: THREE.AdditiveBlending,
+      color: 0x335577
+    })
+    this.backwardGlowMaterial = new THREE.SpriteMaterial({
+      map: s.textures.particle,
+      useScreenCoordinates: false,
+      blending: THREE.AdditiveBlending,
+      color: 0x115599
+    })
 
     // Engine glow
     this.flames = [];
-    this.flameMultiplier = [2, 3, 2, 1, 0.75];
-    for (var i = this.flameMultiplier.length - 1; i >= 0; i--) {
-      var sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: s.textures.particle,
-        useScreenCoordinates: false,
-        blending: THREE.AdditiveBlending,
-        color: 0x00FFFF
-      }));
+    this.baseFlamePosition = -40;
+    this.flamePositions = [22, 19, 13, 7, 0];
+    this.flameMultiplier = [0.5, 0.75, 1.25, 2.25, 3.25, 2];
+    this.flameMultiplierBackwards = [1, 2, 3, 1, 2, 3];
+    for (var i = 0; i < this.flameMultiplier.length; i++) {
+      var flame = new THREE.Sprite();
 
-      this.flames.push(sprite);
-      this.root.add(sprite);
-      sprite.position.set(0, 0, (i+1) * 10 - 100);
+      this.flames.push(flame);
+      this.root.add(flame);
     }
 
-    this.trailGlow = new THREE.PointLight(0x002525, 1, 250);
+    // Color and intensity are calculated according to thrust impulse
+    // Changing these here will do nothing
+    this.trailGlow = new THREE.PointLight(0xFFFFFF, 1, 250);
+    this.trailGlow.position.set(0, 5, -50);
     this.root.add(this.trailGlow);
-    this.trailGlow.position.set(0, 0, 35);
+
+    // Vectors for gun offsets
+    var xOff = 29;
+    var yOff = -4.5;
+    var zOff = 19;
+    this.offsetGunLeft = new THREE.Vector3(xOff, -yOff, zOff);
+    this.offsetGunRight = new THREE.Vector3(-xOff, -yOff, zOff);
+    this.offsetBullet = new THREE.Vector3(0, 0, 100);
   },
 
   update: function() {
+    var self = this;
     this._super.apply(this, arguments);
 
     // Adjusts engine glow based on linear velocity
-    this.trailGlow.intensity = this.game.controls.thrustImpulse / 5;
+    this.trailGlow.intensity = Math.abs(this.game.controls.thrustImpulse) / 8;
+    var intensity = Math.abs(this.game.controls.thrustImpulse) / 2;
 
+    var material;
+    var flameMultiplier;
+    if (this.game.controls.thrustImpulse < 0) {
+      material = this.backwardGlowMaterial;
+      flameMultiplier = this.flameMultiplierBackwards;
+
+      this.trailGlow.position.set(0, 6, 20);
+      this.flames.forEach(function(flame, index) {
+        if (index < 3) {
+          flame.position.copy(self.offsetGunLeft);
+        }
+        else {
+          flame.position.copy(self.offsetGunRight);
+        }
+      });
+    }
+    else {
+      flameMultiplier = this.flameMultiplier;
+      material = this.forwardGlowMaterial;
+
+      this.trailGlow.position.set(0, 5, -50);
+      this.flames.forEach(function(flame, i) {
+        // Use a random Y value to make it shimmer
+        flame.position.set(0, Math.random(), self.baseFlamePosition - self.flamePositions[i]);
+      });
+    }
+
+    // Set the glow color
+    this.trailGlow.color.set(material.color);
+
+    // Set random intensity variation
     var flameScaler = (Math.random()*0.1 + 1);
-    this.flames[0].scale.set(this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[0]*this.trailGlow.intensity*flameScaler);
-    this.flames[1].scale.set(this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[1]*this.trailGlow.intensity*flameScaler);
-    this.flames[2].scale.set(this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[2]*this.trailGlow.intensity*flameScaler);
-    this.flames[3].scale.set(this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[3]*this.trailGlow.intensity*flameScaler);
-    this.flames[4].scale.set(this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler, this.flameMultiplier[4]*this.trailGlow.intensity*flameScaler);
+
+    // Set intensity and color
+    this.flames.forEach(function(flame, index) {
+      flame.scale.set(flameMultiplier[index]*intensity*flameScaler, flameMultiplier[index]*intensity*flameScaler, flameMultiplier[index]*intensity*flameScaler);
+      flame.material = material;
+    });
   },
 
   lookAt: function(worldPosVec3) {

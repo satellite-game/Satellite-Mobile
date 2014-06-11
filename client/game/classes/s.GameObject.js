@@ -2,6 +2,31 @@ s.GameObject = new Class({
   toString: 'GameObject',
   extend: s.EventEmitter,
 
+  properties: {
+    hp: {
+      default: 100,
+      set: function(value) {
+        this._hp = value;
+
+        if (value <= 0) {
+          this.explode();
+        }
+      },
+      get: function() {
+        return this._hp;
+      }
+    },
+    visible: {
+      default: true,
+      set: function(visible) {
+        self.root.visible = visible;
+      },
+      get: function() {
+        return self.root.visible;
+      }
+    }
+  },
+
   construct: function(options) {
     if (options.rotation) {
       if (!(options.rotation instanceof THREE.Quaternion)) {
@@ -18,9 +43,48 @@ s.GameObject = new Class({
 
     // Store options
     this.options = options;
+
+    // Flag to destruct on next tick
+    this.isDestroyed = false;
+
+    // Set default hitpoints
+    this.hp = this.constructor.properties.hp.default;
+  },
+
+  // Die after the call stack clears
+  // If executed immediately, Cannon.js throws
+  destructOnNextTick: function() {
+    this.isDestroyed = true;
+  },
+
+  explode: function() {
+    var self = this;
+    var defaultHP = this.constructor.properties.hp.default;
+    var size = defaultHP * 5;
+    var totalIterations = Math.round(defaultHP / 100);
+    var iterations = totalIterations;
+    do {
+      setTimeout(function() {
+        var position = self.root.position.clone().add(new THREE.Vector3(Math.random()*600-300, Math.random()*200-100, Math.random()*600-300))
+        new s.Explosion({
+          game: self.game,
+          size: size,
+          position: position
+        });
+      }, iterations * 500);
+
+      iterations--;
+    }
+    while (iterations > 0);
+
+    setTimeout(function() {
+      self.destructOnNextTick();
+    }, totalIterations * 500);
   },
 
   init: function() {
+    this.team = this.options.team || 'unaffiliated';
+
     if (this.root) {
       // Position mesh in scene
       if (this.options.position) {
@@ -35,7 +99,7 @@ s.GameObject = new Class({
       // Store a reference to the instance on the object
       // This is used after a collision is detected
       // For instance, to remove HP from the item hit
-      // this.body.instance = this;
+      this.body.instance = this;
 
       // Position body in physics simulation
       // Manually assign values so both CANNON and THREE math types are supported
@@ -51,6 +115,14 @@ s.GameObject = new Class({
       if (this.options.angularVelocity) {
         this.body.angularVelocity.set(this.options.angularVelocity.x, this.options.angularVelocity.y, this.options.angularVelocity.z);
       }
+
+      var self = this;
+      this.body.addEventListener('collide', function(evt) {
+        var target = evt['with'];
+        if (target.instance.toString() === 'WeaponPlasma') {
+          self.hp -= 10;
+        }
+      });
     }
 
     this.add();
@@ -93,22 +165,23 @@ s.GameObject = new Class({
   },
 
   update: function() {
-    if (this.body) {
-      // Copy coordinates from Cannon.js to Three.js
-      this.body.position.copy(this.root.position);
-      this.body.quaternion.copy(this.root.quaternion);
+    if (this.isDestroyed) {
+      this.destruct();
+    }
+    else {
+      if (this.body) {
+        // Copy coordinates from Cannon.js to Three.js
+        this.body.position.copy(this.root.position);
+        this.body.quaternion.copy(this.root.quaternion);
+      }
     }
   },
 
-  getRoot: function() {
-    return this.root;
-  },
-
   show: function() {
-    this.root.visible = true;
+    this.visible = true;
   },
 
   hide: function() {
-    this.root.visible = false;
+    this.visible = false;
   }
 });

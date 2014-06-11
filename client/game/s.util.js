@@ -8,6 +8,8 @@ Math.toRadians = function(degrees) {
   return degrees * Math.PI/180;
 };
 
+Math.epsilon = 1e-12;
+
 /**
   Load textures
 

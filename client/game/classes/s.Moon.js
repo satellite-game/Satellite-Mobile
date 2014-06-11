@@ -1,6 +1,12 @@
 s.Moon = new Class({
   extend: s.GameObject,
 
+  properties: {
+    hp: {
+      default: 500000 // Moon can take some hits
+    }
+  },
+
   construct: function(options) {
     // handle parameters
     this.options = options = jQuery.extend({
@@ -22,7 +28,5 @@ s.Moon = new Class({
     var body = this.body = new CANNON.RigidBody(mass, shape);
 
     this.root.name = 'moon';
-    // this.root.scale.set(2, 2, 2);
-    // this.root.receiveShadow = true; // Causes shader error
   }
 });

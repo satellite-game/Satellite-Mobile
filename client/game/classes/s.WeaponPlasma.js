@@ -8,7 +8,7 @@ s.WeaponPlasma = new Class({
   scale: new THREE.Vector3(50, 50, 1.0),
 
   colors: {
-    alliance: 0x00F2FF,
+    alliance: 0x157ADF,
     rebel: 0xFF0000,
     enemy: 0xFF0000
   },
@@ -32,11 +32,7 @@ s.WeaponPlasma = new Class({
 
       self.trigger('collide', evt);
 
-      // Die after some time
-      // @todo why does this break?
-      setTimeout(function() {
-        self.destruct();
-      }, 0);
+      self.destructOnNextTick();
     };
 
     this.body.addEventListener('collide', handleCollision);
