@@ -5,7 +5,9 @@
     construct: function(options){
       var size = options.size || 20;
       var geometry = new THREE.Geometry();
-      for (var i = 0; i < 10; i++){
+
+      // @perf: iOS: More than 3 halves framerate up close
+      for (var i = 0; i < 3; i++){
         var vertex = new THREE.Vector3();
         vertex.x = Math.random() * size - 10;
         vertex.y = Math.random() * size - 10;
