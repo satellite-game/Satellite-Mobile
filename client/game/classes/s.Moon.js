@@ -1,4 +1,5 @@
 s.Moon = new Class({
+  toString: 'Moon',
   extend: s.GameObject,
 
   properties: {
@@ -23,10 +24,42 @@ s.Moon = new Class({
     this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 
     // Cannon.js
-    var shape = new CANNON.Sphere(7000);
-    var mass = 0; // Fixed body
-    var body = this.body = new CANNON.RigidBody(mass, shape);
+    var hitBoxes = [
+      [0, 0, 0, 5900],
+      [-3540, -500, -100, 3540],
+      [3430, -500, 50, 4720],
+      [-1900, -750, 1250, 4500],
+      [0, -50, 1650, 4500],
+      [-1342, -807, -2519, 4500],
+      [3000, -500, -2900, 3500],
+      [800, 700, -3600, 3500],
+      [-742, 1590, -1481, 3750],
+      [1938, 2432, -2189, 2500]
+    ];
 
-    this.root.name = 'moon';
+    var debug = false;
+
+    var compound = new CANNON.Compound();
+    for (var i = 0; i < hitBoxes.length; i++) {
+      var x = hitBoxes[i][0];
+      var y = hitBoxes[i][1];
+      var z = hitBoxes[i][2];
+      var size = hitBoxes[i][3] * 0.80; // Resize the hitboxes
+      var hitBox = new CANNON.Sphere(size);
+      compound.addChild(hitBox, new CANNON.Vec3(x, y, z));
+
+      if (debug) {
+        // Match size of real box
+        var sphere = new THREE.Mesh(new THREE.SphereGeometry(size * 1.10), new THREE.MeshBasicMaterial({
+          wireframe: true,
+          color: 'red'
+        }));
+        sphere.position = new THREE.Vector3(x, y, z);
+        this.root.add(sphere);
+      }
+    }
+
+    var mass = 0; // Fixed body
+    var body = this.body = new CANNON.RigidBody(mass, compound);
   }
 });

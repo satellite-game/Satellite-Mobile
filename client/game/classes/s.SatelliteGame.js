@@ -59,13 +59,31 @@ s.SatelliteGame = new Class({
     // Add spacestation
     this.spaceStation = new s.SpaceStation({
       game: this,
-      team: 'alliance'
+      team: 'alliance',
+      position: new THREE.Vector3(20000, 20000, 20000),
+      rotation: new THREE.Quaternion()
     });
 
     // Add tall moon base
-    this.moonBase = new s.BuildingTall({
+    this.moonBase1 = new s.BuildingTall({
       game: this,
-      team: 'rebel'
+      team: 'rebel',
+      position: new THREE.Vector3(-3202.4802401107377, 1894.8442691216867, 3839.9961391320685),
+      rotation: new THREE.Quaternion(-0.17990696233627135, -0.45340581037032207, -0.37852982963312304, -0.786620508315977)
+    });
+
+    this.moonBase2 = new s.BuildingShort({
+      game: this,
+      team: 'rebel',
+      position: new THREE.Vector3(-3582.224014746993, 2110.7667637886925, 3387.119769191431),
+      rotation: new THREE.Quaternion(-0.35407504525506794, -0.02522594297569987, -0.2368707669391499, -0.9043709161059235)
+    });
+
+    this.moonBase3 = new s.BuildingShort({
+      game: this,
+      team: 'rebel',
+      position: new THREE.Vector3(-3506.2446102564877, 1883.3176856045577, 3667.1759831868803),
+      rotation: new THREE.Quaternion(-0.3447861720355756, -0.02279656928332127, -0.23711690056676846, -0.9079528553110975)
     });
 
     // // Add a hud
@@ -77,10 +95,10 @@ s.SatelliteGame = new Class({
       HUD: this.HUD,
       game: this,
       name: 'Player',
-      position: this.startingPosition.clone(),
       shipClass: 'human_ship_heavy',
       team: 'alliance',
-      camera: this.camera
+      camera: this.camera,
+      position: this.startingPosition
     });
 
     this.player.on('fire', s.util.throttle(function() {
