@@ -1,4 +1,5 @@
 s.Ship = new Class({
+  toString: 'Ship',
   extend: s.GameObject,
 
   construct: function(options) {
@@ -11,10 +12,26 @@ s.Ship = new Class({
     this.root = new THREE.Mesh(geometry, this.materials);
     this.root.castShadow = true;
 
-    // Cannon.js
-    var shape = new CANNON.Sphere(100);
-    var mass = 1;
+    // Shield hit box
+    // var shape = new CANNON.Sphere(40);
+    // var mass = 0;
+    // var body = this.body = new CANNON.RigidBody(mass, shape);
+    // var sphere = new THREE.Mesh(new THREE.SphereGeometry(40), new THREE.MeshBasicMaterial({
+    //   wireframe: true,
+    //   color: 'red'
+    // }));
+    // this.root.add(sphere);
+
+    // Ship hitbox
+    // var shipShape = new CANNON.Box(new CANNON.Vec3(40, 10, 40)); // Tight
+    var shape = new CANNON.Box(new CANNON.Vec3(50, 20, 50)); // Loose
+    var mass = 1; // Fixed body
     var body = this.body = new CANNON.RigidBody(mass, shape);
+
+    // var cube = new THREE.BoxHelper();
+    // cube.material.color.setRGB(1, 0, 0);
+    // cube.scale.set(50, 20, 50);
+    // this.root.add(cube);
 
     // Slow down/bleed off rolling
     body.angularDamping = 0.99;

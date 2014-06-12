@@ -1,5 +1,7 @@
 s.Player = new Class({
+  toString: 'Player',
   extend: s.Ship,
+
   construct: function(options) {
     this.camera = options.camera;
     this.name = options.name || '';
