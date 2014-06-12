@@ -205,25 +205,28 @@ s.Game = new Class({
 
    // Perform render
    render: function(now) {
-     if (this.doRender) {
-        // Step the physics world
-        this.world.step(1/60);
+    // Store the current time
+    this.now = now;
 
-        // Calculate the time since the last frame was rendered
-        var delta = now - this.lastRender;
-        this.lastRender = now;
+    if (this.doRender) {
+      // Step the physics world
+      this.world.step(1/60);
 
-        // Run each hooked function before rendering
-        this.hookedFuncs.forEach(function(func) {
-          func(now, delta);
-        });
+      // Calculate the time since the last frame was rendered
+      var delta = now - this.lastRender;
+      this.lastRender = now;
 
-        this.renderer.render(this.scene, this.camera);
+      // Run each hooked function before rendering
+      this.hookedFuncs.forEach(function(func) {
+        func(now, delta);
+      });
 
-        // Request the next frame to be rendered
-        requestAnimationFrame(this.render);
+      this.renderer.render(this.scene, this.camera);
 
-        this.render_stats.update();
-     }
-   }
+      // Request the next frame to be rendered
+      requestAnimationFrame(this.render);
+
+      this.render_stats.update();
+    }
+  }
 });
