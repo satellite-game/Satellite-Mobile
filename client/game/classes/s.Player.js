@@ -21,7 +21,36 @@ s.Player = new Class({
 
     this.curViewMode = 0;
 
-    this.cycleCameraViewMode = s.util.throttle(this.cycleCameraViewMode, 500, { leading: true, trailing: false});
+    // Throttle camera view mode calls
+    this.cycleCameraViewMode = s.util.throttle(this.cycleCameraViewMode, 250, { leading: true, trailing: false});
+  },
+
+  fire: function() {
+    // Don't call superclass method to avoid overhead
+
+    // Fire some plasma
+    var now = s.game.now;
+    if (now - this.lastFireTime > s.Ship.fireInterval) {
+      this.root.updateMatrixWorld();
+
+      new s.WeaponPlasma({
+        game: s.game,
+        velocity: this.body.velocity,
+        position: this.offsetGunLeft.clone().add(this.offsetBullet).applyMatrix4(this.root.matrixWorld),
+        rotation: this.root.quaternion,
+        team: this.team
+      });
+
+      new s.WeaponPlasma({
+        game: s.game,
+        velocity: this.body.velocity,
+        position: this.offsetGunRight.clone().add(this.offsetBullet).applyMatrix4(this.root.matrixWorld),
+        rotation: this.root.quaternion,
+        team: this.team
+      });
+
+      this.lastFireTime = now;
+    }
   },
 
   setCameraViewMode: function(mode) {

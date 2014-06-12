@@ -104,26 +104,6 @@ s.SatelliteGame = new Class({
       rotation: new THREE.Quaternion(-0.17750835538730667, 0.8755285517609332, -0.23197996825512426, -0.38487119033184075) 
     });
 
-    this.player.on('fire', s.util.throttle(function() {
-      player.root.updateMatrixWorld();
-
-      var instance = new s.WeaponPlasma({
-        game: s.game,
-        velocity: player.body.velocity,
-        position: player.offsetGunLeft.clone().add(player.offsetBullet).applyMatrix4(player.root.matrixWorld),
-        rotation: player.root.quaternion,
-        team: player.team
-      });
-
-      var instance = new s.WeaponPlasma({
-        game: s.game,
-        velocity: player.body.velocity,
-        position: player.offsetGunRight.clone().add(player.offsetBullet).applyMatrix4(player.root.matrixWorld),
-        rotation: player.root.quaternion,
-        team: player.team
-      });
-    }, 125));
-
     // Moon facing
     this.player.lookAt(this.moon.root.position);
 

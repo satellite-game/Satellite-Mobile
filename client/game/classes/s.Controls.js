@@ -54,7 +54,7 @@ s.Controls = new Class({
     var fire = false;
     var thrust = 0;
     var brakes = 0;
-    var thrustScalar = Math.abs(this.thrustImpulse)/s.config.ship.maxSpeed + 1;
+    var thrustScalar = Math.abs(this.thrustImpulse)/this.options.forwardThrust + 1;
 
     ///////////////////////
     // RADIAL SUBRETICLE //
@@ -178,7 +178,7 @@ s.Controls = new Class({
     // body.applyForce(forceVector, new CANNON.Vec3(0,0,0));
 
     if (fire) {
-      this.player.trigger('fire');
+      this.player.fire();
     }
 
     if (changeViewMode) {
