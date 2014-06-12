@@ -8,67 +8,78 @@ s.Touch = new Class({
     var self = this;
     this.keyCodes = {};
 
-    this.handleTouchStart = this.handleTouchStart.bind(this);
-    this.handleTouchMove = this.handleTouchMove.bind(this);
-    this.handleTouchEnd = this.handleTouchEnd.bind(this);
+    this.handleTouches = this.handleTouches.bind(this);
 
     // Listen to key events
-    window.addEventListener('touchstart', this.handleTouchStart, false);
-    window.addEventListener('touchmove', this.handleTouchMove, false);
-    window.addEventListener('touchend', this.handleTouchEnd, false);
+    window.addEventListener('touchstart', this.handleTouches, false);
+    window.addEventListener('touchmove', this.handleTouches, false);
+    window.addEventListener('touchend', this.handleTouches, false);
 
-    this.x = 0;
-    this.y = 0;
+    this.fire = false;
+    this.leftStick = { x: 0, y: 0 };
+    this.rightStick = { x: 0, y: 0 };
   },
 
   destruct: function() {
-    window.removeEventListener('touchstart', this.handleTouchStart, false);
-    window.removeEventListener('touchmove', this.handleTouchMove, false);
-    window.removeEventListener('touchend', this.handleTouchEnd, false);
+    window.removeEventListener('touchstart', this.handleTouches, false);
+    window.removeEventListener('touchmove', this.handleTouches, false);
+    window.removeEventListener('touchend', this.handleTouches, false);
   },
 
-  handleTouchStart: function(evt) {
-    // Store start X/Y
-    this._startX = evt.touches[0].screenX;
-    this._startY = evt.touches[0].screenY;
-
-    this.firing = true;
-
-    if (evt.touches.length > 1) {
-      this.throttle = true;
-    }
-  },
-
-  handleTouchMove: function(evt) {
+  handleTouches: function(evt) {
+    // Stop scrolling
     evt.preventDefault();
 
-    // Calculate delta
-    var deltaX = s.util.clamp((this._startX/this._steerSize - evt.touches[0].screenX/this._steerSize), -1, 1)
-    var deltaY = s.util.clamp((this._startY/this._steerSize - evt.touches[0].screenY/this._steerSize), -1, 1)
+    var width = window.innerWidth;
+    var height = window.innerHeight;
 
-    // Store steer values
-    if (Math.abs(deltaX) > this._deadZone) {
-      this.x = deltaX;
-    }
-    else {
-      this.x = 0;
-    }
+    this.fire = false;
+    this.leftStick.x =  0;
+    this.leftStick.y =  0;
+    this.rightStick.x =  0;
+    this.rightStick.y =  0;
 
-    if (Math.abs(deltaY) > this._deadZone) {
-      this.y = deltaY;
-    }
-    else {
-      this.y = 0;
-    }
-  },
+    for (var i = 0; i < evt.touches.length; i++) {
+      var touch = evt.touches[i];
 
-  handleTouchEnd: function(evt) {
-    // Clear steer values
-    this.x = 0;
-    this.y = 0;
+      // Determine zone
+      var x = touch.clientX;
+      var y = touch.clientY;
 
-    this.throttle = false;
-    this.firing = false;
-  },
+      var joyWidth = 240;
+      var joyOffset = width * 0.05;
+      var joyDeadZone = joyWidth * 0.10;
+
+      var yCenter = height - joyOffset - joyWidth / 2;
+      var xCenterLeft = joyOffset + joyWidth / 2;
+      var xCenterRight = width - joyOffset - joyWidth/2;
+
+      // Fire if Y is in top of screen
+      if (y < height/2) {
+        this.fire = true;
+      }
+
+      if (x > joyOffset && x < joyOffset + joyWidth && y > height - joyOffset - joyWidth && y < height - joyOffset) {
+        var leftXInDeadZone = Math.abs(xCenterLeft - x) <= joyDeadZone
+        var leftYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone
+        if (!leftXInDeadZone) {
+          this.leftStick.x = (x - xCenterLeft) / joyWidth;
+        }
+        if (!leftYInDeadZone) {
+          this.leftStick.y = (yCenter - y) / joyWidth;
+        }
+      }
+      if (x > width - joyWidth - joyOffset && x < width - joyOffset && y > height - joyOffset - joyWidth && y < height - joyOffset) {
+        var rightXInDeadZone = Math.abs(xCenterRight - x) <= joyDeadZone
+        var rightYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone
+        if (!rightXInDeadZone) {
+          this.rightStick.x = (x - xCenterRight) / joyWidth;
+        }
+        if (!rightYInDeadZone) {
+          this.rightStick.y = (yCenter - y) / joyWidth;
+        }
+      }
+    }
+  }
 });
 

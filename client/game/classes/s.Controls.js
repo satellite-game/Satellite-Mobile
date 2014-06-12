@@ -6,8 +6,12 @@ s.Controls = new Class({
     rotationSpeed: Math.PI/8,
     pitchSpeed: Math.PI/32,
     yawSpeed: Math.PI/32,
-    forwardThrust: 25,
-    backwardThrust: 15,
+    // forwardThrust: 25,
+    // backwardThrust: 15,
+
+    forwardThrust: 50,
+    backwardThrust: 50,
+
     velocityFadeFactor: 16,
     rotationFadeFactor: 4,
     boundaryPushback: 0
@@ -49,6 +53,7 @@ s.Controls = new Class({
     var roll = 0;
     var yaw = 0;
 
+    var fire = false;
     var thrust = 0;
     var brakes = 0;
     var thrustScalar = Math.abs(this.thrustImpulse)/s.config.ship.maxSpeed + 1;
@@ -64,20 +69,18 @@ s.Controls = new Class({
     // TOUCH CONTROLS  //
     ///////////////////////
 
-    pitch = this.touch.y * this.options.pitchSpeed;
-    roll = this.touch.x*-1 * this.options.rotationSpeed;
-    yaw = 0;
+    pitch = this.touch.rightStick.y * this.options.pitchSpeed;
+    roll = this.touch.rightStick.x * this.options.rotationSpeed;
+    yaw = this.touch.leftStick.x * -1 * this.options.yawSpeed;
 
-    // @todo don't hardcode
-    // var gamepadThrust = 0.5;
-    // this.thrustImpulse = gamepadThrust * s.config.ship.maxSpeed;
-    if (this.touch.throttle) {
-      thrust = 1;
+    if (this.touch.leftStick.y > 0) {
+      thrust = this.touch.leftStick.y;
+    }
+    else if (this.touch.leftStick.y < 0) {
+      brakes = -this.touch.leftStick.y;
     }
 
-    if (this.touch.firing) {
-      this.player.trigger('fire');
-    }
+    fire = this.touch.fire;
 
     ///////////////////////
     // KEYBOARD COMMANDS //
@@ -114,7 +117,7 @@ s.Controls = new Class({
     }
 
     if (this.keyboard.pressed('space')) {
-      this.player.trigger('fire');
+      fire = true;
     }
 
     //////////////////////////////
@@ -157,11 +160,11 @@ s.Controls = new Class({
     //   this.thrustImpulse -= difference;
     // }
 
-    if (thrust) {
-        this.thrustImpulse = this.options.forwardThrust;
+    if (thrust > 0) {
+        this.thrustImpulse = thrust * this.options.forwardThrust;
     }
-    else if (brakes) {
-        this.thrustImpulse = -this.options.backwardThrust;
+    else if (brakes > 0) {
+        this.thrustImpulse = brakes * -1 * this.options.backwardThrust;
     }
     else {
         this.thrustImpulse = 0;
@@ -171,5 +174,9 @@ s.Controls = new Class({
     var cannonVector = new CANNON.Vec3(forceVector.x, forceVector.y, forceVector.z);
     body.applyImpulse(cannonVector, body.position);
     // body.applyForce(forceVector, new CANNON.Vec3(0,0,0));
+
+    if (fire) {
+      this.player.trigger('fire');
+    }
   }
 });

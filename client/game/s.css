@@ -15,3 +15,25 @@ canvas {
 	/* Kill whitespace */
 	display: block;
 }
+
+.s-Joystick {
+	font-size: 24px;
+
+	position: absolute;
+	width: 10em;
+	height: 10em;
+
+	border-radius: 50%;
+
+	border: 2px solid green;
+}
+
+.s-Joystick--right {
+	bottom: 5%;
+	right: 5%;
+}
+
+.s-Joystick--left {
+	bottom: 5%;
+	left: 5%;
+}
