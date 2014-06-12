@@ -5,16 +5,8 @@ Copyright (C) 2013 Larry Davis
 
 window.s = {
     config: {
-        ship: {
-            hull: 120,
-            shields: 80,
-            maxSpeed: 25
-        },
-        base: {
-            shields: 400
-        },
         sound: {
-            enabled: true,
+            enabled: false, // @perf: Extremely slow on iOS
             silentDistance: 10000,
             sounds: {
                 laser: 'game/sounds/laser.mp3'

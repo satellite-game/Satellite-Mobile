@@ -59,11 +59,10 @@ s.WeaponPlasma = new Class({
     };
 
     this.body.addEventListener('collide', handleCollision);
-  }
+  },
 
-  // @perf: Extremely slow on iOS
-  // ,init: function() {
-  //   this._super.call(this);
-  //   this.game.sound.play('laser', 0.050);
-  // }
+  init: function() {
+    this._super.call(this);
+    this.game.sound.play('laser', 0.050);
+  }
 });
