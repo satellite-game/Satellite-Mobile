@@ -124,14 +124,5 @@ s.Ship = new Class({
       flame.scale.set(flameMultiplier[index]*intensity*flameScaler, flameMultiplier[index]*intensity*flameScaler, flameMultiplier[index]*intensity*flameScaler);
       flame.material = material;
     });
-  },
-
-  lookAt: function(worldPosVec3) {
-    // Make the mesh point at the position
-    this.root.lookAt(worldPosVec3);
-
-    // Use the mesh's quaternion to set the rotation of the body in the physics simulation
-    var q = this.root.quaternion;
-    this.body.quaternion.set(q.x, q.y, q.z, q.w);
   }
 });

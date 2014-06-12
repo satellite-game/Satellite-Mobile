@@ -183,5 +183,15 @@ s.GameObject = new Class({
 
   hide: function() {
     this.visible = false;
+  },
+
+  lookAt: function(worldPosVec3) {
+    // Make the mesh point at the position
+    this.root.lookAt(worldPosVec3);
+    if (this.body) {
+      // Use the mesh's quaternion to set the rotation of the body in the physics simulation
+      var q = this.root.quaternion;
+      this.body.quaternion.set(q.x, q.y, q.z, q.w);
+    }
   }
 });

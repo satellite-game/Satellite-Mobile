@@ -30,17 +30,13 @@ s.SatelliteGame = new Class({
         sounds: s.config.sound.sounds
     });
 
-    // this.startingPosition = this.getStartPosition();
-    // Start looking at the space station
-    this.startingPosition = new THREE.Vector3(20969.368762656006, 21203.296709545128, 21156.31191586029);
-
     // Ambient light
     this.ambientLight = new THREE.AmbientLight(0x382828);
     this.scene.add(this.ambientLight);
 
     // Directional light
     this.light = new THREE.DirectionalLight(0xEEEEEE, 2);
-    this.light.position.set(-100000, 0, 0);
+    this.light.position.set(100000, 50000, 50000);
     this.scene.add(this.light);
 
     // Explosion lights
@@ -61,7 +57,7 @@ s.SatelliteGame = new Class({
       game: this,
       team: 'alliance',
       position: new THREE.Vector3(20000, 20000, 20000),
-      rotation: new THREE.Quaternion()
+      rotation: new THREE.Quaternion(0.034971379498817616, 0.3468714418444932, -0.27655401457101153, -0.8955306150396697)
     });
 
     // Add tall moon base
@@ -98,7 +94,14 @@ s.SatelliteGame = new Class({
       shipClass: 'human_ship_heavy',
       team: 'alliance',
       camera: this.camera,
-      position: this.startingPosition
+
+      // Nice outside angle
+      // position: new THREE.Vector3(22765.105955147825, 22878.477872164884, 22005.84642690411),
+      // rotation: new THREE.Quaternion(-0.2840628330856818, 0.8298857037518823, -0.19073508075184492, -0.4407018885121397)
+
+      // Inside docking bay
+      position: new THREE.Vector3(19562.491512697547, 19618.948414021877, 19988.645332582022),
+      rotation: new THREE.Quaternion(-0.17750835538730667, 0.8755285517609332, -0.23197996825512426, -0.38487119033184075) 
     });
 
     this.player.on('fire', s.util.throttle(function() {
@@ -223,7 +226,6 @@ s.SatelliteGame = new Class({
       }
 
       geometry.vertices.push(vertex);
-
     }
 
     var material = new THREE.ParticleBasicMaterial({
@@ -237,9 +239,5 @@ s.SatelliteGame = new Class({
     this.dust = new THREE.ParticleSystem(geometry, material);
 
     this.scene.add(this.dust);
-  },
-
-  getStartPosition: function() {
-    return new THREE.Vector3(s.util.getRandomCoordinate(), s.util.getRandomCoordinate(), s.util.getRandomCoordinate());
   }
 });

@@ -6,11 +6,8 @@ s.Controls = new Class({
     rotationSpeed: Math.PI/8,
     pitchSpeed: Math.PI/32,
     yawSpeed: Math.PI/32,
-    // forwardThrust: 25,
-    // backwardThrust: 15,
-
-    forwardThrust: 50,
-    backwardThrust: 50,
+    forwardThrust: 25,
+    backwardThrust: 15,
 
     velocityFadeFactor: 16,
     rotationFadeFactor: 4,
@@ -53,6 +50,7 @@ s.Controls = new Class({
     var roll = 0;
     var yaw = 0;
 
+    var changeViewMode = false;
     var fire = false;
     var thrust = 0;
     var brakes = 0;
@@ -120,6 +118,10 @@ s.Controls = new Class({
       fire = true;
     }
 
+    if (this.keyboard.pressed('v')) {
+      changeViewMode = true;
+    }
+
     //////////////////////////////
     // MOTION AND PHYSICS LOGIC //
     //////////////////////////////
@@ -177,6 +179,10 @@ s.Controls = new Class({
 
     if (fire) {
       this.player.trigger('fire');
+    }
+
+    if (changeViewMode) {
+      this.player.cycleCameraViewMode();
     }
   }
 });
