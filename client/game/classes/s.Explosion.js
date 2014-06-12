@@ -10,14 +10,13 @@
       // @perf: iOS: More than 3 halves framerate up close
       for (var i = 0; i < 3; i++){
         var vertex = new THREE.Vector3();
-        vertex.x = Math.random() * spread - 10;
-        vertex.y = Math.random() * spread - 10;
-        vertex.z = Math.random() * spread - 10;
+        vertex.x = Math.random() * spread - spread/2;
+        vertex.y = Math.random() * spread - spread/2;
+        vertex.z = Math.random() * spread - spread/2;
         geometry.vertices.push(vertex);
       }
 
-      // Re-use material
-      var material = new THREE.ParticleBasicMaterial({
+      var material = new THREE.ParticleSystemMaterial({
         color: 0xFFFFFF,
         size: size,
         map: s.textures.explosion,
@@ -29,7 +28,8 @@
       this.root = new THREE.Object3D();
 
       var particles = this.particles = new THREE.ParticleSystem(geometry, material);
-      particles.sortParticles = true;
+      // particles.sortParticles = false;
+      // particles.frustrumCulled = false;
       this.root.add(particles);
 
       this.startTime = null;
@@ -42,6 +42,8 @@
     },
  
     update: function(){
+      this._super.apply(this, arguments);
+
       if (this.startTime === null){
         this.startTime = new Date().getTime();
       }
@@ -54,7 +56,6 @@
 
       // Destroy after animation complete
       if (progress > this.animationTime) {
-        var self = this;
         this.destructOnNextTick();
       }
     }
