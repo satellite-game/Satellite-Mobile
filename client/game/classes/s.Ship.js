@@ -3,6 +3,10 @@ s.Ship = new Class({
   extend: s.GameObject,
 
   construct: function(options) {
+    this.lastThrustTime = 0;
+    this.lastRetroThrustTime = 0;
+    this.lastFireTime = 0;
+
     var geometry = s.models[options.shipClass].geometry;
     this.materials = s.models[options.shipClass].materials[0];
 
@@ -37,92 +41,146 @@ s.Ship = new Class({
     body.angularDamping = 0.99;
     body.linearDamping = 0.5;
 
-    this.forwardGlowMaterial = new THREE.SpriteMaterial({
+    this.engineGlowMaterial = new THREE.SpriteMaterial({
       map: s.textures.particle,
-      useScreenCoordinates: false,
       blending: THREE.AdditiveBlending,
       color: 0x335577
     })
-    this.backwardGlowMaterial = new THREE.SpriteMaterial({
+
+    this.gunGlowMaterial = new THREE.SpriteMaterial({
       map: s.textures.particle,
-      useScreenCoordinates: false,
       blending: THREE.AdditiveBlending,
-      color: 0x115599
+      color: 0x1A8CFF
     })
 
-    // Engine glow
-    this.flames = [];
-    this.baseFlamePosition = -40;
-    this.flamePositions = [22, 19, 13, 7, 0];
-    this.flameMultiplier = [0.5, 0.75, 1.25, 2.25, 3.25, 2];
-    this.flameMultiplierBackwards = [1, 2, 3, 1, 2, 3];
-    for (var i = 0; i < this.flameMultiplier.length; i++) {
-      var flame = new THREE.Sprite();
-
-      this.flames.push(flame);
-      this.root.add(flame);
-    }
-
-    // Color and intensity are calculated according to thrust impulse
-    // Changing these here will do nothing
-    this.trailGlow = new THREE.PointLight(0xFFFFFF, 1, 250);
-    this.trailGlow.position.set(0, 5, -50);
-    this.root.add(this.trailGlow);
-
     // Vectors for gun offsets
-    var xOff = 29;
-    var yOff = -4.5;
-    var zOff = 19;
+    var xOff = 29.30;
+    var yOff = -3.85;
+    var zOff = 18.5;
     this.offsetGunLeft = new THREE.Vector3(xOff, -yOff, zOff);
     this.offsetGunRight = new THREE.Vector3(-xOff, -yOff, zOff);
     this.offsetBullet = new THREE.Vector3(0, 0, 100);
+
+    // Engine glow
+    this.engineFlames = [];
+    this.baseFlamePosition = -42;
+    this.flamePositions = [30, 25, 20, 14, 8, 0];
+    this.flameMultiplier = [0.5, 0.75, 1.25, 2.25, 3.25, 2];
+    for (var i = 0; i < this.flameMultiplier.length; i++) {
+      var flame = new THREE.Sprite(this.engineGlowMaterial);
+      this.engineFlames.push(flame);
+      this.root.add(flame);
+    }
+
+    // Flares on each gun tip
+    this.leftGunFlare = new THREE.Sprite(this.gunGlowMaterial);
+    this.leftGunFlare.scale.set(0, 0, 0);
+    this.leftGunFlare.position.copy(this.offsetGunLeft);
+    this.root.add(this.leftGunFlare);
+
+    this.rightGunFlare = new THREE.Sprite(this.gunGlowMaterial);
+    this.rightGunFlare.scale.set(0, 0, 0);
+    this.rightGunFlare.position.copy(this.offsetGunRight);
+    this.root.add(this.rightGunFlare);
+
+    // Intensity is dynamic
+    // Changing it here will do nothing
+    this.engineGlow = new THREE.PointLight(this.engineGlowMaterial.color, 1, 250);
+    this.engineGlow.position.set(0, 5, -50);
+    this.root.add(this.engineGlow);
+
+    // Intensity is dynamic
+    // Changing it here will do nothing
+    this.gunGlow = new THREE.PointLight(this.gunGlowMaterial.color, 1, 250);
+    this.gunGlow.position.set(0, 6, 20);
+    this.root.add(this.gunGlow);
   },
 
-  update: function() {
+  fire: function() {
+    // Just store the time for lighting effects
+    this.lastFireTime = s.game.now;
+  },
+
+  update: function(now, delta) {
     var self = this;
     this._super.apply(this, arguments);
 
     // Adjusts engine glow based on linear velocity
-    this.trailGlow.intensity = Math.abs(this.game.controls.thrustImpulse) / 8;
-    var intensity = Math.abs(this.game.controls.thrustImpulse) / 2;
+    var thrustScalar = Math.abs(this.game.controls.thrustImpulse) / this.game.controls.options.forwardThrust;
 
-    var material;
-    var flameMultiplier;
+    var lightMin = 0.5;
+    var lightScalar = 4;
+    var glowScalar = 15
+    var flameDanceScaler = (Math.random()*0.1 + 1);
+
+    // Calculate time since events happened to determine fade
+    var timeSinceLastThrust = s.game.now - this.lastThrustTime;
+    var timeSinceLastRetroThrust = s.game.now - this.lastRetroThrustTime;
+    var timeSinceLastFire = now - this.lastFireTime;
+
     if (this.game.controls.thrustImpulse < 0) {
-      material = this.backwardGlowMaterial;
-      flameMultiplier = this.flameMultiplierBackwards;
+      this.lastRetroThrustTime = now;
+    }
 
-      this.trailGlow.position.set(0, 6, 20);
-      this.flames.forEach(function(flame, index) {
-        if (index < 3) {
-          flame.position.copy(self.offsetGunLeft);
-        }
-        else {
-          flame.position.copy(self.offsetGunRight);
-        }
+    if (this.game.controls.thrustImpulse > 0) {
+      var lightIntensity = thrustScalar * lightScalar;
+      var glowIntensity = thrustScalar * glowScalar;
+
+      // Light in the back
+      this.engineGlow.intensity = lightIntensity;
+
+      this.engineGlow.color.set(this.engineGlowMaterial.color);
+
+      // Set random intensity variation
+      var flameMultiplier = this.flameMultiplier;
+      this.engineFlames.forEach(function(flame, i) {
+        // Use a random Y value to make it shimmer
+        flame.position.set(Math.random() - 0.5, Math.random() - 0.5, self.baseFlamePosition - self.flamePositions[i]);
+        flame.scale.set(flameMultiplier[i]*glowIntensity*flameDanceScaler, flameMultiplier[i]*glowIntensity*flameDanceScaler, flameMultiplier[i]*glowIntensity*flameDanceScaler);
       });
+
+      this.lastThrustTime = now;
+    }
+    else if (timeSinceLastThrust < s.Ship.engineFadeTime) {
+      // Fade out engine flames
+      var fadeScale = 1 - (now - this.lastThrustTime)/s.Ship.engineFadeTime;
+
+      this.engineFlames.forEach(function(flame, i) {
+        flame.scale.multiplyScalar(fadeScale, fadeScale, fadeScale);
+      });
+
+      this.engineGlow.intensity *= fadeScale;
+      this.engineGlow.intensity = Math.max(this.engineGlow.intensity, lightMin);
+    }
+
+    // Fade out gun lights
+    var showGunLights = false;
+    var gunLightFadeScale = 0;
+
+    if (timeSinceLastFire <= s.Ship.fireInterval) {
+      showGunLights = true;
+      gunLightFadeScale = 1 - timeSinceLastFire / s.Ship.fireInterval;
+    }
+    else if (timeSinceLastRetroThrust < s.Ship.fireInterval) {
+      showGunLights = true;
+      gunLightFadeScale = 1 - timeSinceLastRetroThrust / s.Ship.fireInterval
+    }
+
+    if (showGunLights) {
+      // Light in the front
+      this.gunGlow.intensity = gunLightFadeScale * lightScalar;
+
+      // Fade out so guns are not lit up before next fire
+      this.leftGunFlare.scale.set(glowScalar*gunLightFadeScale*flameDanceScaler, glowScalar*gunLightFadeScale*flameDanceScaler, glowScalar*gunLightFadeScale*flameDanceScaler);
+      this.rightGunFlare.scale.set(glowScalar*gunLightFadeScale*flameDanceScaler, glowScalar*gunLightFadeScale*flameDanceScaler, glowScalar*gunLightFadeScale*flameDanceScaler);
     }
     else {
-      flameMultiplier = this.flameMultiplier;
-      material = this.forwardGlowMaterial;
-
-      this.trailGlow.position.set(0, 5, -50);
-      this.flames.forEach(function(flame, i) {
-        // Use a random Y value to make it shimmer
-        flame.position.set(0, Math.random(), self.baseFlamePosition - self.flamePositions[i]);
-      });
+      // Hide them
+      this.leftGunFlare.scale.set(0, 0, 0);
+      this.rightGunFlare.scale.set(0, 0, 0);
     }
-
-    // Set the glow color
-    this.trailGlow.color.set(material.color);
-
-    // Set random intensity variation
-    var flameScaler = (Math.random()*0.1 + 1);
-
-    // Set intensity and color
-    this.flames.forEach(function(flame, index) {
-      flame.scale.set(flameMultiplier[index]*intensity*flameScaler, flameMultiplier[index]*intensity*flameScaler, flameMultiplier[index]*intensity*flameScaler);
-      flame.material = material;
-    });
   }
 });
+
+s.Ship.engineFadeTime = 3000;
+s.Ship.fireInterval = 125;
