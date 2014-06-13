@@ -1,37 +1,59 @@
 s.Touch = new Class({
   toString: 'Touch',
 
-  _steerSize: 100,
-  _deadZone: 0.15,
-
   construct: function(game, player) {
     var self = this;
     this.keyCodes = {};
 
     this.handleTouches = this.handleTouches.bind(this);
-
-    // Listen to key events
-    window.addEventListener('touchstart', this.handleTouches, false);
-    window.addEventListener('touchmove', this.handleTouches, false);
-    window.addEventListener('touchend', this.handleTouches, false);
+    this.setScreenVariables = this.setScreenVariables.bind(this);
 
     this.fire = false;
     this.leftStick = { x: 0, y: 0 };
     this.rightStick = { x: 0, y: 0 };
+
+    // Set parameters
+    this.joyWidth = 240;
+    this.joyDeadZone = this.joyWidth * 0.10;
+    this.inputRange = { min: this.joyDeadZone / this.joyWidth * 2, max: 1.0};
+    this.outputRange = { min: 0.0, max: 1.0};
+    this.setScreenVariables();
+
+    // Listen to events
+    window.addEventListener('touchstart', this.handleTouches, false);
+    window.addEventListener('touchmove', this.handleTouches, false);
+    window.addEventListener('touchend', this.handleTouches, false);
+    window.addEventListener('resize', this.setScreenVariables, false);
+  },
+
+  setScreenVariables: function() {
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    this.joyOffset = this.width * 0.05;
   },
 
   destruct: function() {
+    window.removeEventListener('resize', this.setScreenVariables, false);
     window.removeEventListener('touchstart', this.handleTouches, false);
     window.removeEventListener('touchmove', this.handleTouches, false);
     window.removeEventListener('touchend', this.handleTouches, false);
   },
 
+  rescaleJoyTouch: function(value) {
+      var sign = value/Math.abs(value);
+      value = Math.abs(value);
+      if (value > this.inputRange.min && value < this.inputRange.max) {
+        value = (value - this.inputRange.min)*(this.outputRange.max-this.outputRange.min)/(this.inputRange.max-this.inputRange.min);
+      }
+      value *= sign;
+      value = s.util.clamp(value, -1, 1);
+      return value;
+  },
+
   handleTouches: function(evt) {
     // Stop scrolling
     evt.preventDefault();
-
-    var width = window.innerWidth;
-    var height = window.innerHeight;
 
     this.fire = false;
     this.leftStick.x =  0;
@@ -47,36 +69,36 @@ s.Touch = new Class({
       var y = touch.clientY;
 
       var joyWidth = 240;
-      var joyOffset = width * 0.05;
+      var joyOffset = this.width * 0.05;
       var joyDeadZone = joyWidth * 0.10;
 
-      var yCenter = height - joyOffset - joyWidth / 2;
+      var yCenter = this.height - joyOffset - joyWidth / 2;
       var xCenterLeft = joyOffset + joyWidth / 2;
-      var xCenterRight = width - joyOffset - joyWidth/2;
+      var xCenterRight = this.width - joyOffset - joyWidth/2;
 
       // Fire if Y is in top of screen
-      if (y < height/2) {
+      if (y < this.height/2) {
         this.fire = true;
       }
 
-      if (x > 0 && x < joyOffset * 2 + joyWidth && y > height - joyOffset * 2 - joyWidth && y < height) {
+      if (x > 0 && x < joyOffset * 2 + joyWidth && y > this.height - joyOffset * 2 - joyWidth && y < this.height) {
         var leftXInDeadZone = Math.abs(xCenterLeft - x) <= joyDeadZone;
         var leftYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone;
         if (!leftXInDeadZone) {
-          this.leftStick.x = (x - xCenterLeft) / (joyWidth / 2);
+          this.leftStick.x = this.rescaleJoyTouch((x - xCenterLeft) / (joyWidth / 2));
         }
         if (!leftYInDeadZone) {
-          this.leftStick.y = (yCenter - y) / (joyWidth / 2);
+          this.leftStick.y = this.rescaleJoyTouch((yCenter - y) / (joyWidth / 2));
         }
       }
-      if (x > width - joyWidth - joyOffset * 2 && x < width && y > height - joyOffset * 2 - joyWidth && y < height) {
+      if (x > this.width - joyWidth - joyOffset * 2 && x < this.width && y > this.height - joyOffset * 2 - joyWidth && y < this.height) {
         var rightXInDeadZone = Math.abs(xCenterRight - x) <= joyDeadZone;
         var rightYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone;
         if (!rightXInDeadZone) {
-          this.rightStick.x = (x - xCenterRight) / (joyWidth / 2);
+          this.rightStick.x = this.rescaleJoyTouch((x - xCenterRight) / (joyWidth / 2));
         }
         if (!rightYInDeadZone) {
-          this.rightStick.y = (yCenter - y) / (joyWidth / 2);
+          this.rightStick.y = this.rescaleJoyTouch((yCenter - y) / (joyWidth / 2));
         }
       }
     }
