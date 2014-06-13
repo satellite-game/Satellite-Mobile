@@ -68,8 +68,8 @@ s.Controls = new Class({
     ///////////////////////
 
     pitch = this.touch.rightStick.y * this.options.pitchSpeed;
-    roll = this.touch.rightStick.x * this.options.rotationSpeed;
-    yaw = this.touch.leftStick.x * -1 * this.options.yawSpeed;
+    roll = this.touch.leftStick.x * this.options.rotationSpeed;
+    yaw = this.touch.rightStick.x * -1 * this.options.yawSpeed;
 
     if (this.touch.leftStick.y > 0) {
       thrust = this.touch.leftStick.y;

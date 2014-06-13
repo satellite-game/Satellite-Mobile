@@ -59,24 +59,24 @@ s.Touch = new Class({
         this.fire = true;
       }
 
-      if (x > joyOffset && x < joyOffset + joyWidth && y > height - joyOffset - joyWidth && y < height - joyOffset) {
-        var leftXInDeadZone = Math.abs(xCenterLeft - x) <= joyDeadZone
-        var leftYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone
+      if (x > 0 && x < joyOffset * 2 + joyWidth && y > height - joyOffset * 2 - joyWidth && y < height) {
+        var leftXInDeadZone = Math.abs(xCenterLeft - x) <= joyDeadZone;
+        var leftYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone;
         if (!leftXInDeadZone) {
-          this.leftStick.x = (x - xCenterLeft) / joyWidth;
+          this.leftStick.x = (x - xCenterLeft) / (joyWidth / 2);
         }
         if (!leftYInDeadZone) {
-          this.leftStick.y = (yCenter - y) / joyWidth;
+          this.leftStick.y = (yCenter - y) / (joyWidth / 2);
         }
       }
-      if (x > width - joyWidth - joyOffset && x < width - joyOffset && y > height - joyOffset - joyWidth && y < height - joyOffset) {
-        var rightXInDeadZone = Math.abs(xCenterRight - x) <= joyDeadZone
-        var rightYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone
+      if (x > width - joyWidth - joyOffset * 2 && x < width && y > height - joyOffset * 2 - joyWidth && y < height) {
+        var rightXInDeadZone = Math.abs(xCenterRight - x) <= joyDeadZone;
+        var rightYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone;
         if (!rightXInDeadZone) {
-          this.rightStick.x = (x - xCenterRight) / joyWidth;
+          this.rightStick.x = (x - xCenterRight) / (joyWidth / 2);
         }
         if (!rightYInDeadZone) {
-          this.rightStick.y = (yCenter - y) / joyWidth;
+          this.rightStick.y = (yCenter - y) / (joyWidth / 2);
         }
       }
     }
