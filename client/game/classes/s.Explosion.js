@@ -4,7 +4,7 @@
 
     construct: function(options){
       var size = options.size || 300;
-      var spread = options.spread || 20;
+      var spread = options.spread || size / 15;
       var geometry = new THREE.Geometry();
 
       // @perf: iOS: More than 3 halves framerate up close

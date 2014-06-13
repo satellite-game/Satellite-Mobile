@@ -61,25 +61,17 @@ s.GameObject = new Class({
     var self = this;
     var defaultHP = this.constructor.properties.hp.default;
     var size = defaultHP * 5;
-    var totalIterations = Math.round(defaultHP / 100);
-    var iterations = totalIterations;
-    do {
-      setTimeout(function() {
-        var position = self.root.position.clone().add(new THREE.Vector3(Math.random()*600-300, Math.random()*200-100, Math.random()*600-300))
-        new s.Explosion({
-          game: self.game,
-          size: size,
-          position: position
-        });
-      }, iterations * 500);
 
-      iterations--;
-    }
-    while (iterations > 0);
+    var position = this.root.position.clone().add(new THREE.Vector3(Math.random()*20-10, Math.random()*20-10, Math.random()*20-10))
+    new s.Explosion({
+      game: this.game,
+      size: size,
+      position: position
+    });
 
     setTimeout(function() {
       self.destructOnNextTick();
-    }, totalIterations * 500);
+    }, 500);
   },
 
   init: function() {

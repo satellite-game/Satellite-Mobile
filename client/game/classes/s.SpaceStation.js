@@ -28,5 +28,30 @@ s.SpaceStation = new Class({
     // cube.material.color.setRGB(1, 0, 0);
     // cube.scale.set(500, 220, 850);
     // this.root.add(cube);
+  },
+
+  explode: function() {
+    var self = this;
+    var defaultHP = this.constructor.properties.hp.default;
+    var size = defaultHP * 5;
+    var totalIterations = Math.round(defaultHP / 100);
+    var iterations = totalIterations;
+    do {
+      setTimeout(function() {
+        var position = self.root.position.clone().add(new THREE.Vector3(Math.random()*400-200, Math.random()*200-100, Math.random()*800-400))
+        new s.Explosion({
+          game: self.game,
+          size: size,
+          position: position
+        });
+      }, iterations * 500);
+
+      iterations--;
+    }
+    while (iterations > 0);
+
+    setTimeout(function() {
+      self.destructOnNextTick();
+    }, totalIterations * 500);
   }
 });
