@@ -15,7 +15,25 @@ s.SatelliteGame = new Class({
   textures: [
     'particle.png',
     'explosion.png',
-    'crosshairs.png'
+    'crosshairs.png',
+    'phobos.jpg',
+    'phobos.jpg',
+    'human_space_station_color.png',
+    'human_space_station_bump.gif',
+    'human_ship_light.jpg',
+    'human_ship_light_bump.jpg',
+    'human_ship_heavy.jpg',
+    'human_ship_heavy_bump.jpg',
+    'human_building_tall_color.jpg',
+    'human_building_tall_bump.jpg',
+    'human_building_short_color.jpg',
+    'human_building_short_bump.jpg',
+    'skybox/Purple_Nebula_back6.png',
+    'skybox/Purple_Nebula_bottom4.png',
+    'skybox/Purple_Nebula_front5.png',
+    'skybox/Purple_Nebula_left2.png',
+    'skybox/Purple_Nebula_right1.png',
+    'skybox/Purple_Nebula_top3.png'
   ],
 
   construct: function() {
@@ -43,7 +61,7 @@ s.SatelliteGame = new Class({
     // @perf: iOS: 5 lights makes the framerate drop to 40, whereas 20 lights halves it
     while (this.explosionLights.length < 3) {
       var light = new THREE.PointLight(0xF16718, 0.45, 2500);
-      scene.add(light);
+      this.scene.add(light);
       this.explosionLights.push(light);
     }
 

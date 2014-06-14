@@ -52,3 +52,35 @@ canvas {
 	bottom: 5%;
 	left: 5%;
 }
+
+.s-FPS {
+	opacity: 0.5 !important;
+	position: absolute;
+	top: 0;
+}
+
+.s-Loading {
+	z-index: 1;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+
+	background: black;
+}
+
+.s-Progress {
+	width: 100%;
+
+	font-size: 16px;
+
+	height: 0.25em;
+}
+
+.s-Progress-bar {
+	width: 0%;
+	height: 0.25rem;
+
+	background: rgb(81, 176, 255);
+}

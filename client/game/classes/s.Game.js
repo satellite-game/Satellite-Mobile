@@ -6,7 +6,6 @@ s.Game = new Class({
 
     this.doRender = false;
     this.lastRender = 0;
-    this.room = null;
 
     // Store functions that should be called before render
     this.hookedFuncs = [];
@@ -32,9 +31,10 @@ s.Game = new Class({
     this.renderer.shadowMapCullFrontFaces = false;
 
     // Create the scene
-    this.scene = scene = new THREE.Scene();
+    var scene = this.scene = new THREE.Scene();
 
-    this.world = world = new CANNON.World();
+    // Initialize physics engine
+    var world = this.world = new CANNON.World();
     world.gravity.set(0,0,0);
     world.broadphase = new CANNON.NaiveBroadphase();
     world.solver.iterations = 10;
@@ -44,31 +44,40 @@ s.Game = new Class({
 
     // Add the renderer's canvas to the DOM
     this.el = this.renderer.domElement;
-    $(document.body).append(this.el);
+    this.$el = $(this.el).appendTo(document.body);
 
     // Handle window resizes
-    $(window).on('resize', this.fitWindow.bind(this));
+    $(window)
+      .on('resize', this.fitWindow.bind(this));
     this.fitWindow();
 
+    // Handle pointer lock changes
     // Handle fullscreen state changes
-    $(document).on('fullscreenchange mozfullscreenchange webkitfullscreenchange', this.handleFullscreenChange.bind(this));
+    $(document)
+      .on('pointerlockchange mozpointerlockchange webkitpointerlockchange', this.handlePointerLockChange.bind(this))
+      .on('fullscreenchange mozfullscreenchange webkitfullscreenchange', this.handleFullscreenChange.bind(this))
+      .on('pointerlockerror mozpointerlockerror webkitpointerlockerror', this.handlePointerLockError.bind(this));
     this.handleFullscreenChange();
 
-    // Handle pointer lock changes
-    $(document).on('pointerlockchange mozpointerlockchange webkitpointerlockchange', this.handlePointerLockChange.bind(this));
-    $(document).on('pointerlockerror mozpointerlockerror webkitpointerlockerror', this.handlePointerLockError.bind(this));
-
     // Monitor rendering stats
-    this.render_stats = new Stats();
-    $(this.render_stats.domElement).css({
-      position: 'absolute',
-      top: 0,
-      zIndex: 100
-    }).appendTo(document.body);
+    this.renderStats = new Stats();
+    this.$renderStats = $(this.renderStats.domElement).hide().addClass('s-FPS').appendTo(document.body)
+
+    // Loading progress
+    this.$loadingOverlay = $('.js-loadingOverlay');
+    this.$loadingBar = $('.js-progressBar');
+    this.loadProgress = {
+      models: 0,
+      textures: 0
+    };
 
     // Start loading models
     s.util.loadModels({
       models: this.models,
+      progress: function(pct) {
+        self.loadProgress.models = pct;
+        self.updateLoadProgress();
+      },
       complete: function(models) {
         self.modelsLoaded = true;
 
@@ -82,6 +91,10 @@ s.Game = new Class({
 
     s.util.loadTextures({
       textures: this.textures,
+      progress: function(pct) {
+        self.loadProgress.textures = pct;
+        self.updateLoadProgress();
+      },
       complete: function(textures) {
         self.texturesLoaded = true;
 
@@ -94,9 +107,24 @@ s.Game = new Class({
     });
   },
 
+  updateLoadProgress: function() {
+    var totalPct = (this.loadProgress.models + this.loadProgress.textures) / 2;
+    this.$loadingBar.css('width', totalPct+'%');
+  },
+
   // Attempt to start the game
   tryInitialize: function() {
     if (this.modelsLoaded && this.texturesLoaded && !this.initialized) {
+      console.log('Loading complete!');
+
+      // Show rendering stats
+      this.$renderStats.show();
+
+      // Hide loading status
+      this.$loadingBar.css('width', '100%');
+      this.$loadingOverlay.fadeOut();
+
+      // Start game
       this.initialize();
     }
   },
@@ -226,7 +254,7 @@ s.Game = new Class({
       // Request the next frame to be rendered
       requestAnimationFrame(this.render);
 
-      this.render_stats.update();
+      this.renderStats.update();
     }
   }
 });

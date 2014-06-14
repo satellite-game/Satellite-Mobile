@@ -30,17 +30,17 @@ s.util.loadTextures = function(options) {
 
     // Track progress
     toLoad--;
-    if (toLoad === 0) {
-      console.log('Textures loaded!');
-      if (typeof options.complete === 'function')
-        options.complete(textures);
-    }
-    else {
-      var pct = (options.textures.length-toLoad)/options.textures.length*100;
+    var pct = (options.textures.length-toLoad)/options.textures.length*100;
 
-      console.log('Loading textures: '+pct.toFixed(0)+'%');
-      if (typeof options.progress === 'function')
-        options.progress(pct, textures[name]);
+    if (typeof options.progress === 'function') {
+      options.progress(pct, textures[name]);
+    }
+    console.log('Loading textures: '+pct.toFixed(0)+'%');
+
+    if (toLoad === 0) {
+      if (typeof options.complete === 'function') {
+        options.complete(textures);
+      }
     }
   };
 
@@ -75,17 +75,16 @@ s.util.loadModels = function(options) {
 
     // Track progress
     toLoad--;
-    if (toLoad === 0) {
-      console.log('Models loaded!');
-      if (typeof options.complete === 'function')
-        options.complete(models);
+    var pct = (options.models.length-toLoad)/options.models.length*100;
+    if (typeof options.progress === 'function') {
+      options.progress(pct, models[name]);
     }
-    else {
-      var pct = (options.models.length-toLoad)/options.models.length*100;
+    console.log('Loading models: '+pct.toFixed(0)+'%');
 
-      console.log('Loading models: '+pct.toFixed(0)+'%');
-      if (typeof options.progress === 'function')
-        options.progress(pct, models[name]);
+    if (toLoad === 0) {
+      if (typeof options.complete === 'function') {
+        options.complete(models);
+      }
     }
   };
 
