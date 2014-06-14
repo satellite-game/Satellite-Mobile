@@ -9,14 +9,19 @@ s.Touch = new Class({
     this.setScreenVariables = this.setScreenVariables.bind(this);
 
     this.fire = false;
-    this.leftStick = { x: 0, y: 0 };
-    this.rightStick = { x: 0, y: 0 };
+
+    // Joysticks
+    var joyWidth = 240;
+    var joyOptions = {
+      width: joyWidth,
+      deadZone: joyWidth * 0.10,
+      margin: joyWidth * 0.15
+    };
+
+    this.leftStick = new s.Touch.Joystick(joyOptions);
+    this.rightStick = new s.Touch.Joystick(joyOptions);
 
     // Set parameters
-    this.joyWidth = 240;
-    this.joyDeadZone = this.joyWidth * 0.10;
-    this.inputRange = { min: this.joyDeadZone / this.joyWidth * 2, max: 1.0};
-    this.outputRange = { min: 0.0, max: 1.0};
     this.setScreenVariables();
 
     // Listen to events
@@ -30,11 +35,27 @@ s.Touch = new Class({
     this.width = window.innerWidth;
     this.height = window.innerHeight;
 
-    this.joyOffset = this.width * 0.05;
+    // Use previously passed margin
+    var joyMargin = this.leftStick.margin;
+    var joyWidth = this.leftStick.width;
 
-    this.yCenter = this.height - this.joyOffset - this.joyWidth / 2;
-    this.xCenterLeft = this.joyOffset + this.joyWidth / 2;
-    this.xCenterRight = this.width - this.joyOffset - this.joyWidth/2;
+    var yCenter = this.height - joyMargin - joyWidth / 2;
+    var xCenterLeft = joyMargin + joyWidth / 2;
+    var xCenterRight = this.width - joyMargin - joyWidth/2;
+
+    this.leftStick.configure({
+      position: {
+        x: xCenterLeft,
+        y: yCenter
+      }
+    });
+
+    this.rightStick.configure({
+      position: {
+        x: xCenterRight,
+        y: yCenter
+      }
+    });
   },
 
   destruct: function() {
@@ -44,26 +65,15 @@ s.Touch = new Class({
     window.removeEventListener('touchend', this.handleTouches, false);
   },
 
-  rescaleJoyTouch: function(value) {
-      var sign = value/Math.abs(value);
-      value = Math.abs(value);
-      if (value > this.inputRange.min && value < this.inputRange.max) {
-        value = (value - this.inputRange.min)*(this.outputRange.max-this.outputRange.min)/(this.inputRange.max-this.inputRange.min);
-      }
-      value *= sign;
-      value = s.util.clamp(value, -1, 1);
-      return value;
-  },
-
   handleTouches: function(evt) {
     // Stop scrolling
     evt.preventDefault();
 
     this.fire = false;
-    this.leftStick.x =  0;
-    this.leftStick.y =  0;
-    this.rightStick.x =  0;
-    this.rightStick.y =  0;
+
+    // Reset state before trying each touch
+    this.leftStick.reset();
+    this.rightStick.reset();
 
     for (var i = 0; i < evt.touches.length; i++) {
       var touch = evt.touches[i];
@@ -72,39 +82,13 @@ s.Touch = new Class({
       var x = touch.clientX;
       var y = touch.clientY;
 
-      var joyWidth = this.joyWidth;
-      var joyOffset = this.joyOffset;
-      var joyDeadZone = this.joyDeadZone;
-
-      var yCenter = this.yCenter;
-      var xCenterLeft = this.xCenterLeft;
-      var xCenterRight = this.xCenterRight;
-
       // Fire if Y is in top of screen
       if (y < this.height/2) {
         this.fire = true;
       }
 
-      if (x > 0 && x < joyOffset * 2 + joyWidth && y > this.height - joyOffset * 2 - joyWidth && y < this.height) {
-        var leftXInDeadZone = Math.abs(xCenterLeft - x) <= joyDeadZone;
-        var leftYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone;
-        if (!leftXInDeadZone) {
-          this.leftStick.x = this.rescaleJoyTouch((x - xCenterLeft) / (joyWidth / 2));
-        }
-        if (!leftYInDeadZone) {
-          this.leftStick.y = this.rescaleJoyTouch((yCenter - y) / (joyWidth / 2));
-        }
-      }
-      if (x > this.width - joyWidth - joyOffset * 2 && x < this.width && y > this.height - joyOffset * 2 - joyWidth && y < this.height) {
-        var rightXInDeadZone = Math.abs(xCenterRight - x) <= joyDeadZone;
-        var rightYInDeadZone = Math.abs(yCenter - y) <= joyDeadZone;
-        if (!rightXInDeadZone) {
-          this.rightStick.x = this.rescaleJoyTouch((x - xCenterRight) / (joyWidth / 2));
-        }
-        if (!rightYInDeadZone) {
-          this.rightStick.y = this.rescaleJoyTouch((yCenter - y) / (joyWidth / 2));
-        }
-      }
+      this.leftStick.update(touch);
+      this.rightStick.update(touch);
     }
   }
 });
