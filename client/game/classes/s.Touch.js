@@ -31,6 +31,10 @@ s.Touch = new Class({
     this.height = window.innerHeight;
 
     this.joyOffset = this.width * 0.05;
+
+    this.yCenter = this.height - this.joyOffset - this.joyWidth / 2;
+    this.xCenterLeft = this.joyOffset + this.joyWidth / 2;
+    this.xCenterRight = this.width - this.joyOffset - this.joyWidth/2;
   },
 
   destruct: function() {
@@ -68,13 +72,13 @@ s.Touch = new Class({
       var x = touch.clientX;
       var y = touch.clientY;
 
-      var joyWidth = 240;
-      var joyOffset = this.width * 0.05;
-      var joyDeadZone = joyWidth * 0.10;
+      var joyWidth = this.joyWidth;
+      var joyOffset = this.joyOffset;
+      var joyDeadZone = this.joyDeadZone;
 
-      var yCenter = this.height - joyOffset - joyWidth / 2;
-      var xCenterLeft = joyOffset + joyWidth / 2;
-      var xCenterRight = this.width - joyOffset - joyWidth/2;
+      var yCenter = this.yCenter;
+      var xCenterLeft = this.xCenterLeft;
+      var xCenterRight = this.xCenterRight;
 
       // Fire if Y is in top of screen
       if (y < this.height/2) {
