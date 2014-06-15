@@ -38,8 +38,8 @@ s.Ship = new Class({
     // this.root.add(cube);
 
     // Slow down/bleed off rolling
-    body.angularDamping = 0.99;
-    body.linearDamping = 0.5;
+    body.angularDamping = s.constants.ship.angularDamping;
+    body.linearDamping = s.constants.ship.linearDamping;
 
     this.engineGlowMaterial = new THREE.SpriteMaterial({
       map: s.textures.particle,
@@ -105,8 +105,8 @@ s.Ship = new Class({
     var self = this;
     this._super.apply(this, arguments);
 
-    // Adjusts engine glow based on linear velocity
-    var thrustScalar = Math.abs(this.game.controls.thrustImpulse) / this.game.controls.options.forwardThrust;
+    // Adjusts engine glow based on thrust impulse
+    var thrustScalar = Math.abs(this.game.controls.thrustImpulse) / s.constants.ship.forwardThrust;
 
     var lightMin = 0.5;
     var lightScalar = 4;

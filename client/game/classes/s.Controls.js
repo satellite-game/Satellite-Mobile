@@ -2,37 +2,22 @@ s.Controls = new Class({
 
   toString: 'Controls',
 
-  options: {
-    rotationSpeed: Math.PI/8,
-    pitchSpeed: Math.PI/32,
-    yawSpeed: Math.PI/32,
-    forwardThrust: 25,
-    backwardThrust: 15,
-
-    velocityFadeFactor: 16,
-    rotationFadeFactor: 4,
-    boundaryPushback: 0
-  },
-
   construct: function(options) {
     // Store references to game objects
-    this.HUD = options.HUD;
     this.game = options.game;
     this.player = options.player;
 
     // Create interpreters for controllers
-    this.keyboard = new s.Keyboard();
-    this.touch = new s.Touch();
+    this.keyboard = new s.Controls.Keyboard();
+    this.touch = new s.Controls.Touch();
 
     // Hook to the gameloop
     this.update = this.update.bind(this);
     this.game.hook(this.update);
 
-    this.firing = false;
-
-    this.lastTime = new Date().getTime();
-
-    this.thrustImpulse = 0; 
+    // Choose control method
+    var hasTouch = ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
+    this.controlMethod = hasTouch ? 'touch' : 'keyboard';
   },
 
   destruct: function() {
@@ -41,7 +26,6 @@ s.Controls = new Class({
 
   update: function(time, delta) {
     var now = new Date().getTime();
-    var difference = now - this.lastTime;
 
     var root = this.player.root;
     var body = this.player.body;
@@ -50,166 +34,67 @@ s.Controls = new Class({
     var roll = 0;
     var yaw = 0;
 
+    var thrust = 0;
+
     var changeViewMode = false;
     var fire = false;
-    var thrust = 0;
-    var brakes = 0;
-    var thrustScalar = Math.abs(this.thrustImpulse)/this.options.forwardThrust + 1;
 
-    var yawSpeed = this.options.yawSpeed;
-    var pitchSpeed = this.options.pitchSpeed;
-
-    ///////////////////////
-    // TOUCH CONTROLS  //
-    ///////////////////////
-
-    /*
-    pitch = this.touch.rightStick.y * this.options.pitchSpeed;
-    roll = this.touch.leftStick.x * this.options.rotationSpeed;
-    yaw = this.touch.rightStick.x * -1 * this.options.yawSpeed;
-
-    if (this.touch.leftStick.y > 0) {
-      thrust = this.touch.leftStick.y;
+    // Control method
+    if (this.controlMethod === 'touch') {
+      pitch = this.touch.pitch;
+      roll = this.touch.roll;
+      yaw = this.touch.yaw;
+      thrust = this.touch.thrust;
+      fire = this.touch.fire;
+      changeViewMode = this.touch.changeViewMode;
     }
-    else if (this.touch.leftStick.y < 0) {
-      brakes = -this.touch.leftStick.y;
-    }
-    */
+    else if (this.controlMethod === 'keyboard') {
+      // Update keyboard before polling
+      this.keyboard.update();
 
-    var rightStickMode = 'yaw'; // 'roll';
-
-    pitch = this.touch.joyStick.y * this.options.pitchSpeed;
-    if (rightStickMode === 'roll') {
-        roll = this.touch.joyStick.x * this.options.rotationSpeed;
-        if (this.touch.leftButton.pressed) {
-            yaw = 0.125; //-1;
-        }
-        else if (this.touch.rightButton.pressed) {
-            yaw = -0.125; //1;
-        }
-    }
-    else if (rightStickMode === 'yaw') {
-        yaw = -1 * this.touch.joyStick.x * this.options.yawSpeed;
-        if (this.touch.leftButton.pressed) {
-            roll = -0.25 // -1;
-        }
-        else if (this.touch.rightButton.pressed) {
-            roll = 0.25 // 1;
-        }
+      pitch = this.keyboard.pitch;
+      roll = this.keyboard.roll;
+      yaw = this.keyboard.yaw;
+      thrust = this.keyboard.thrust;
+      fire = this.keyboard.fire;
+      changeViewMode = this.keyboard.changeViewMode;
     }
 
-    /*
-    yaw = this.touch.rightStick.x * -1 * this.options.yawSpeed;
-
-    if (this.touch.leftStick.y > 0) {
-      thrust = this.touch.leftStick.y;
+    // Calculate thrust impulse based on direction
+    var thrustImpulse = 0;
+    if (thrust > 0) {
+      thrustImpulse = thrust * s.constants.ship.forwardThrust;
     }
-    else if (this.touch.leftStick.y < 0) {
-      brakes = -this.touch.leftStick.y;
-    }
-    */
-
-    thrust = this.touch.thrustButton.pressed ? 1 : 0;
-    brakes = this.touch.retroThrustButton.pressed ? 1 : 0;
-    fire = this.touch.fireButton.pressed;
-
-    ///////////////////////
-    // KEYBOARD COMMANDS //
-    ///////////////////////
-
-    if (this.keyboard.pressed('left')) {
-      yaw = yawSpeed / thrustScalar;
-    }
-    else if (this.keyboard.pressed('right')) {
-      yaw = -1*yawSpeed / thrustScalar;
+    else if (thrust < 0) {
+      thrustImpulse = thrust * s.constants.ship.backwardThrust;
     }
 
-    if (this.keyboard.pressed('down')) {
-      // Pitch down
-      pitch = -1*pitchSpeed / thrustScalar;
-    }
-    else if (this.keyboard.pressed('up')) {
-      // Pitch up
-      pitch = pitchSpeed / thrustScalar;
-    }
+    // Expose thrust impulse for visuals
+    this.thrustImpulse = thrustImpulse;
 
-    if (this.keyboard.pressed('w')) {
-      thrust = 1;
-    }
-    else if (this.keyboard.pressed('s')) {
-      brakes = 1;
-    }
+    // A scalar used to control rate of turn based on thrust
+    var thrustScalar = Math.abs(thrustImpulse)/s.constants.ship.forwardThrust + 1;
 
-    if (this.keyboard.pressed('d')) {
-      roll = this.options.rotationSpeed;
-    }
-    else if (this.keyboard.pressed('a')) {
-      roll = -1*this.options.rotationSpeed;
-    }
+    // Apply speeds to values so ship behaves the same for each control type
+    // Apply thrustScalar so the ship turns slower when under thrust
+    pitch = pitch * s.constants.ship.pitchSpeed / thrustScalar;
+    roll = roll * s.constants.ship.rollSpeed / thrustScalar;
+    yaw = yaw * s.constants.ship.yawSpeed / thrustScalar;
 
-    if (this.keyboard.pressed('space')) {
-      fire = true;
-    }
-
-    if (this.keyboard.pressed('v')) {
-      changeViewMode = true;
-    }
-
-    //////////////////////////////
-    // MOTION AND PHYSICS LOGIC //
-    //////////////////////////////
-
-    var linearVelocity = body.velocity;
+    // Apply values to physics simulation
     var angularVelocity = body.angularVelocity;
     var rotationMatrix = new THREE.Matrix4();
     rotationMatrix.extractRotation(root.matrix);
-
-    // If ship position is greater then x apply thrust in opposite direction
-    // If ship position is not greater then x allow to apply thrust
-    // var playerPosition = this.player.root.position;
-    // var boundryLimit = 30000;
-    // If the ship is beyound the boundary limit steer it back into the map
-    // if(s.util.largerThan(playerPosition, boundryLimit)){
-    //   var boundryPush = new THREE.Vector3(-2*this.options.boundaryPushback*this.thrustImpulse, 0, 2*this.options.boundaryPushback*this.thrustImpulse).applyMatrix4(rotationMatrix);
-    //   yaw = this.options.boundaryPushback;
-    //   if (this.options.boundaryPushback < 2) this.options.boundaryPushback += 0.01;
-    //   root.applyCentralImpulse(boundryPush);
-    //   console.log('--Outside Boundry Limit--');
-    // } else if (this.options.boundaryPushback > 0) {
-    //   this.options.boundaryPushback -= 0.005;
-    // }
 
     // Add to the existing angular velocity,
     var newAngularVelocity = new THREE.Vector3(pitch, yaw, roll).applyMatrix4(rotationMatrix).add(angularVelocity);
     body.angularVelocity.set(newAngularVelocity.x, newAngularVelocity.y, newAngularVelocity.z);
 
-    // Apply thrust
-    // Invert existing linear velocity
-    // Fractionally apply the opposite impulse
-    // Then apply forward impulse
-    // if (thrust && this.thrustImpulse < s.config.ship.maxSpeed){
-    //   this.thrustImpulse += (difference > s.config.ship.maxSpeed) ? s.config.ship.maxSpeed : difference;
-    // }
-
-    // if (brakes && this.thrustImpulse > 0){
-    //   this.thrustImpulse -= difference;
-    // }
-
-    if (thrust > 0) {
-        this.thrustImpulse = thrust * this.options.forwardThrust;
-    }
-    else if (brakes > 0) {
-        this.thrustImpulse = brakes * -1 * this.options.backwardThrust;
-    }
-    else {
-        this.thrustImpulse = 0;
-    }
-
-    var forceVector = new THREE.Vector3(0, 0, this.thrustImpulse).applyMatrix4(rotationMatrix);
+    var forceVector = new THREE.Vector3(0, 0, thrustImpulse).applyMatrix4(rotationMatrix);
     var cannonVector = new CANNON.Vec3(forceVector.x, forceVector.y, forceVector.z);
     body.applyImpulse(cannonVector, body.position);
-    // body.applyForce(forceVector, new CANNON.Vec3(0,0,0));
 
+    // Tell the player to perform actions
     if (fire) {
       this.player.fire();
     }

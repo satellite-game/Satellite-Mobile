@@ -1,7 +1,7 @@
-s.Touch.Joystick = function(options) {
+s.Controls.Touch.Joystick = function(options) {
   if (!options.position) {
-    // throw new Error('s.Touch.Joystick: You must provide options.position');
-    console.warn('s.Touch.Joystick: options.position not passed during construction');
+    // throw new Error('s.Controls.Touch.Joystick: You must provide options.position');
+    console.warn('s.Controls.Touch.Joystick: options.position not passed during construction');
   }
 
   this.update = this.update.bind(this);
@@ -18,7 +18,7 @@ s.Touch.Joystick = function(options) {
   this.configure(options || {});
 };
 
-s.Touch.Joystick.prototype.rescaleJoyTouch = function(value) {
+s.Controls.Touch.Joystick.prototype.rescaleJoyTouch = function(value) {
   var sign = value/Math.abs(value);
   value = Math.abs(value);
   if (value > this.inputRange.min && value < this.inputRange.max) {
@@ -29,7 +29,7 @@ s.Touch.Joystick.prototype.rescaleJoyTouch = function(value) {
   return value;
 };
 
-s.Touch.Joystick.prototype.configure = function(options) {
+s.Controls.Touch.Joystick.prototype.configure = function(options) {
   // User provided
   // Use existing values if not provided
   this.position = options.position || this.position;
@@ -53,12 +53,12 @@ s.Touch.Joystick.prototype.configure = function(options) {
   this.el.style.marginTop = -this.width/2 + 'px';
 };
 
-s.Touch.Joystick.prototype.reset = function() {
+s.Controls.Touch.Joystick.prototype.reset = function() {
   this.x = 0;
   this.y = 0;
 };
 
-s.Touch.Joystick.prototype.update = function(touch) {
+s.Controls.Touch.Joystick.prototype.update = function(touch) {
   var x = touch.clientX;
   var y = touch.clientY;
 

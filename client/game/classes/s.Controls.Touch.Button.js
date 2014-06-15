@@ -1,7 +1,7 @@
-s.Touch.Button = function(options) {
+s.Controls.Touch.Button = function(options) {
   if (!options.position) {
-    // throw new Error('s.Touch.Button: You must provide options.position');
-    console.warn('s.Touch.Button: options.position not passed during construction');
+    // throw new Error('s.Controls.Touch.Button: You must provide options.position');
+    console.warn('s.Controls.Touch.Button: options.position not passed during construction');
   }
 
   this.el = document.createElement('div');
@@ -17,7 +17,7 @@ s.Touch.Button = function(options) {
   this.configure(options || {});
 };
 
-s.Touch.Button.prototype.configure = function(options) {
+s.Controls.Touch.Button.prototype.configure = function(options) {
   // User provided
   // Use existing values if not provided
   this.position = options.position || this.position;
@@ -44,11 +44,11 @@ s.Touch.Button.prototype.configure = function(options) {
   this.el.textContent = this.text;
 };
 
-s.Touch.Button.prototype.reset = function() {
+s.Controls.Touch.Button.prototype.reset = function() {
   this.pressed = false;
 };
 
-s.Touch.Button.prototype.update = function(touch) {
+s.Controls.Touch.Button.prototype.update = function(touch) {
   var x = touch.clientX;
   var y = touch.clientY;
 
