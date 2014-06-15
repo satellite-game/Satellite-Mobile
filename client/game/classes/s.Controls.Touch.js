@@ -1,6 +1,4 @@
 s.Controls.Touch = function() {
-  this.stickMode = 'yaw'; // 'roll'
-
   this.handleTouches = this.handleTouches.bind(this);
   this.setScreenVariables = this.setScreenVariables.bind(this);
 
@@ -10,11 +8,12 @@ s.Controls.Touch = function() {
   var joyWidth = 240;
   var joyOptions = {
     width: joyWidth,
-    deadZone: joyWidth * 0.10,
+    deadZone: joyWidth * 0.25,
     margin: joyWidth * 0.15
   };
 
-  this.joyStick = new s.Controls.Touch.Joystick(joyOptions);
+  this.rightStick = new s.Controls.Touch.Joystick(joyOptions);
+  this.leftStick = new s.Controls.Touch.Joystick(joyOptions);
 
   // Buttons
   var buttonWidth = 96;
@@ -26,29 +25,9 @@ s.Controls.Touch = function() {
   this.fireButton = new s.Controls.Touch.Button({
     width: 128,
     margin: 128 * 0.025,
-    text: 'fire',
+    fill: 'rgba(255, 0, 0, 0.5)',
     color: 'red'
   });
-
-  this.retroThrustButton = new s.Controls.Touch.Button(s.util.extend({}, buttonOptions, {
-    text: 'back',
-    color: 'blue'
-  }));
-
-  this.thrustButton = new s.Controls.Touch.Button(s.util.extend({}, buttonOptions, {
-    text: 'forward',
-    color: 'blue'
-  }));
-
-  this.leftButton = new s.Controls.Touch.Button(s.util.extend({}, buttonOptions, {
-    text: 'left',
-    color: 'white'
-  }));
-
-  this.rightButton = new s.Controls.Touch.Button(s.util.extend({}, buttonOptions, {
-    text: 'right',
-    color: 'white'
-  }));
 
   // Set parameters
   this.setScreenVariables();
@@ -72,60 +51,34 @@ s.Controls.Touch.prototype.setScreenVariables = function() {
   this.height = window.innerHeight;
 
   // Use previously passed margin
-  var joyWidth = this.joyStick.width;
-  var joyMargin = this.joyStick.margin;
+  var joyWidth = this.rightStick.width;
+  var joyMargin = this.rightStick.margin;
 
   var fireButtonWidth = this.fireButton.width;
-  var buttonWidth = this.thrustButton.width;
-  var buttonMargin = this.thrustButton.margin;
 
   var joyX = this.width - joyMargin - joyWidth/2;
   var joyY = this.height - joyMargin - joyWidth/2;
 
-  var buttonX = 0 + fireButtonWidth + buttonWidth/2;
-  var buttonY = this.height - fireButtonWidth - buttonWidth/2;
+  var leftControlX = joyMargin + joyWidth/2;
 
-  var buttonOffset = buttonWidth * 0.75;
-
-  this.joyStick.configure({
+  this.rightStick.configure({
     position: {
       x: joyX,
       y: joyY
     }
   });
 
-  this.thrustButton.configure({
+  this.leftStick.configure({
     position: {
-      x: buttonX,
-      y: buttonY - buttonOffset
-    }
-  });
-
-  this.retroThrustButton.configure({
-    position: {
-      x: buttonX,
-      y: buttonY + buttonOffset
+      x: leftControlX,
+      y: joyY
     }
   });
 
   this.fireButton.configure({
     position: {
-      x: buttonX,
-      y: buttonY
-    }
-  });
-
-  this.leftButton.configure({
-    position: {
-      x: buttonX - buttonOffset,
-      y: buttonY
-    }
-  });
-
-  this.rightButton.configure({
-    position: {
-      x: buttonX + buttonOffset,
-      y: buttonY
+      x: leftControlX,
+      y: joyY
     }
   });
 };
@@ -137,22 +90,16 @@ s.Controls.Touch.prototype.handleTouches = function(evt) {
   this.fire = false;
 
   // Reset state before trying each touch
-  this.joyStick.reset();
+  this.rightStick.reset();
+  this.leftStick.reset();
   this.fireButton.reset();
-  this.thrustButton.reset();
-  this.retroThrustButton.reset();
-  this.leftButton.reset();
-  this.rightButton.reset();
 
   for (var i = 0; i < evt.touches.length; i++) {
     var touch = evt.touches[i];
 
-    this.retroThrustButton.update(touch);
-    this.thrustButton.update(touch);
+    this.rightStick.update(touch);
+    this.leftStick.update(touch);
     this.fireButton.update(touch);
-    this.joyStick.update(touch);
-    this.leftButton.update(touch);
-    this.rightButton.update(touch);
   }
 
   this.pitch = 0;
@@ -161,31 +108,23 @@ s.Controls.Touch.prototype.handleTouches = function(evt) {
   this.thrust = 0;
   this.fire = false;
 
-  this.pitch = this.joyStick.y;
-  if (this.stickMode === 'roll') {
-      this.roll = this.joyStick.x;
-      if (this.leftButton.pressed) {
-          this.yaw = 0.125; //-1;
-      }
-      else if (this.rightButton.pressed) {
-          this.yaw = -0.125; //1;
-      }
-  }
-  else if (this.stickMode === 'yaw') {
-      this.yaw = -1 * this.joyStick.x;
-      if (this.leftButton.pressed) {
-          this.roll = -0.25 // -1;
-      }
-      else if (this.rightButton.pressed) {
-          this.roll = 0.25 // 1;
-      }
-  }
+  this.pitch = this.rightStick.y;
+  this.yaw = -1 * this.rightStick.x;
 
-  if (this.thrustButton.pressed) {
+  // If Y is outside the deadzone, give full thrust
+  if (this.leftStick.y > 0) {
     this.thrust = 1;
   }
-  else if (this.retroThrustButton.pressed) {
+  else if (this.leftStick.y < 0) {
     this.thrust = -1;
+  }
+
+  // If X is outside the deadzone, give partial roll
+  if (this.leftStick.x > 0) {
+    this.roll = 0.75;
+  }
+  else if (this.leftStick.x < 0) {
+    this.roll = -0.75;
   }
 
   this.fire = this.fireButton.pressed;

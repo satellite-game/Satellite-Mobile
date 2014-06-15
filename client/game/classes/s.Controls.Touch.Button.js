@@ -24,6 +24,7 @@ s.Controls.Touch.Button.prototype.configure = function(options) {
   this.width = options.width || this.width || 240;
   this.margin = options.margin || this.margin || this.width * 0.15; // 15% of width
 
+  this.fill = options.fill || this.fill || 'transparent';
   this.color = options.color || this.color || 'green';
   this.text = options.text || this.text || '';
 
@@ -38,6 +39,7 @@ s.Controls.Touch.Button.prototype.configure = function(options) {
   this.el.style.marginLeft = -this.width/2 + 'px';
   this.el.style.marginTop = -this.width/2 + 'px';
 
+  this.el.style.backgroundColor = this.fill;
   this.el.style.borderColor = this.color;
   this.el.style.color = this.color;
   this.el.style.lineHeight = this.width + 'px';

@@ -11,8 +11,12 @@ s.Controls.Touch.Joystick = function(options) {
   this.y = 0;
 
   this.el = document.createElement('div');
-  this.el.className = 's-Joystick s-Joystick--left';
+  this.el.className = 's-Joystick';
   document.body.appendChild(this.el);
+
+  this.deadZoneEl = document.createElement('div');
+  this.deadZoneEl.className = 's-Joystick-deadZone';
+  this.el.appendChild(this.deadZoneEl);
 
   // Initial configuration
   this.configure(options || {});
@@ -48,9 +52,13 @@ s.Controls.Touch.Joystick.prototype.configure = function(options) {
 
   this.el.style.width = this.width + 'px';
   this.el.style.height = this.width + 'px';
-
   this.el.style.marginLeft = -this.width/2 + 'px';
   this.el.style.marginTop = -this.width/2 + 'px';
+
+  this.deadZoneEl.style.width = this.deadZone + 'px';
+  this.deadZoneEl.style.height = this.deadZone + 'px';
+  this.deadZoneEl.style.marginLeft = -this.deadZone/2 + 'px';
+  this.deadZoneEl.style.marginTop = -this.deadZone/2 + 'px';
 };
 
 s.Controls.Touch.Joystick.prototype.reset = function() {
@@ -71,8 +79,8 @@ s.Controls.Touch.Joystick.prototype.update = function(touch) {
   var radius = (this.width / 2);
 
   if (x > xMin && x < xMax && y > yMin && y < yMax) {
-    var leftXInDeadZone = Math.abs(this.position.x - x) <= this.deadZone;
-    var leftYInDeadZone = Math.abs(this.position.y - y) <= this.deadZone;
+    var leftXInDeadZone = Math.abs(this.position.x - x) <= this.deadZone/2;
+    var leftYInDeadZone = Math.abs(this.position.y - y) <= this.deadZone/2;
 
     if (!leftXInDeadZone) {
       this.x = this.rescaleJoyTouch((x - this.position.x) / radius);
