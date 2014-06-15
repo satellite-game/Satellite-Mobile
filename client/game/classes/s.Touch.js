@@ -27,9 +27,33 @@ s.Touch = new Class({
       width: buttonWidth,
       margin: buttonWidth * 0.025
     };
-    this.fireButton = new s.Touch.Button(buttonOptions);
-    this.retroThrustButton = new s.Touch.Button(buttonOptions);
-    this.thrustButton = new s.Touch.Button(buttonOptions);
+
+    this.fireButton = new s.Touch.Button({
+      width: 128,
+      margin: 128 * 0.025,
+      text: 'fire',
+      color: 'red'
+    });
+
+    this.retroThrustButton = new s.Touch.Button(s.util.extend({}, buttonOptions, {
+      text: 'back',
+      color: 'blue'
+    }));
+
+    this.thrustButton = new s.Touch.Button(s.util.extend({}, buttonOptions, {
+      text: 'forward',
+      color: 'blue'
+    }));
+
+    this.leftButton = new s.Touch.Button(s.util.extend({}, buttonOptions, {
+      text: 'left',
+      color: 'white'
+    }));
+
+    this.rightButton = new s.Touch.Button(s.util.extend({}, buttonOptions, {
+      text: 'right',
+      color: 'white'
+    }));
 
     // Set parameters
     this.setScreenVariables();
@@ -49,14 +73,17 @@ s.Touch = new Class({
     var joyWidth = this.joyStick.width;
     var joyMargin = this.joyStick.margin;
 
-    var buttonWidth = this.fireButton.width;
-    var buttonMargin = this.fireButton.margin;
+    var fireButtonWidth = this.fireButton.width;
+    var buttonWidth = this.thrustButton.width;
+    var buttonMargin = this.thrustButton.margin;
 
     var joyX = this.width - joyMargin - joyWidth/2;
-    var joyY = this.height - joyMargin - joyWidth / 2;
+    var joyY = this.height - joyMargin - joyWidth/2;
 
-    var buttonX = 0 + buttonWidth;
-    var buttonY = this.height - buttonWidth;
+    var buttonX = 0 + fireButtonWidth + buttonWidth/2;
+    var buttonY = this.height - fireButtonWidth - buttonWidth/2;
+
+    var buttonOffset = buttonWidth * 0.75;
 
     this.joyStick.configure({
       position: {
@@ -66,29 +93,37 @@ s.Touch = new Class({
     });
 
     this.thrustButton.configure({
-      text: 'thrust',
-      color: 'blue',
       position: {
         x: buttonX,
-        y: buttonY - buttonWidth * 2 + buttonWidth/2
+        y: buttonY - buttonOffset
       }
     });
 
     this.retroThrustButton.configure({
-      text: 'retro-thrust',
-      color: 'green',
+      position: {
+        x: buttonX,
+        y: buttonY + buttonOffset
+      }
+    });
+
+    this.fireButton.configure({
       position: {
         x: buttonX,
         y: buttonY
       }
     });
 
-    this.fireButton.configure({
-      text: 'fire',
-      color: 'red',
+    this.leftButton.configure({
       position: {
-        x: buttonX,
-        y: buttonY - buttonWidth + buttonWidth/4
+        x: buttonX - buttonOffset,
+        y: buttonY
+      }
+    });
+
+    this.rightButton.configure({
+      position: {
+        x: buttonX + buttonOffset,
+        y: buttonY
       }
     });
   },
@@ -111,6 +146,8 @@ s.Touch = new Class({
     this.fireButton.reset();
     this.thrustButton.reset();
     this.retroThrustButton.reset();
+    this.leftButton.reset();
+    this.rightButton.reset();
 
     for (var i = 0; i < evt.touches.length; i++) {
       var touch = evt.touches[i];
@@ -119,6 +156,8 @@ s.Touch = new Class({
       this.thrustButton.update(touch);
       this.fireButton.update(touch);
       this.joyStick.update(touch);
+      this.leftButton.update(touch);
+      this.rightButton.update(touch);
     }
   }
 });

@@ -152,7 +152,7 @@ s.util.createRay = function(pointA, pointB) {
 };
 
 /**
-  Create a ray between two points
+  Clamp a value between a min and a max
 
   @param {Number} value  Value to clamp
   @param {Number} min    Lowest value
@@ -160,6 +160,21 @@ s.util.createRay = function(pointA, pointB) {
 */
 s.util.clamp = function(value, min, max) {
   return Math.max(Math.min(value, max), min)
+};
+
+/**
+  Extend an object by another
+
+  @param {Object} target    Object to copy values to
+  @param {Object} source... Any number of objects to copy properties from
+*/
+s.util.extend = function(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    for (var prop in arguments[i]) {
+      target[prop] = arguments[i][prop];
+    }
+  }
+  return target;
 };
 
 /**

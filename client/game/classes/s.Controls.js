@@ -76,8 +76,27 @@ s.Controls = new Class({
     }
     */
 
+    var rightStickMode = 'yaw'; // 'roll';
+
     pitch = this.touch.joyStick.y * this.options.pitchSpeed;
-    roll = this.touch.joyStick.x * this.options.rotationSpeed;
+    if (rightStickMode === 'roll') {
+        roll = this.touch.joyStick.x * this.options.rotationSpeed;
+        if (this.touch.leftButton.pressed) {
+            yaw = 0.125; //-1;
+        }
+        else if (this.touch.rightButton.pressed) {
+            yaw = -0.125; //1;
+        }
+    }
+    else if (rightStickMode === 'yaw') {
+        yaw = -1 * this.touch.joyStick.x * this.options.yawSpeed;
+        if (this.touch.leftButton.pressed) {
+            roll = -0.25 // -1;
+        }
+        else if (this.touch.rightButton.pressed) {
+            roll = 0.25 // 1;
+        }
+    }
 
     /*
     yaw = this.touch.rightStick.x * -1 * this.options.yawSpeed;
