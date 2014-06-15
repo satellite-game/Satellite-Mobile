@@ -18,8 +18,18 @@ s.Touch = new Class({
       margin: joyWidth * 0.15
     };
 
-    this.leftStick = new s.Touch.Joystick(joyOptions);
-    this.rightStick = new s.Touch.Joystick(joyOptions);
+    this.joyStick = new s.Touch.Joystick(joyOptions);
+    // this.rightStick = new s.Touch.Joystick(joyOptions);
+
+    // Buttons
+    var buttonWidth = 96;
+    var buttonOptions = {
+      width: buttonWidth,
+      margin: buttonWidth * 0.025
+    };
+    this.fireButton = new s.Touch.Button(buttonOptions);
+    this.retroThrustButton = new s.Touch.Button(buttonOptions);
+    this.thrustButton = new s.Touch.Button(buttonOptions);
 
     // Set parameters
     this.setScreenVariables();
@@ -36,24 +46,49 @@ s.Touch = new Class({
     this.height = window.innerHeight;
 
     // Use previously passed margin
-    var joyMargin = this.leftStick.margin;
-    var joyWidth = this.leftStick.width;
+    var joyWidth = this.joyStick.width;
+    var joyMargin = this.joyStick.margin;
 
-    var yCenter = this.height - joyMargin - joyWidth / 2;
-    var xCenterLeft = joyMargin + joyWidth / 2;
-    var xCenterRight = this.width - joyMargin - joyWidth/2;
+    var buttonWidth = this.fireButton.width;
+    var buttonMargin = this.fireButton.margin;
 
-    this.leftStick.configure({
+    var joyX = this.width - joyMargin - joyWidth/2;
+    var joyY = this.height - joyMargin - joyWidth / 2;
+
+    var buttonX = 0 + buttonWidth;
+    var buttonY = this.height - buttonWidth;
+
+    this.joyStick.configure({
       position: {
-        x: xCenterLeft,
-        y: yCenter
+        x: joyX,
+        y: joyY
       }
     });
 
-    this.rightStick.configure({
+    this.thrustButton.configure({
+      text: 'thrust',
+      color: 'blue',
       position: {
-        x: xCenterRight,
-        y: yCenter
+        x: buttonX,
+        y: buttonY - buttonWidth * 2 + buttonWidth/2
+      }
+    });
+
+    this.retroThrustButton.configure({
+      text: 'retro-thrust',
+      color: 'green',
+      position: {
+        x: buttonX,
+        y: buttonY
+      }
+    });
+
+    this.fireButton.configure({
+      text: 'fire',
+      color: 'red',
+      position: {
+        x: buttonX,
+        y: buttonY - buttonWidth + buttonWidth/4
       }
     });
   },
@@ -72,23 +107,18 @@ s.Touch = new Class({
     this.fire = false;
 
     // Reset state before trying each touch
-    this.leftStick.reset();
-    this.rightStick.reset();
+    this.joyStick.reset();
+    this.fireButton.reset();
+    this.thrustButton.reset();
+    this.retroThrustButton.reset();
 
     for (var i = 0; i < evt.touches.length; i++) {
       var touch = evt.touches[i];
 
-      // Determine zone
-      var x = touch.clientX;
-      var y = touch.clientY;
-
-      // Fire if Y is in top of screen
-      if (y < this.height/2) {
-        this.fire = true;
-      }
-
-      this.leftStick.update(touch);
-      this.rightStick.update(touch);
+      this.retroThrustButton.update(touch);
+      this.thrustButton.update(touch);
+      this.fireButton.update(touch);
+      this.joyStick.update(touch);
     }
   }
 });

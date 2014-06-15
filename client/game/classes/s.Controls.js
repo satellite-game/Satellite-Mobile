@@ -56,10 +56,6 @@ s.Controls = new Class({
     var brakes = 0;
     var thrustScalar = Math.abs(this.thrustImpulse)/this.options.forwardThrust + 1;
 
-    ///////////////////////
-    // RADIAL SUBRETICLE //
-    ///////////////////////
-
     var yawSpeed = this.options.yawSpeed;
     var pitchSpeed = this.options.pitchSpeed;
 
@@ -67,6 +63,7 @@ s.Controls = new Class({
     // TOUCH CONTROLS  //
     ///////////////////////
 
+    /*
     pitch = this.touch.rightStick.y * this.options.pitchSpeed;
     roll = this.touch.leftStick.x * this.options.rotationSpeed;
     yaw = this.touch.rightStick.x * -1 * this.options.yawSpeed;
@@ -77,8 +74,25 @@ s.Controls = new Class({
     else if (this.touch.leftStick.y < 0) {
       brakes = -this.touch.leftStick.y;
     }
+    */
 
-    fire = this.touch.fire;
+    pitch = this.touch.joyStick.y * this.options.pitchSpeed;
+    roll = this.touch.joyStick.x * this.options.rotationSpeed;
+
+    /*
+    yaw = this.touch.rightStick.x * -1 * this.options.yawSpeed;
+
+    if (this.touch.leftStick.y > 0) {
+      thrust = this.touch.leftStick.y;
+    }
+    else if (this.touch.leftStick.y < 0) {
+      brakes = -this.touch.leftStick.y;
+    }
+    */
+
+    thrust = this.touch.thrustButton.pressed ? 1 : 0;
+    brakes = this.touch.retroThrustButton.pressed ? 1 : 0;
+    fire = this.touch.fireButton.pressed;
 
     ///////////////////////
     // KEYBOARD COMMANDS //

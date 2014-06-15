@@ -16,10 +16,21 @@ canvas {
 	display: block;
 }
 
+.s-Button,
+.s-Joystick {
+	box-sizing: border-box; /* So border doesn't mess with calculations */
+	position: absolute;
+	border-radius: 50%;
+
+	border: 2px solid green;
+
+	text-align: center;
+	font-family: monospace;
+}
+
 .s-Joystick {
 	font-size: 24px;
 
-	position: absolute;
 	width: 10em;
 	height: 10em;
 	margin: 1.5em;

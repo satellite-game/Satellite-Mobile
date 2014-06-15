@@ -4,14 +4,18 @@ s.Touch.Joystick = function(options) {
     console.warn('s.Touch.Joystick: options.position not passed during construction');
   }
 
-  // Initial configuration
-  this.configure(options || {});
-
   this.update = this.update.bind(this);
 
   // Current joystick position
   this.x = 0;
   this.y = 0;
+
+  this.el = document.createElement('div');
+  this.el.className = 's-Joystick s-Joystick--left';
+  document.body.appendChild(this.el);
+
+  // Initial configuration
+  this.configure(options || {});
 };
 
 s.Touch.Joystick.prototype.rescaleJoyTouch = function(value) {
@@ -36,6 +40,17 @@ s.Touch.Joystick.prototype.configure = function(options) {
   // Calculated
   this.inputRange = { min: this.deadZone / this.width * 2, max: 1.0};
   this.outputRange = { min: 0.0, max: 1.0};
+
+  if (this.position) {
+    this.el.style.left = this.position.x + 'px';
+    this.el.style.top = this.position.y + 'px';
+  }
+
+  this.el.style.width = this.width + 'px';
+  this.el.style.height = this.width + 'px';
+
+  this.el.style.marginLeft = -this.width/2 + 'px';
+  this.el.style.marginTop = -this.width/2 + 'px';
 };
 
 s.Touch.Joystick.prototype.reset = function() {
