@@ -68,7 +68,7 @@ s.Player = new Class({
     else {
         // Chase
         this.game.camera.position.set(0, 25, -250);
-        this.game.camera.lookAt(new THREE.Vector3(0,0,0));
+        this.game.camera.lookAt(new THREE.Vector3(0,25,0));
     }
   },
 

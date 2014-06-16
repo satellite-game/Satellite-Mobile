@@ -100,10 +100,10 @@ s.SatelliteGame = new Class({
       rotation: new THREE.Quaternion(-0.3447861720355756, -0.02279656928332127, -0.23711690056676846, -0.9079528553110975)
     });
 
-    // // Add a hud
-    // this.HUD = new s.HUD({
-    //     game: this
-    // });
+    // Add a hud
+    this.HUD = new s.HUD({
+      game: this
+    });
 
     var player = this.player = new s.Player({
       HUD: this.HUD,
