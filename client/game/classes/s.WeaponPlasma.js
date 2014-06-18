@@ -45,20 +45,20 @@ s.WeaponPlasma = new Class({
     // }));
     // this.root.add(sphere);
 
-    var self = this;
-    var handleCollision = function(evt) {
-      // Explosion animation
-      new s.Explosion({
-        game: self.game,
-        position: self.body.position
-      });
+    // @todo: do we need to remove this listener when destructed?
+    this.body.addEventListener('collide', this.handleCollision.bind(this));
+  },
 
-      self.trigger('collide', evt);
+  handleCollision: function(evt) {
+    // Explosion animation
+    new s.Explosion({
+      game: this.game,
+      position: this.body.position
+    });
 
-      self.destructOnNextTick();
-    };
+    this.trigger('collide', evt);
 
-    this.body.addEventListener('collide', handleCollision);
+    this.destructOnNextTick();
   },
 
   init: function() {

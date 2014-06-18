@@ -15,8 +15,7 @@ s.Game = new Class({
 
     // Create renderer
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      // alpha: true
+      antialias: true
     });
 
     // Enable alpha

@@ -55,3 +55,8 @@ s.SpaceStation = new Class({
     }, totalIterations * 500);
   }
 });
+
+s.SpaceStation.shipSpawn = {
+  position: new THREE.Vector3(19562.491512697547, 19618.948414021877, 19988.645332582022),
+  rotation: new THREE.Quaternion(-0.17750835538730667, 0.8755285517609332, -0.23197996825512426, -0.38487119033184075) 
+};

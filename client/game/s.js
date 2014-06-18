@@ -1,6 +1,6 @@
-/*
+/*!
 Satellite
-Copyright (C) 2013 Larry Davis
+Copyright (C) 2014 Contributors
 */
 
 window.s = {
@@ -29,11 +29,14 @@ window.s = {
 
     init: function() {
         console.log('Satellite starting...');
+
         // Create a projector for 2D <-> 3D calculations
         s.projector = new THREE.Projector();
 
         // Create a model loader
         s.loader = new THREE.JSONLoader();
+
+        // Start the game
         s.game = new s.SatelliteGame();
     }
 };

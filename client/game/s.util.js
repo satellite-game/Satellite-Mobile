@@ -202,7 +202,7 @@ s.util.getNDC = function(x, y, width, height) {
 s.util.get2DCoords = function(objVector, width, height) {
   var vector3D = objVector.clone();
 
-  var vector2D = this.projector.projectVector(vector3D, this.camera);
+  var vector2D = split.projector.projectVector(vector3D, this.camera);
 
   vector2D.y = -(vector2D.y*height - height)/2;
   vector2D.x = (vector2D.x*width + width)/2;
@@ -210,64 +210,29 @@ s.util.get2DCoords = function(objVector, width, height) {
   return vector2D;
 };
 
-s.util.debounce = function(func, wait, immediate) {
-  var result;
-  var timeout = null;
-  return function() {
-    var context = this, args = arguments;
-    var later = function() {
-      timeout = null;
-      if (!immediate) result = func.apply(context, args);
-    };
-    var callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) result = func.apply(context, args);
-    return result;
+/**
+  Throttle calls to a function with a leading edge trigger
+
+  @param {Function} func  Function to throttle
+  @param {Number}   wait  Time to wait between calls
+*/
+s.util.throttle = function(func, wait) {
+  var doTrigger = true;
+  var reset = function() {
+    doTrigger = true;
   };
-};
 
-s.util.largerThan = function(vector, value){
-  if(Math.abs(vector.x) > value || Math.abs(vector.y) > value || Math.abs(vector.z) > value) return true;
-  return false;
-};
-
-// Get a random coordinate
-s.util.getRandomCoordinate = function(){
-  var coefficient = 1;
-  if (Math.random() > 0.5){
-    coefficient = -1;
-  }
-  return Math.floor(Math.random()* 15000 + 15000) * coefficient;
-};
-
-s.util.throttle = function(func, wait, options) {
-  var context, args, result;
-  var timeout = null;
-  var previous = 0;
-  if (!options) options = {};
-  var later = function() {
-    previous = options.leading === false ? 0 : new Date().getTime();
-    timeout = null;
-    result = func.apply(context, args);
-    if (!timeout) context = args = null;
-  };
   return function() {
-    var now = new Date().getTime();
-    if (!previous && options.leading === false) previous = now;
-    var remaining = wait - (now - previous);
-    context = this;
-    args = arguments;
-    if (remaining <= 0 || remaining > wait) {
-      clearTimeout(timeout);
-      timeout = null;
-      previous = now;
-      result = func.apply(context, args);
-      if (!timeout) context = args = null;
-    } else if (!timeout && options.trailing !== false) {
-      timeout = setTimeout(later, remaining);
+    if (doTrigger) {
+      // Disable calling
+      doTrigger = false;
+
+      // Allow calling again after wait ms
+      timeout = setTimeout(reset, wait)
+
+      return func.apply(this, arguments);
     }
-    return result;
+
+    return null;
   };
 };
-

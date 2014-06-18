@@ -41,6 +41,9 @@ s.SatelliteGame = new Class({
     this.explosionLights = [];
   },
 
+  /**
+    Called after all models and textures are laoded
+  */
   initialize: function() {
     // Create sound object
     this.sound = new s.Sound({
@@ -57,13 +60,17 @@ s.SatelliteGame = new Class({
     this.light.position.set(100000, 50000, 50000);
     this.scene.add(this.light);
 
-    // Explosion lights
+    // Create a set of explosion lights we'll reuse across the game
     // @perf: iOS: 5 lights makes the framerate drop to 40, whereas 20 lights halves it
     while (this.explosionLights.length < 3) {
       var light = new THREE.PointLight(0xF16718, 0.45, 2500);
       this.scene.add(light);
       this.explosionLights.push(light);
     }
+
+    // Dust and skybox
+    this.addSkybox();
+    this.addDust();
 
     // Add moon
     this.moon = new s.Moon({
@@ -100,11 +107,7 @@ s.SatelliteGame = new Class({
       rotation: new THREE.Quaternion(-0.3447861720355756, -0.02279656928332127, -0.23711690056676846, -0.9079528553110975)
     });
 
-    // Add a hud
-    this.HUD = new s.HUD({
-      game: this
-    });
-
+    // Create the player
     var player = this.player = new s.Player({
       HUD: this.HUD,
       game: this,
@@ -113,25 +116,17 @@ s.SatelliteGame = new Class({
       team: 'alliance',
       camera: this.camera,
 
-      // Nice outside angle
-      // position: new THREE.Vector3(22765.105955147825, 22878.477872164884, 22005.84642690411),
-      // rotation: new THREE.Quaternion(-0.2840628330856818, 0.8298857037518823, -0.19073508075184492, -0.4407018885121397)
-
       // Inside docking bay
-      position: new THREE.Vector3(19562.491512697547, 19618.948414021877, 19988.645332582022),
-      rotation: new THREE.Quaternion(-0.17750835538730667, 0.8755285517609332, -0.23197996825512426, -0.38487119033184075) 
+      position: s.SpaceStation.shipSpawn.position,
+      rotation: s.SpaceStation.shipSpawn.rotation
     });
 
-    // Moon facing
-    this.player.lookAt(this.moon.root.position);
+    // Add a hud
+    this.HUD = new s.HUD({
+      game: this
+    });
 
-    // this.player.root.addEventListener('ready', function(){
-    // s.game.start();
-    // });
-    s.game.start();
-
-    this.addSkybox();
-    this.addDust();
+    this.hook(this.fadeLights.bind(this));
 
     // Fly controls
     this.controls = new s.Controls({
@@ -140,9 +135,12 @@ s.SatelliteGame = new Class({
         camera: this.camera
     });
 
-    this.hook(this.fadeLights.bind(this));
+    s.game.start();
   },
 
+  /**
+    Constantly fade explosion lights to zero
+  */
   fadeLights: function(x, delta) {
     this.explosionLights.forEach(function(light) {
       if (light.intensity > 0) {
@@ -151,6 +149,9 @@ s.SatelliteGame = new Class({
     });
   },
 
+  /**
+    Move an explosion light to the provided position
+  */
   putLightAt: function(position) {
     this.curExplosionLight++;
     if (this.curExplosionLight >= this.explosionLights.length) {
@@ -167,12 +168,13 @@ s.SatelliteGame = new Class({
     light.intensity = 1;
   },
 
+  // @todo: refactor as a separate constructor
   addSkybox: function() {
-    var urlPrefix = "game/textures/skybox/Purple_Nebula_";
+    var urlPrefix = 'game/textures/skybox/Purple_Nebula_';
     var urls = [
-      urlPrefix + "right1.png", urlPrefix + "left2.png",
-      urlPrefix + "top3.png", urlPrefix + "bottom4.png",
-      urlPrefix + "front5.png", urlPrefix + "back6.png"
+      urlPrefix + 'right1.png', urlPrefix + 'left2.png',
+      urlPrefix + 'top3.png', urlPrefix + 'bottom4.png',
+      urlPrefix + 'front5.png', urlPrefix + 'back6.png'
     ];
 
     THREE.ImageUtils.loadTextureCube(urls, {}, function(textureCube) {
@@ -194,6 +196,7 @@ s.SatelliteGame = new Class({
     }.bind(this));
   },
 
+  // @todo: refactor as a separate constructor
   addDust: function() {
     var starSprite = THREE.ImageUtils.loadTexture('game/textures/particle.png');
     var geometry = new THREE.Geometry();
