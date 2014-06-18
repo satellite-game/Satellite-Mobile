@@ -1,89 +1,89 @@
 html, body {
-	overflow: hidden;
+  overflow: hidden;
 }
 
 body {
-	margin: 0;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 canvas {
-	/* Kill whitespace */
-	display: block;
+  /* Kill whitespace */
+  display: block;
 }
 
 .s-Button,
 .s-Joystick {
-	box-sizing: border-box; /* So border doesn't mess with calculations */
-	position: absolute;
-	border-radius: 50%;
+  box-sizing: border-box; /* So border doesn't mess with calculations */
+  position: absolute;
+  border-radius: 50%;
 
-	border: 2px solid green;
+  border: 2px solid green;
 
-	text-align: center;
-	font-family: monospace;
+  text-align: center;
+  font-family: monospace;
 }
 
 .s-Joystick {
-	font-size: 24px;
+  font-size: 24px;
 
-	width: 10em;
-	height: 10em;
-	margin: 1.5em;
+  width: 10em;
+  height: 10em;
+  margin: 1.5em;
 
-	border-radius: 50%;
+  border-radius: 50%;
 
-	border: 2px solid green;
+  border: 2px solid green;
 }
 
 .s-Joystick-deadZone {
-	box-sizing: border-box; /* So border doesn't mess with calculations */
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 2em;
-	height: 2em;
-	margin: -1em 0 0 -1em;
-	content: '';
+  box-sizing: border-box; /* So border doesn't mess with calculations */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2em;
+  height: 2em;
+  margin: -1em 0 0 -1em;
+  content: '';
 
-	border-radius: 50%;
+  border-radius: 50%;
 
-	border: 2px solid green;
-	background: rgba(0, 200, 0, 0.25);
+  border: 2px solid green;
+  background: rgba(0, 200, 0, 0.25);
 }
 
 .s-FPS {
-	opacity: 0.5 !important;
-	position: absolute;
-	top: 0;
+  opacity: 0.5 !important;
+  position: absolute;
+  top: 0;
 }
 
 .s-Loading {
-	z-index: 1;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 
-	background: black;
+  background: black;
 }
 
 .s-Progress {
-	width: 100%;
+  width: 100%;
 
-	font-size: 16px;
+  font-size: 16px;
 
-	height: 0.25em;
+  height: 0.25em;
 }
 
 .s-Progress-bar {
-	width: 0%;
-	height: 0.25rem;
+  width: 0%;
+  height: 0.25rem;
 
-	background: rgb(81, 176, 255);
+  background: rgb(81, 176, 255);
 }
