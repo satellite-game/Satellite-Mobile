@@ -43,13 +43,13 @@ s.Ship = function(options) {
     map: s.textures.particle,
     blending: THREE.AdditiveBlending,
     color: 0x335577
-  })
+  });
 
   this.gunGlowMaterial = new THREE.SpriteMaterial({
     map: s.textures.particle,
     blending: THREE.AdditiveBlending,
     color: 0x1A8CFF
-  })
+  });
 
   // Vectors for gun offsets
   var xOff = 29.30;
@@ -111,7 +111,7 @@ s.Ship.prototype.update = function(now, delta) {
 
   var lightMin = 0.5;
   var lightScalar = 4;
-  var glowScalar = 15
+  var glowScalar = 15;
   var flameDanceScaler = (Math.random()*0.1 + 1);
 
   // Calculate time since events happened to determine fade
@@ -164,7 +164,7 @@ s.Ship.prototype.update = function(now, delta) {
   }
   else if (timeSinceLastRetroThrust < s.Ship.fireInterval) {
     showGunLights = true;
-    gunLightFadeScale = 1 - timeSinceLastRetroThrust / s.Ship.fireInterval
+    gunLightFadeScale = 1 - timeSinceLastRetroThrust / s.Ship.fireInterval;
   }
 
   if (showGunLights) {

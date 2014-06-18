@@ -25,15 +25,18 @@ s.SpaceStation.prototype.explode = function() {
   var size = defaultHP;
   var totalIterations = Math.round(defaultHP / 200);
   var iterations = totalIterations;
+
+  var makeExplosion = function() {
+    var position = self.root.position.clone().add(new THREE.Vector3(Math.random()*400-200, Math.random()*200-100, Math.random()*800-400));
+    new s.Explosion({
+      game: self.game,
+      size: size,
+      position: position
+    });
+  };
+
   do {
-    setTimeout(function() {
-      var position = self.root.position.clone().add(new THREE.Vector3(Math.random()*400-200, Math.random()*200-100, Math.random()*800-400))
-      new s.Explosion({
-        game: self.game,
-        size: size,
-        position: position
-      });
-    }, iterations * 500);
+    setTimeout(makeExplosion, iterations * 500);
 
     iterations--;
   }

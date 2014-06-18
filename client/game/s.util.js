@@ -159,7 +159,7 @@ s.util.createRay = function(pointA, pointB) {
   @param {Number} max    Highest value
 */
 s.util.clamp = function(value, min, max) {
-  return Math.max(Math.min(value, max), min)
+  return Math.max(Math.min(value, max), min);
 };
 
 /**
@@ -228,7 +228,7 @@ s.util.throttle = function(func, wait) {
       doTrigger = false;
 
       // Allow calling again after wait ms
-      timeout = setTimeout(reset, wait)
+      timeout = setTimeout(reset, wait);
 
       return func.apply(this, arguments);
     }

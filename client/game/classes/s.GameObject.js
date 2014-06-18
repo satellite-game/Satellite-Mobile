@@ -71,7 +71,7 @@ s.GameObject.prototype.explode = function() {
   var defaultHP = this.constructor.prototype.hp;
   var size = defaultHP * 5;
 
-  var position = this.root.position.clone().add(new THREE.Vector3(Math.random()*20-10, Math.random()*20-10, Math.random()*20-10))
+  var position = this.root.position.clone().add(new THREE.Vector3(Math.random()*20-10, Math.random()*20-10, Math.random()*20-10));
   new s.Explosion({
     game: this.game,
     size: size,

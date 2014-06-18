@@ -57,7 +57,7 @@ s.Game = function(options) {
 
   // Monitor rendering stats
   this.renderStats = new Stats();
-  this.$renderStats = $(this.renderStats.domElement).hide().addClass('s-FPS').appendTo(document.body)
+  this.$renderStats = $(this.renderStats.domElement).hide().addClass('s-FPS').appendTo(document.body);
 
   // Loading progress
   this.$loadingOverlay = $('.js-loadingOverlay');
