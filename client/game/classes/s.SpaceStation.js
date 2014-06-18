@@ -1,60 +1,50 @@
-s.SpaceStation = new Class({
-  toString: 'SpaceStation',
-  extend: s.GameObject,
+s.SpaceStation = function(options) {
+  s.GameObject.call(this, options);
 
-  properties: {
-    hp: {
-      default: 200//2500
-    }
-  },
+  var geometry = s.models.human_space_station.geometry;
+  var materials = s.models.human_space_station.materials;
 
-  construct: function(options){
-    this.options = options = jQuery.extend({
-      position: new THREE.Vector3(),
-      rotation: new THREE.Quaternion()
-    }, options);
+  this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
 
-    var geometry = s.models.human_space_station.geometry;
-    var materials = s.models.human_space_station.materials;
+  // Cannon.js
+  var shape = new CANNON.Box(new CANNON.Vec3(400, 200, 800));
+  var mass = 0; // Fixed body
+  var body = this.body = new CANNON.RigidBody(mass, shape);
 
-    this.root = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
+  // var cube = new THREE.BoxHelper();
+  // cube.material.color.setRGB(1, 0, 0);
+  // cube.scale.set(500, 220, 850);
+  // this.root.add(cube);
+};
 
-    // Cannon.js
-    var shape = new CANNON.Box(new CANNON.Vec3(400, 200, 800));
-    var mass = 0; // Fixed body
-    var body = this.body = new CANNON.RigidBody(mass, shape);
+s.SpaceStation.prototype = Object.create(s.GameObject.prototype);
 
-    // var cube = new THREE.BoxHelper();
-    // cube.material.color.setRGB(1, 0, 0);
-    // cube.scale.set(500, 220, 850);
-    // this.root.add(cube);
-  },
-
-  explode: function() {
-    var self = this;
-    var defaultHP = this.constructor.properties.hp.default;
-    var size = defaultHP * 5;
-    var totalIterations = Math.round(defaultHP / 100);
-    var iterations = totalIterations;
-    do {
-      setTimeout(function() {
-        var position = self.root.position.clone().add(new THREE.Vector3(Math.random()*400-200, Math.random()*200-100, Math.random()*800-400))
-        new s.Explosion({
-          game: self.game,
-          size: size,
-          position: position
-        });
-      }, iterations * 500);
-
-      iterations--;
-    }
-    while (iterations > 0);
-
+s.SpaceStation.prototype.explode = function() {
+  var self = this;
+  var defaultHP = s.SpaceStation.prototype.hp;
+  var size = defaultHP;
+  var totalIterations = Math.round(defaultHP / 200);
+  var iterations = totalIterations;
+  do {
     setTimeout(function() {
-      self.destructOnNextTick();
-    }, totalIterations * 500);
+      var position = self.root.position.clone().add(new THREE.Vector3(Math.random()*400-200, Math.random()*200-100, Math.random()*800-400))
+      new s.Explosion({
+        game: self.game,
+        size: size,
+        position: position
+      });
+    }, iterations * 500);
+
+    iterations--;
   }
-});
+  while (iterations > 0);
+
+  setTimeout(function() {
+    self.destructOnNextTick();
+  }, totalIterations * 500);
+};
+
+s.SpaceStation.prototype.hp = 2500;
 
 s.SpaceStation.shipSpawn = {
   position: new THREE.Vector3(19562.491512697547, 19618.948414021877, 19988.645332582022),
