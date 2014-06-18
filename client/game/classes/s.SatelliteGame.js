@@ -63,7 +63,7 @@ s.SatelliteGame.prototype.initialize = function() {
   // Create a set of explosion lights we'll reuse across the game
   // @perf: iOS: 5 lights makes the framerate drop to 40, whereas 20 lights halves it
   while (this.explosionLights.length < 3) {
-    var light = new THREE.PointLight(0xF16718, 0.45, 2500);
+    var light = new THREE.PointLight(0x72b3fd, 0.45, 2500);
     this.scene.add(light);
     this.explosionLights.push(light);
   }
