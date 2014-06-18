@@ -8,6 +8,7 @@ s.Controls.Keyboard.prototype.update = function() {
   this.yaw = 0;
   this.thrust = 0;
   this.fire = false;
+  this.changeViewMode = false;
 
   if (this.keyboard.pressed('left')) {
     this.yaw = 1;
