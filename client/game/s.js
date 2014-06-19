@@ -6,11 +6,7 @@ Copyright (C) 2014 Contributors
 window.s = {
   config: {
     sound: {
-      enabled: false, // @perf: Extremely slow on iOS
-      silentDistance: 10000,
-      sounds: {
-        laser: 'game/sounds/laser.mp3'
-      }
+      enabled: true
     }
   },
 

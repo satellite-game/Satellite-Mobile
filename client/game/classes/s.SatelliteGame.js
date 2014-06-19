@@ -45,12 +45,6 @@ s.SatelliteGame.prototype.textures = [
   Called after all models and textures are laoded
 */
 s.SatelliteGame.prototype.initialize = function() {
-  // Create sound object
-  this.sound = new s.Sound({
-      enabled: s.config.sound.enabled,
-      sounds: s.config.sound.sounds
-  });
-
   // Ambient light
   this.ambientLight = new THREE.AmbientLight(0x382828);
   this.scene.add(this.ambientLight);

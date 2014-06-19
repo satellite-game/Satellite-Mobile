@@ -48,6 +48,8 @@ s.Player.prototype.fire = function() {
       team: this.team
     });
 
+    s.Weapon.Plasma.sound.play();
+
     this.lastFireTime = now;
   }
 };

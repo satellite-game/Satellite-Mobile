@@ -33,13 +33,12 @@ s.Weapon.Plasma = function(options) {
   // this.root.add(sphere);
 };
 
+s.Weapon.Plasma.sound = new s.Sound({
+  urls: ['game/sounds/laser.mp3'],
+  volume: 0.5
+});
+
 s.Weapon.Plasma.prototype = Object.create(s.Weapon.prototype);
-
-s.Weapon.Plasma.prototype.init = function() {
-  s.Weapon.prototype.init.call(this);
-
-  this.game.sound.play('laser', 0.050);
-};
 
 s.Weapon.Plasma.prototype.handleCollision = function(event) {
   // Explosion animation
