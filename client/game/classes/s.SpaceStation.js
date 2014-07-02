@@ -19,6 +19,8 @@ s.SpaceStation = function(options) {
 
 s.SpaceStation.prototype = Object.create(s.GameObject.prototype);
 
+s.SpaceStation.prototype.toString = function() { return 'Space Station'; };
+
 s.SpaceStation.prototype.explode = function() {
   var self = this;
   var defaultHP = s.SpaceStation.prototype.hp;

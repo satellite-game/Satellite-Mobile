@@ -94,6 +94,8 @@ s.GameObject.prototype.init = function() {
     if (this.options.rotation) {
       this.root.quaternion.copy(this.options.rotation);
     }
+
+    this.root.name = this.toString();
   }
 
   if (this.body) {

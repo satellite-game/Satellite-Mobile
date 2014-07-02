@@ -233,12 +233,12 @@ s.Game.prototype.render = function(now) {
   this.now = now;
 
   if (this.doRender) {
-    // Step the physics world
-    this.world.step(1/60);
-
     // Calculate the time since the last frame was rendered
     var delta = now - this.lastRender;
     this.lastRender = now;
+
+    // Step the physics world
+    this.world.step(1/60);
 
     // Run each hooked function before rendering
     this.hookedFuncs.forEach(function(func) {
