@@ -99,19 +99,38 @@ s.HUD.prototype.drawTarget = function(circleTarget, fillColor, distanceFromRadiu
     var circleTarget2D = new THREE.Vector2(vcircleTarget2D.x, vcircleTarget2D.y);
     circleTarget2D.multiplyScalar(1/circleTarget2D.length()).multiplyScalar(s.HUD.radius+distanceFromRadius);
 
+    var directionalIndicatorCenterX = circleTarget2D.x+this.centerX
+    var directionalIndicatorCenterY = -(circleTarget2D.y-this.centerY);
+    // Calculate angle away from center
+    var directionalIndicatorAngle = Math.atan2(directionalIndicatorCenterY-this.centerY, directionalIndicatorCenterX-this.centerX)
+
     if (vcircleTarget2D.z > 1) {
+      var contextRotation = directionalIndicatorAngle + Math.PI/2;
       // Target is behind us
-      // Things get ugly so do nothing
-      // this.ctx.arc(-circleTarget2D.x+this.centerX, (-circleTarget2D.y+this.centerY), 10, 0, 2*Math.PI, false);
+      this.ctx.beginPath();
+
+      // Move to center
+      this.ctx.translate(this.centerX, this.centerY);
+
+      // Rotate around axis
+      this.ctx.rotate(contextRotation);
+
+      // Draw half circle
+      this.ctx.arc(0, s.HUD.radius, 10, 0, Math.PI, false);
+      this.ctx.fillStyle = fillColor;
+      this.ctx.fill();
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = s.HUD.indicatorStroke;
+
+      this.ctx.stroke();
+
+      // Move back
+      this.ctx.rotate(-contextRotation);
+      this.ctx.translate(-this.centerX, -this.centerY);
     }
     else {
       // Target is in front of us
       this.ctx.beginPath();
-      var directionalIndicatorCenterX = circleTarget2D.x+this.centerX
-      var directionalIndicatorCenterY = -(circleTarget2D.y-this.centerY);
-
-      // Calculate angle away from center
-      var directionalIndicatorAngle = Math.atan2(directionalIndicatorCenterY-this.centerY, directionalIndicatorCenterX-this.centerX)
 
       // Calculate the tip of the triangle
       var directionalIndicatorTopX = this.centerX + (s.HUD.radius + s.HUD.directionalIndicatorHeight) * Math.cos(directionalIndicatorAngle);
