@@ -64,10 +64,12 @@ s.HUD.prototype.update = function() {
   this.drawTarget(s.game.moonBase1.root, s.HUD.enemyIndicatorColor, 34, 5500);
 };
 
-s.HUD.prototype.writeName = function(name, clone, fillColor) {
+s.HUD.prototype.writeName = function(name, position, fillColor, textOffset) {
   this.ctx.fillStyle = fillColor;
   // @todo correctly center text
-  this.ctx.fillText(name, clone.x-40, clone.y+35);
+  this.ctx.font = 'bold 14px Andale Mono';
+  var width = this.ctx.measureText(name).width;
+  this.ctx.fillText(name, position.x - width / 2, position.y + textOffset);
 };
 
 s.HUD.prototype.fitWindow = function() {
@@ -161,7 +163,8 @@ s.HUD.prototype.drawTarget = function(circleTarget, fillColor, distanceFromRadiu
     this.ctx.strokeRect(v2DcircleTarget.x-squareSize, v2DcircleTarget.y-squareSize, squareSize*2, squareSize*2);
 
     if (circleTarget.name) {
-      this.writeName(circleTarget.name, v2DcircleTarget, fillColor);
+      var textOffset = squareSize * 2;
+      this.writeName(circleTarget.name, v2DcircleTarget, fillColor, textOffset);
     }
     else {
       throw new Error('s.HUD: Name not defined for mesh');
