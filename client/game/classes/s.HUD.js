@@ -38,10 +38,10 @@ s.HUD = function(options) {
 s.HUD.baseColor = 'rgba(0, 255, 0, 0.5)';
 
 // The height of the directional indicator (away from the circumference of the circle)
-s.HUD.directionalIndicatorHeight = 20;
+s.HUD.directionalIndicatorHeight = 23;
 
 // The angular offset for the two sides of the directional indicator
-s.HUD.directionalIndicatorAngularWidth = Math.PI/32;
+s.HUD.directionalIndicatorAngularWidth = Math.PI/28;
 
 s.HUD.friendlyIndicatorColor = 'rgba(0, 255, 0, 0.75)';
 s.HUD.enemyIndicatorColor = 'rgba(255, 143, 0, 0.75)';
@@ -104,7 +104,13 @@ s.HUD.prototype.drawTarget = function(circleTarget, fillColor, distanceFromRadiu
     // Calculate angle away from center
     var directionalIndicatorAngle = Math.atan2(directionalIndicatorCenterY-this.centerY, directionalIndicatorCenterX-this.centerX)
 
-    if (vcircleTarget2D.z > 1) {
+    var targetIsBehindUs = vcircleTarget2D.z > 1;
+    if (this.game.player.viewMode === 'front') {
+      targetIsBehindUs = !targetIsBehindUs;
+      directionalIndicatorAngle += Math.PI;
+    }
+
+    if (targetIsBehindUs) {
       var contextRotation = directionalIndicatorAngle + Math.PI/2;
       // Target is behind us
       this.ctx.beginPath();
