@@ -9,6 +9,7 @@ s.Controls.Keyboard.prototype.update = function() {
   this.thrust = 0;
   this.fire = false;
   this.changeViewMode = false;
+  this.showBackCam = false;
 
   if (this.keyboard.pressed('left')) {
     this.yaw = 1;
@@ -42,6 +43,10 @@ s.Controls.Keyboard.prototype.update = function() {
 
   if (this.keyboard.pressed('space')) {
     this.fire = true;
+  }
+
+  if (this.keyboard.pressed('q')) {
+    this.showBackCam = true;
   }
 
   if (this.keyboard.pressed('v')) {

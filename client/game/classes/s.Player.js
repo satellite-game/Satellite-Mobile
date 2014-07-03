@@ -10,7 +10,7 @@ s.Player = function(options) {
   // Set default view mode
   this.setCameraViewMode();
 
-  this.curViewMode = 0;
+  this._viewModeIndex = 0;
 
   // Throttle camera view mode calls
   this.cycleCameraViewMode = s.util.throttle(this.cycleCameraViewMode, 250, { leading: true, trailing: false});
@@ -54,26 +54,41 @@ s.Player.prototype.fire = function() {
   }
 };
 
-s.Player.prototype.setCameraViewMode = function(mode) {
-  if (mode === 'cockpit') {
-      this.camera.position.set(0, 0, 0);
-  }
-  else if (mode === 'front') {
-      this.camera.position.set(0, 35, 300);
-      this.camera.lookAt(new THREE.Vector3(0,0,0));
-  }
-  else if (mode === 'overhead') {
-      this.camera.position.set(0, 250, 0);
-      this.camera.lookAt(new THREE.Vector3(0,0,0));
-  }
-  else {
-      // Chase
-      this.camera.position.set(0, 25, -250);
-      this.camera.lookAt(new THREE.Vector3(0,25,0));
+s.Player.prototype.restoreViewMode = function() {
+  var actualViewMode = this.viewMode;
+  var oldViewMode = this.viewModes[this._viewModeIndex];
+  if (oldViewMode !== actualViewMode) {
+    // Don't bother calling methods if we're already in that mode
+    this.setCameraViewMode(oldViewMode);
   }
 };
 
-s.Player.prototype.cycleCameraViewMode = function() {
-  this.curViewMode = (this.curViewMode + 1) % this.viewModes.length;
-  this.setCameraViewMode(this.viewModes[this.curViewMode]);
+s.Player.prototype.setCameraViewMode = function(mode) {
+  if (mode === 'cockpit') {
+    this.camera.position.set(0, 0, 0);
+    this.camera.lookAt(new THREE.Vector3(0,0,25));
+  }
+  else if (mode === 'front') {
+    this.camera.position.set(0, 35, 300);
+    this.camera.lookAt(new THREE.Vector3(0,0,0));
+  }
+  else if (mode === 'overhead') {
+    this.camera.position.set(0, 250, 0);
+    this.camera.lookAt(new THREE.Vector3(0,0,0));
+  }
+  else {
+    mode = 'chase';
+    // Chase
+    this.camera.position.set(0, 25, -250);
+    this.camera.lookAt(new THREE.Vector3(0,25,0));
+  }
+  this.viewMode = mode;
+};
+
+s.Player.prototype.cycleCameraViewMode = function(previous) {
+  // Change the current view mode index
+  this._viewModeIndex = (this._viewModeIndex + 1) % this.viewModes.length;
+
+  // Restore view mode, which resets the view mode to the current index in the cycle
+  this.restoreViewMode();
 };

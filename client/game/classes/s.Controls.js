@@ -34,6 +34,7 @@ s.Controls.prototype.update = function(time, delta) {
 
   var changeViewMode = false;
   var fire = false;
+  var showBackCam = false;
 
   // Control method
   if (this.controlMethod === 'touch') {
@@ -54,6 +55,7 @@ s.Controls.prototype.update = function(time, delta) {
     thrust = this.keyboard.thrust;
     fire = this.keyboard.fire;
     changeViewMode = this.keyboard.changeViewMode;
+    showBackCam = this.keyboard.showBackCam;
   }
 
   // Calculate thrust impulse based on direction
@@ -95,7 +97,15 @@ s.Controls.prototype.update = function(time, delta) {
     this.player.fire();
   }
 
-  if (changeViewMode) {
+  if (showBackCam) {
+    // @todo animate along top
+    // Show cam from behind
+    this.player.setCameraViewMode('front');
+  }
+  else if (changeViewMode) {
     this.player.cycleCameraViewMode();
+  }
+  else {
+    this.player.restoreViewMode();
   }
 };
