@@ -41,7 +41,7 @@ s.HUD.baseColor = 'rgba(0, 255, 0, 0.5)';
 s.HUD.directionalIndicatorHeight = 23;
 
 // The angular offset for the two sides of the directional indicator
-s.HUD.directionalIndicatorAngularWidth = Math.PI/28;
+s.HUD.directionalIndicatorAngularWidth = Math.PI/24;
 
 s.HUD.friendlyIndicatorColor = 'rgba(0, 255, 0, 0.75)';
 s.HUD.enemyIndicatorColor = 'rgba(255, 143, 0, 0.75)';
@@ -50,7 +50,7 @@ s.HUD.indicatorStroke = 'rgba(0, 0, 0, 0.5)';
 s.HUD.targetColor = 'rgba(255, 0, 0, 0.5)';
 
 // The radius of the circle around which directional circles should be drawn
-s.HUD.radius = 200;
+s.HUD.radius = 150;
 
 // The size of the target square relative to distance
 s.HUD.squareSizeFactor = 0.02;
