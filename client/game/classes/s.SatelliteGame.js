@@ -103,7 +103,8 @@ s.SatelliteGame.prototype.initialize = function() {
 
   // Add a hud
   this.HUD = new s.HUD({
-    game: this
+    game: this,
+    client: this.client
   });
 
   // Create the player
@@ -124,10 +125,18 @@ s.SatelliteGame.prototype.initialize = function() {
 
   // Fly controls
   this.controls = new s.Controls({
-      game: this,
-      player: this.player,
-      camera: this.camera
+    game: this,
+    player: this.player,
+    camera: this.camera
   });
+
+  // Communication
+  this.client = new s.Client({
+    game: this, 
+    player: player
+  });
+
+  this.hook(this.client.update.bind(this.client));
 
   s.game.start();
 };
