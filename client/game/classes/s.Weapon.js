@@ -24,7 +24,7 @@ s.Weapon.prototype.init = function() {
   rotationMatrix.extractRotation(this.root.matrix);
 
   // Apply impulse
-  var forceVector = new THREE.Vector3(0, 0, this.velocity).applyMatrix4(rotationMatrix);
+  var forceVector = new THREE.Vector3(0, 0, this.impulse).applyMatrix4(rotationMatrix);
   var cannonVector = new CANNON.Vec3(forceVector.x, forceVector.y, forceVector.z);
   body.applyImpulse(cannonVector, body.position);
 };

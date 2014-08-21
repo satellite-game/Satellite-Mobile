@@ -54,7 +54,7 @@ s.Moon = function(options) {
 
 s.Moon.prototype = Object.create(s.GameObject.prototype);
 
-s.Moon.prototype.toString = function() { return 'Moon'; };
+s.Moon.prototype.name = 'Moon';
 
 // Show hitboxes if true 
 s.Moon.prototype.debug = false;

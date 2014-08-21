@@ -18,10 +18,11 @@ s.Player = function(options) {
   // State packet
   // We'll re-use this object and its arrays to avoid constant object allocation/deallocation
   this.state = {
-    pos: [0, 0, 0],
-    rot: [0, 0, 0, 0],
-    va: [0, 0, 0],
-    vl: [0, 0, 0]
+    pos: [0, 0, 0],     // Position vector
+    rot: [0, 0, 0, 0],  // Rotation quaternion
+    va: [0, 0, 0],      // Angular velocity vector
+    vl: [0, 0, 0],      // Linear velocity vector
+    th: 0               // Thrust
   };
 
   // Set initial state
@@ -69,14 +70,9 @@ s.Player.prototype.fire = function() {
 
     this.trigger('fire', {
       vl: this.body.velocity,
-      pos: leftPos,
+      pos: [leftPos, rightPos],
       rot: this.root.quaternion,
-    });
-
-    this.trigger('fire', {
-      vl: this.body.velocity,
-      pos: rightPos,
-      rot: this.root.quaternion,
+      type: 'plasma'
     });
   }
 };
@@ -142,6 +138,8 @@ s.Player.prototype.getState = function() {
   this.state.va[0] = va.x;
   this.state.va[1] = va.y;
   this.state.va[2] = va.z;
+
+  this.state.th = this.thrustImpulse;
 
   return this.state;
 };

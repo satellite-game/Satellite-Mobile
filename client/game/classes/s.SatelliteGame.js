@@ -75,8 +75,8 @@ s.SatelliteGame.prototype.initialize = function() {
   this.spaceStation = new s.SpaceStation({
     game: this,
     team: 'alliance',
-    position: new THREE.Vector3(20000, 20000, 20000),
-    rotation: new THREE.Quaternion(0.034971379498817616, 0.3468714418444932, -0.27655401457101153, -0.8955306150396697)
+    position: new THREE.Vector3(34909.57019523937, -3518.1015191242786, 6165.897081138204),
+    rotation: new THREE.Quaternion(-0.2557681600381702, 0.7161396699284692, 0.2863470690590406, -0.5828653167814406)
   });
 
   // Add tall moon base
@@ -111,14 +111,18 @@ s.SatelliteGame.prototype.initialize = function() {
   var player = this.player = new s.Player({
     HUD: this.HUD,
     game: this,
-    name: 'Player',
+    // Use hash as name, or just generate random player name
+    name: window.location.hash || 'Player '+Date.now().toString().slice(-5),
     shipClass: 'human_ship_heavy',
-    team: 'alliance',
+    team: 'alliance', // @todo base on player selection
     camera: this.camera,
 
     // Inside docking bay
     position: s.SpaceStation.shipSpawn.position,
+    // position: this.spaceStation.root.position.clone().add(new THREE.Vector3(0,0,1000)),
     rotation: s.SpaceStation.shipSpawn.rotation
+    // rotation: this.spaceStation.root.quaternion.clone()
+    
   });
 
   this.hook(this.fadeLights.bind(this));

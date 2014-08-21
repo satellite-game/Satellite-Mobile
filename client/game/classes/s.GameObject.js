@@ -19,6 +19,9 @@ s.GameObject = function(options) {
   // Store scene for remove
   this.game = options.game;
 
+  // Store team name
+  this.team = options.team;
+
   // Store options
   this.options = options;
 
@@ -33,6 +36,8 @@ s.GameObject = function(options) {
 };
 
 s.GameObject.prototype = Object.create(s.EventEmitter.prototype);
+
+s.GameObject.prototype.toString = function() { return this.name; };
 
 // Default HP
 s.GameObject.prototype.hp = 100;
@@ -178,6 +183,46 @@ s.GameObject.prototype.update = function() {
       // Copy coordinates from Cannon.js to Three.js
       this.body.position.copy(this.root.position);
       this.body.quaternion.copy(this.root.quaternion);
+    }
+  }
+};
+
+/**
+  Set the state of this object given a packet from the server
+
+  state - An object representing the game object's state
+  state.pos - Position vector3 represented as [x, y, z]
+  state.rot - Rotation quaternion represented as [x, y, z, w]
+  state.lv - Linear velocity vector3 represented as [x, y, z]
+  state.av - Angular velocity vector3 represented as [x, y, z]
+*/
+s.GameObject.prototype.setStateFromPacket = function(state) {
+  var pos = state.pos;
+  var rot = state.rot;
+  var av = state.av;
+  var lv = state.lv;
+
+  if (pos) {
+    this.root.position.set(pos[0], pos[1], pos[2]);
+  }
+  if (rot) {
+    this.root.quaternion.set(rot[0], rot[1], rot[2], rot[3]);
+  }
+
+  if (this.body) {
+    if (pos) {
+      this.body.position.set(pos[0], pos[1], pos[2]);
+    }
+
+    if (rot) {
+      this.body.quaternion.set(rot[0], rot[1], rot[2], rot[3]);
+    }
+
+    if (lv) {
+      this.body.velocity.set(lv[0], lv[1], lv[2]);
+    }
+    if (av) {
+      this.body.angularVelocity.set(av[0], av[1], av[2]);
     }
   }
 };

@@ -4,6 +4,7 @@ s.Ship = function(options) {
   this.lastThrustTime = 0;
   this.lastRetroThrustTime = 0;
   this.lastFireTime = 0;
+  this.thrustImpulse = 0;
 
   var geometry = s.models[options.shipClass].geometry;
   this.materials = s.models[options.shipClass].materials[0];
@@ -27,7 +28,7 @@ s.Ship = function(options) {
   // Ship hitbox
   // var shipShape = new CANNON.Box(new CANNON.Vec3(40, 10, 40)); // Tight
   var shape = new CANNON.Box(new CANNON.Vec3(50, 20, 50)); // Loose
-  var mass = 1; // Fixed body
+  var mass = this.mass; // Fixed body
   var body = this.body = new CANNON.RigidBody(mass, shape);
 
   // var cube = new THREE.BoxHelper();
@@ -42,13 +43,13 @@ s.Ship = function(options) {
   this.engineGlowMaterial = new THREE.SpriteMaterial({
     map: s.textures.particle,
     blending: THREE.AdditiveBlending,
-    color: 0x335577
+    color: s.Ship.engineGlowColors[this.team]
   });
 
   this.gunGlowMaterial = new THREE.SpriteMaterial({
     map: s.textures.particle,
     blending: THREE.AdditiveBlending,
-    color: 0x1A8CFF
+    color: s.Ship.gunGlowColors[this.team]
   });
 
   // Vectors for gun offsets
@@ -81,6 +82,9 @@ s.Ship = function(options) {
   this.rightGunFlare.position.copy(this.offsetGunRight);
   this.root.add(this.rightGunFlare);
 
+  // @todo these lights don't show up on other players since we can't add lights dynamically!
+  // @todo we need a pool of lights to use on nearby ships
+
   // Intensity is dynamic
   // Changing it here will do nothing
   this.engineGlow = new THREE.PointLight(this.engineGlowMaterial.color, 1, 250);
@@ -94,10 +98,47 @@ s.Ship = function(options) {
   this.root.add(this.gunGlow);
 };
 
+s.Ship.gunGlowColors = {
+  alliance: 0x1A8CFF, // 0x335577
+  rebel: 0xFF0000 //  ??
+};
+
+s.Ship.engineGlowColors = {
+  alliance: 0x335577, // 0x335577
+  rebel: 0xFF0000 //  ??
+};
+
+s.Ship.engineFadeTime = 3000;
+s.Ship.fireInterval = 125;
+
 s.Ship.prototype = Object.create(s.GameObject.prototype);
 
-s.Ship.prototype.fire = function() {
-  // Just store the time for lighting effects
+s.Ship.prototype.mass = 100;
+s.Ship.prototype.engineImpulse = 100;
+
+s.Ship.prototype.name = 'Ship';
+
+s.Ship.prototype.fire = function(packet) {
+  new s.Weapon.Plasma({
+    game: s.game,
+    velocity: packet.vl,
+    position: packet.pos[0],
+    rotation: packet.rot,
+    team: this.team
+    // @todo player object?
+  });
+
+  new s.Weapon.Plasma({
+    game: s.game,
+    velocity: packet.vl,
+    position: packet.pos[1],
+    rotation: packet.rot,
+    team: this.team
+    // @todo player object?
+  });
+
+  s.Weapon.Plasma.sound.play(packet.pos[0]);
+
   this.lastFireTime = s.game.now;
 };
 
@@ -107,7 +148,7 @@ s.Ship.prototype.update = function(now, delta) {
   var self = this;
 
   // Adjusts engine glow based on thrust impulse
-  var thrustScalar = Math.abs(this.game.controls.thrustImpulse) / s.constants.ship.forwardThrust;
+  var thrustScalar = Math.abs(this.thrustImpulse) / s.constants.ship.forwardThrust;
 
   var lightMin = 0.5;
   var lightScalar = 4;
@@ -119,11 +160,11 @@ s.Ship.prototype.update = function(now, delta) {
   var timeSinceLastRetroThrust = s.game.now - this.lastRetroThrustTime;
   var timeSinceLastFire = now - this.lastFireTime;
 
-  if (this.game.controls.thrustImpulse < 0) {
+  if (this.thrustImpulse < 0) {
     this.lastRetroThrustTime = now;
   }
 
-  if (this.game.controls.thrustImpulse > 0) {
+  if (this.thrustImpulse > 0) {
     var lightIntensity = thrustScalar * lightScalar;
     var glowIntensity = thrustScalar * glowScalar;
 
@@ -181,6 +222,3 @@ s.Ship.prototype.update = function(now, delta) {
     this.rightGunFlare.scale.set(0, 0, 0);
   }
 };
-
-s.Ship.engineFadeTime = 3000;
-s.Ship.fireInterval = 125;

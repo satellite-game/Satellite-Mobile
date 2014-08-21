@@ -1,6 +1,5 @@
 var Match = require('./Match');
 
-var players = [];
 var matches = {};
 
 var matchManager = module.exports = {
@@ -32,10 +31,28 @@ var matchManager = module.exports = {
 
       matchManager.leave(player)
     }
+
+    var match = matchManager.getMatch(matchName);
+
     // @todo don't allow joining full matches etc
-    matchManager.getMatch(matchName).join(player);
-    player.socket.join(player.matchName);
+    player.socket.join(matchName);
     player.matchName = matchName;
+
+    // Send list of players and states
+    match.players.forEach(function(otherPlayer) {
+      player.socket.emit('join', {
+        name: otherPlayer.name,
+        id: otherPlayer.socket.id
+      });
+
+      player.socket.emit('state', otherPlayer.get());
+    });
+
+    // Notify that player has joined
+    player.socket.broadcast.to(player.matchName).emit('join', { name: player.name, id: player.socket.id });
+
+    // Join the match
+    match.join(player);
 
     return true;
   },
@@ -46,11 +63,17 @@ var matchManager = module.exports = {
       return false;
     }
 
+    // Notify that player has left
+    player.socket.broadcast.to(player.matchName).emit('leave', { name: player.name, id: player.socket.id });
+
     var match = matchManager.getMatch(player.matchName);
-    match.leave(player);
     player.socket.leave(player.matchName);
     player.matchName = null;
 
+    // Leave the match
+    match.leave(player);
+
+    // End the match if everyone left
     if (match.players.length === 0) {
       matchManager.endMatch[player.matchName];
     }

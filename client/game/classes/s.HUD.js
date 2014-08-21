@@ -59,9 +59,18 @@ s.HUD.prototype.update = function() {
   // Clear canvas
   this.ctx.clearRect(0, 0, this.width, this.height);
 
-  this.drawTarget(s.game.spaceStation.root, s.HUD.friendlyIndicatorColor, 34, 5500);
+  this.drawTarget(s.game.spaceStation.name, s.game.spaceStation.root, s.HUD.friendlyIndicatorColor, 34, 5500);
 
-  this.drawTarget(s.game.moonBase1.root, s.HUD.enemyIndicatorColor, 34, 5500);
+  this.drawTarget(s.game.moonBase1.name, s.game.moonBase1.root, s.HUD.enemyIndicatorColor, 34, 5500);
+
+  // Draw enemies
+  for (var id in this.game.client.players) {
+    var otherPlayer = this.game.client.players[id];
+    // Since we set players to null when they leave, check if it's truthy
+    if (otherPlayer) {
+      this.drawTarget(otherPlayer.name, otherPlayer.ship.root, this.game.player.team === otherPlayer.ship.team ? s.HUD.friendlyIndicatorColor : s.HUD.enemyIndicatorColor, 34, 700);
+    }
+  }
 };
 
 s.HUD.prototype.writeName = function(name, position, fillColor, textOffset) {
@@ -79,7 +88,7 @@ s.HUD.prototype.fitWindow = function() {
   this.centerY = this.height / 2;
 };
 
-s.HUD.prototype.drawTarget = function(circleTarget, fillColor, distanceFromRadius, maxBoxDistance) {
+s.HUD.prototype.drawTarget = function(name, circleTarget, fillColor, distanceFromRadius, minBoxDistance) {
   var circleTargetInSight;
   var distanceToCircleTarget;
   var v2DcircleTarget;
@@ -178,7 +187,7 @@ s.HUD.prototype.drawTarget = function(circleTarget, fillColor, distanceFromRadiu
   }
 
   // Draw square around object
-  if (circleTargetInSight && distanceToCircleTarget > maxBoxDistance) {
+  if (circleTargetInSight && distanceToCircleTarget > minBoxDistance) {
     v2DcircleTarget = vcircleTarget2D.clone();
     v2DcircleTarget.x =  (this.width  + v2DcircleTarget.x*this.width )/2;
     v2DcircleTarget.y = -(-this.height + v2DcircleTarget.y*this.height)/2;
@@ -187,12 +196,12 @@ s.HUD.prototype.drawTarget = function(circleTarget, fillColor, distanceFromRadiu
     this.ctx.lineWidth = 1;
     this.ctx.strokeRect(v2DcircleTarget.x-squareSize, v2DcircleTarget.y-squareSize, squareSize*2, squareSize*2);
 
-    if (circleTarget.name) {
+    if (name) {
       var textOffset = squareSize * 2;
-      this.writeName(circleTarget.name, v2DcircleTarget, fillColor, textOffset);
+      this.writeName(name, v2DcircleTarget, fillColor, textOffset);
     }
     else {
-      throw new Error('s.HUD: Name not defined for mesh');
+      console.warn('s.HUD: Name not defined for mesh');
     }
   }
 };

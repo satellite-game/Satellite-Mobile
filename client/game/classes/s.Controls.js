@@ -68,7 +68,7 @@ s.Controls.prototype.update = function(time, delta) {
   }
 
   // Expose thrust impulse for visuals
-  this.thrustImpulse = thrustImpulse;
+  this.player.thrustImpulse = thrustImpulse;
 
   // A scalar used to control rate of turn based on thrust
   var thrustScalar = Math.abs(thrustImpulse)/s.constants.ship.forwardThrust + 1;
@@ -88,7 +88,7 @@ s.Controls.prototype.update = function(time, delta) {
   var newAngularVelocity = new THREE.Vector3(pitch, yaw, roll).applyMatrix4(rotationMatrix).add(angularVelocity);
   body.angularVelocity.set(newAngularVelocity.x, newAngularVelocity.y, newAngularVelocity.z);
 
-  var forceVector = new THREE.Vector3(0, 0, thrustImpulse).applyMatrix4(rotationMatrix);
+  var forceVector = new THREE.Vector3(0, 0, thrustImpulse * this.player.engineImpulse).applyMatrix4(rotationMatrix);
   var cannonVector = new CANNON.Vec3(forceVector.x, forceVector.y, forceVector.z);
   body.applyImpulse(cannonVector, body.position);
 

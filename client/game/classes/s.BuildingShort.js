@@ -20,4 +20,4 @@ s.BuildingShort = function(options) {
 
 s.BuildingShort.prototype = Object.create(s.GameObject.prototype);
 
-s.BuildingShort.prototype.toString = function() { return 'Moon Base (small)'; };
+s.BuildingShort.prototype.nane = 'Moon Base (small)';

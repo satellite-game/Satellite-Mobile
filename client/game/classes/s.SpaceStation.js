@@ -19,7 +19,7 @@ s.SpaceStation = function(options) {
 
 s.SpaceStation.prototype = Object.create(s.GameObject.prototype);
 
-s.SpaceStation.prototype.toString = function() { return 'Space Station'; };
+s.SpaceStation.prototype.name = 'Space Station';
 
 s.SpaceStation.prototype.explode = function() {
   var self = this;
@@ -52,6 +52,6 @@ s.SpaceStation.prototype.explode = function() {
 s.SpaceStation.prototype.hp = 2500;
 
 s.SpaceStation.shipSpawn = {
-  position: new THREE.Vector3(19562.491512697547, 19618.948414021877, 19988.645332582022),
-  rotation: new THREE.Quaternion(-0.17750835538730667, 0.8755285517609332, -0.23197996825512426, -0.38487119033184075) 
+  position: new THREE.Vector3(34700.76873771603, -3233.650674476771, 5737.893148853195),
+  rotation: new THREE.Quaternion(0.016937110115200438, 0.911158535280495, 0.4003069980380781, 0.09621624191471519) 
 };

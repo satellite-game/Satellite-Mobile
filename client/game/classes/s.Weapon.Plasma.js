@@ -22,7 +22,7 @@ s.Weapon.Plasma = function(options) {
 
   // Cannon.js
   var shape = new CANNON.Sphere(5);
-  var mass = 1;
+  var mass = this.mass;
   var body = this.body = new CANNON.RigidBody(mass, shape);
 
   // var sphere = new THREE.Mesh(new THREE.SphereGeometry(5), new THREE.MeshLambertMaterial({
@@ -52,13 +52,13 @@ s.Weapon.Plasma.prototype.handleCollision = function(event) {
   this.destructOnNextTick();
 };
 
+s.Weapon.Plasma.prototype.mass = 1;
 s.Weapon.Plasma.prototype.damage = 10;
 s.Weapon.Plasma.prototype.flightTime = 4000;
 s.Weapon.Plasma.prototype.scale = new THREE.Vector3(50, 50, 1.0);
-s.Weapon.Plasma.prototype.velocity = 5000;
+s.Weapon.Plasma.prototype.impulse = 5000;
 
 s.Weapon.Plasma.prototype.colors = {
   alliance: 0x157ADF,
-  rebel: 0xFF0000,
-  enemy: 0xFF0000
+  rebel: 0xFF0000
 };

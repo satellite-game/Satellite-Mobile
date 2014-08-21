@@ -25,7 +25,11 @@ s.Sound.prototype.play = function(worldPosition, sprite, callback) {
 
   if (worldPosition) {
     // Sound is coming from elsewhere
+    // Copy the vector so we don't mess it up
+    worldPosition = worldPosition.clone();
+
     // Convert the vector to the player's local coordinates
+    // This modifies worldPosition itself
     localPosition = s.game.player.root.worldToLocal(worldPosition);
 
     // Apply rotation
