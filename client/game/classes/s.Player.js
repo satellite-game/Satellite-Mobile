@@ -143,3 +143,9 @@ s.Player.prototype.getState = function() {
 
   return this.state;
 };
+
+s.Player.prototype.explode = function() {
+  s.Ship.prototype.explode.apply(this, arguments);
+
+  this.setState(s.SpaceStation.shipSpawn.position, s.SpaceStation.shipSpawn.rotation, new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0));
+};

@@ -6,6 +6,9 @@ s.Ship = function(options) {
   this.lastFireTime = 0;
   this.thrustImpulse = 0;
 
+  // Don't go away when we blow up
+  this.options.destructOnExplode = false;
+
   var geometry = s.models[options.shipClass].geometry;
   this.materials = s.models[options.shipClass].materials[0];
 
@@ -221,4 +224,10 @@ s.Ship.prototype.update = function(now, delta) {
     this.leftGunFlare.scale.set(0, 0, 0);
     this.rightGunFlare.scale.set(0, 0, 0);
   }
+};
+
+s.Ship.prototype.explode = function() {
+  s.GameObject.prototype.explode.apply(this, arguments);
+
+  this.hp = 100;
 };

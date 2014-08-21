@@ -83,9 +83,11 @@ s.GameObject.prototype.explode = function() {
     position: position
   });
 
-  setTimeout(function() {
-    self.destructOnNextTick();
-  }, 500);
+  if (this.options.destructOnExplode !== false) {
+    setTimeout(function() {
+      self.destructOnNextTick();
+    }, 500);
+  }
 };
 
 s.GameObject.prototype.init = function() {
@@ -223,6 +225,41 @@ s.GameObject.prototype.setStateFromPacket = function(state) {
     }
     if (av) {
       this.body.angularVelocity.set(av[0], av[1], av[2]);
+    }
+  }
+};
+
+/**
+  Set the state of this object given a packet from the server
+
+  state - An object representing the game object's state
+  state.pos - Position vector3
+  state.rot - Rotation quaternion represented as [x, y, z, w]
+  state.lv - Linear velocity vector3
+  state.av - Angular velocity vector3
+*/
+s.GameObject.prototype.setState = function(pos, rot, av, lv) {
+  if (pos) {
+    this.root.position.copy(pos);
+  }
+  if (rot) {
+    this.root.quaternion.copy(rot);
+  }
+
+  if (this.body) {
+    if (pos) {
+      this.body.position.set(pos.x, pos.y, pos.z);
+    }
+
+    if (rot) {
+      this.body.quaternion.set(rot.x, rot.y, rot.z, rot.w);
+    }
+
+    if (lv) {
+      this.body.velocity.set(lv.x, lv.y, lv.z);
+    }
+    if (av) {
+      this.body.angularVelocity.set(av.x, av.y, av.z);
     }
   }
 };
