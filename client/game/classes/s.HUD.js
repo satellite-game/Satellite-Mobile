@@ -49,7 +49,7 @@ s.HUD.indicatorStroke = 'rgba(0, 0, 0, 0.5)';
 
 s.HUD.targetColor = 'rgba(255, 0, 0, 0.5)';
 
-// The radius of the circle around which directional circles should be drawn
+// The radius of the circle around which directional indicators should be drawn
 s.HUD.radius = 150;
 
 // The size of the target square relative to distance
@@ -88,32 +88,31 @@ s.HUD.prototype.fitWindow = function() {
   this.centerY = this.height / 2;
 };
 
-s.HUD.prototype.drawTarget = function(name, circleTarget, fillColor, distanceFromRadius, minBoxDistance) {
-  var circleTargetInSight;
-  var distanceToCircleTarget;
-  var v2DcircleTarget;
+s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromRadius, minBoxDistance) {
+  var targetMeshInSight;
+  var distanceToTargetMesh;
   var squareSize;
 
-  var vcircleTarget3D = circleTarget.position.clone();
-  var vcircleTarget2D = s.projector.projectVector(vcircleTarget3D, s.game.camera);
+  // Get the 2D position in NDC (Normalized Device Coordinates) of the target
+  var targetMeshNDC = s.projector.projectVector(targetMesh.position.clone(), s.game.camera);
 
-  if (Math.abs(vcircleTarget2D.x) <= 0.95 && Math.abs(vcircleTarget2D.y) <= 0.95 && vcircleTarget2D.z < 1) {
-    circleTargetInSight = true;
-    distanceToCircleTarget = this.game.player.root.position.distanceTo(circleTarget.position);
-    squareSize = Math.round((this.width - distanceToCircleTarget/100)*s.HUD.squareSizeFactor);
+  if (Math.abs(targetMeshNDC.x) <= 0.95 && Math.abs(targetMeshNDC.y) <= 0.95 && targetMeshNDC.z < 1) {
+    targetMeshInSight = true;
+    distanceToTargetMesh = this.game.player.root.position.distanceTo(targetMesh.position);
+    squareSize = Math.round((this.width - distanceToTargetMesh/100)*s.HUD.squareSizeFactor);
   }
 
-  // circleTarget targeting reticle and targeting box
-  if (!circleTargetInSight) {
-    var circleTarget2D = new THREE.Vector2(vcircleTarget2D.x, vcircleTarget2D.y);
-    circleTarget2D.multiplyScalar(1/circleTarget2D.length()).multiplyScalar(s.HUD.radius+distanceFromRadius);
+  // targetMesh targeting reticle and targeting box
+  if (!targetMeshInSight) {
+    var targetMesh2D = new THREE.Vector2(targetMeshNDC.x, targetMeshNDC.y);
+    targetMesh2D.multiplyScalar(1/targetMesh2D.length()).multiplyScalar(s.HUD.radius+distanceFromRadius);
 
-    var directionalIndicatorCenterX = circleTarget2D.x+this.centerX
-    var directionalIndicatorCenterY = -(circleTarget2D.y-this.centerY);
+    var directionalIndicatorCenterX = targetMesh2D.x+this.centerX
+    var directionalIndicatorCenterY = -(targetMesh2D.y-this.centerY);
     // Calculate angle away from center
     var directionalIndicatorAngle = Math.atan2(directionalIndicatorCenterY-this.centerY, directionalIndicatorCenterX-this.centerX)
 
-    var targetIsBehindUs = vcircleTarget2D.z > 1;
+    var targetIsBehindUs = targetMeshNDC.z > 1;
     if (this.game.player.viewMode === 'front') {
       targetIsBehindUs = !targetIsBehindUs;
       directionalIndicatorAngle += Math.PI;
@@ -187,18 +186,18 @@ s.HUD.prototype.drawTarget = function(name, circleTarget, fillColor, distanceFro
   }
 
   // Draw square around object
-  if (circleTargetInSight && distanceToCircleTarget > minBoxDistance) {
-    v2DcircleTarget = vcircleTarget2D.clone();
-    v2DcircleTarget.x =  (this.width  + v2DcircleTarget.x*this.width )/2;
-    v2DcircleTarget.y = -(-this.height + v2DcircleTarget.y*this.height)/2;
+  if (targetMeshInSight && distanceToTargetMesh > minBoxDistance) {
+    var targetSquarePosition = targetMeshNDC.clone();
+    targetSquarePosition.x =  (this.width  + targetSquarePosition.x*this.width )/2;
+    targetSquarePosition.y = -(-this.height + targetSquarePosition.y*this.height)/2;
 
     this.ctx.strokeStyle = fillColor;
     this.ctx.lineWidth = 1;
-    this.ctx.strokeRect(v2DcircleTarget.x-squareSize, v2DcircleTarget.y-squareSize, squareSize*2, squareSize*2);
+    this.ctx.strokeRect(targetSquarePosition.x-squareSize, targetSquarePosition.y-squareSize, squareSize*2, squareSize*2);
 
     if (name) {
       var textOffset = squareSize * 2;
-      this.writeName(name, v2DcircleTarget, fillColor, textOffset);
+      this.writeName(name, targetSquarePosition, fillColor, textOffset);
     }
     else {
       console.warn('s.HUD: Name not defined for mesh');
