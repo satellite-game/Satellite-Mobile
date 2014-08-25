@@ -70,6 +70,11 @@ s.HUD.prototype.update = function() {
     if (otherPlayer) {
       this.drawTarget(otherPlayer.name, otherPlayer.ship.root, this.game.player.team === otherPlayer.ship.team ? s.HUD.friendlyIndicatorColor : s.HUD.enemyIndicatorColor, 34, 700);
     }
+
+    if (otherPlayer.isTargetted) {
+      // @todo Don't hardcode the weapon class, get it from the player
+      this.drawLeadIndicator(s.game.player.root, otherPlayer.ship.root, s.Weapon.Plasma);
+    }
   }
 };
 
@@ -203,4 +208,24 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
       console.warn('s.HUD: Name not defined for mesh');
     }
   }
+};
+
+s.HUD.prototype.drawLeadIndicator = function(sourceInstance, targetInstance, ProjectileClass) {
+  var sourceMesh = sourceInstance.root;
+  var sourceBody = sourceInstance.body;
+  var targetMesh = targetInstance.root;
+  var targetBody = targetInstance.body;
+
+  // Get position/velocity vectors as THREE.Vector3 so we can use the associated math functions
+  var sourceVelocity = new THREE.Vector3().copy(sourceBody.velocity);
+  var targetVelocity = new THREE.Vector3().copy(targetBody.velocity);
+  var sourcePosition = new THREE.Vector3().copy(sourceInstance.body.position);
+  var targetPosition = new THREE.Vector3().copy(targetInstance.body.position);
+
+  /*
+    Equation:
+      Given the target's current position and velocity, calculate where it will be when the projectile arrives
+      Then, calculate the heading to that location
+      Then, draw a reticle indicating that the ship needs to be pointed there
+  */
 };

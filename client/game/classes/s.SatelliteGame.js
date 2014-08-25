@@ -9,7 +9,6 @@ s.SatelliteGame.prototype = Object.create(s.Game.prototype);
 
 // Models that should be loaded
 s.SatelliteGame.prototype.models = [
-  'phobos_hifi',
   'human_ship_heavy',
   'human_ship_light',
   'human_space_station',
@@ -21,8 +20,7 @@ s.SatelliteGame.prototype.textures = [
   'particle.png',
   'explosion.png',
   'crosshairs.png',
-  'phobos.jpg',
-  'phobos.jpg',
+  'moon.jpg',
   'human_space_station_color.png',
   'human_space_station_bump.gif',
   'human_ship_light.jpg',
@@ -50,16 +48,34 @@ s.SatelliteGame.prototype.initialize = function() {
   this.scene.add(this.ambientLight);
 
   // Directional light
-  this.light = new THREE.DirectionalLight(0xEEEEEE, 2);
-  this.light.position.set(100000, 50000, 50000);
-  this.scene.add(this.light);
+  var light = this.light = new THREE.DirectionalLight(0xEEEEEE, 2);
+  light.position.set(100000, 50000, 50000);
+  this.scene.add(light);
+
+  // Shadow light
+  // var shadowLight = this.shadowLight = new THREE.SpotLight(0xFFFFFF, 2, 0);
+  // shadowLight.position.set(10000, 10000, 10000);
+  // shadowLight.target.position.set(0, 0, 0);
+
+  // shadowLight.castShadow = true;
+  // shadowLight.onlyShadow = true;
+
+  // shadowLight.shadowCameraNear = 2500;
+  // shadowLight.shadowCameraFar = 12000;
+  // shadowLight.shadowCameraFov = 45;
+
+  // shadowLight.shadowCameraVisible = true;
+
+  // shadowLight.shadowMapWidth = 4096;
+  // shadowLight.shadowMapHeight = 4096;
+  // this.scene.add(shadowLight);
 
   // Create a set of explosion lights we'll reuse across the game
   // @perf: iOS: 5 lights makes the framerate drop to 40, whereas 20 lights halves it
   while (this.explosionLights.length < 3) {
-    var light = new THREE.PointLight(0x72b3fd, 0.45, 2500);
-    this.scene.add(light);
-    this.explosionLights.push(light);
+    var pointLight = new THREE.PointLight(0x72b3fd, 0.45, 2500);
+    this.scene.add(pointLight);
+    this.explosionLights.push(pointLight);
   }
 
   // Dust and skybox
@@ -117,10 +133,18 @@ s.SatelliteGame.prototype.initialize = function() {
     team: 'alliance', // @todo base on player selection
     camera: this.camera,
 
+    // On moon for shadow tuning
+    // position: new THREE.Vector3(4767.8224115044395, 4663.914119825157, 4713.0601690146505),
+    // rotation: new THREE.Quaternion(-0.6228059719058848, 0.4742439438123847, 0.1661230663448425,  -0.599673686219288)
+
+    // Further out for shadow tuning
+    position: new THREE.Vector3(12971.887711727039, 18890.552761886636, 12302.594927541113),
+    rotation: new THREE.Quaternion(-0.8456172507580183, -0.0951417149063118, 0.305721022086222, -0.4270997260121961)
+
     // Inside docking bay
-    position: s.SpaceStation.shipSpawn.position,
+    // position: s.SpaceStation.shipSpawn.position,
     // position: this.spaceStation.root.position.clone().add(new THREE.Vector3(0,0,1000)),
-    rotation: s.SpaceStation.shipSpawn.rotation
+    // rotation: s.SpaceStation.shipSpawn.rotation
     // rotation: this.spaceStation.root.quaternion.clone()
     
   });

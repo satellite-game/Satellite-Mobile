@@ -11,20 +11,19 @@ s.Game = function(options) {
   this.render = this.render.bind(this);
 
   // Create renderer
-  this.renderer = new THREE.WebGLRenderer({
-    antialias: true
+  var renderer = this.renderer = new THREE.WebGLRenderer({
+    antialias: false
   });
 
   // Enable alpha
-  this.renderer.setClearColor(0x000000, 0);
+  renderer.setClearColor(0x000000, 0);
 
   // Create a camera
-  this.camera = new THREE.PerspectiveCamera(35, 1, 1, 300000);
+  var camera = this.camera = new THREE.PerspectiveCamera(35, 1, 1, 300000);
 
   // Configure shadows
-  this.renderer.shadowMapEnabled = true;
-  this.renderer.shadowMapSoft = true;
-  this.renderer.shadowMapCullFrontFaces = false;
+  // renderer.shadowMapEnabled = true;
+  // renderer.shadowMapType = THREE.PCFShadowMap;
 
   // Create the scene
   var scene = this.scene = new THREE.Scene();
