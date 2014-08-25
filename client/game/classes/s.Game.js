@@ -22,8 +22,10 @@ s.Game = function(options) {
   var camera = this.camera = new THREE.PerspectiveCamera(35, 1, 1, 300000);
 
   // Configure shadows
-  // renderer.shadowMapEnabled = true;
-  // renderer.shadowMapType = THREE.PCFShadowMap;
+  if (s.config.shadows) {
+    renderer.shadowMapEnabled = true;
+    renderer.shadowMapType = THREE.PCFShadowMap;
+  }
 
   // Create the scene
   var scene = this.scene = new THREE.Scene();
@@ -237,7 +239,7 @@ s.Game.prototype.render = function(now) {
     this.lastRender = now;
 
     // Step the physics world
-    this.world.step(1/60);
+    this.world.step(delta/1000);
 
     // Run each hooked function before rendering
     this.hookedFuncs.forEach(function(func) {

@@ -7,7 +7,8 @@ window.s = {
   config: {
     sound: {
       enabled: true
-    }
+    },
+    shadows: false
   },
 
   constants: {

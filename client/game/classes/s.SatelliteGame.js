@@ -53,22 +53,24 @@ s.SatelliteGame.prototype.initialize = function() {
   this.scene.add(light);
 
   // Shadow light
-  // var shadowLight = this.shadowLight = new THREE.SpotLight(0xFFFFFF, 2, 0);
-  // shadowLight.position.set(10000, 10000, 10000);
-  // shadowLight.target.position.set(0, 0, 0);
+  if (s.config.shadows) {
+    var shadowLight = this.shadowLight = new THREE.SpotLight(0xFFFFFF, 2, 0);
+    shadowLight.position.set(10000, 10000, 10000);
+    shadowLight.target.position.set(0, 0, 0);
 
-  // shadowLight.castShadow = true;
-  // shadowLight.onlyShadow = true;
+    shadowLight.castShadow = true;
+    shadowLight.onlyShadow = true;
 
-  // shadowLight.shadowCameraNear = 2500;
-  // shadowLight.shadowCameraFar = 12000;
-  // shadowLight.shadowCameraFov = 45;
+    shadowLight.shadowCameraNear = 2500;
+    shadowLight.shadowCameraFar = 12000;
+    shadowLight.shadowCameraFov = 45;
 
-  // shadowLight.shadowCameraVisible = true;
+    shadowLight.shadowCameraVisible = true;
 
-  // shadowLight.shadowMapWidth = 4096;
-  // shadowLight.shadowMapHeight = 4096;
-  // this.scene.add(shadowLight);
+    shadowLight.shadowMapWidth = 4096;
+    shadowLight.shadowMapHeight = 4096;
+    this.scene.add(shadowLight);
+  }
 
   // Create a set of explosion lights we'll reuse across the game
   // @perf: iOS: 5 lights makes the framerate drop to 40, whereas 20 lights halves it

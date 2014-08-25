@@ -2,13 +2,16 @@ s.Moon = function(options) {
   s.GameObject.call(this, options);
 
   var geometry = new THREE.SphereGeometry(this.radius, 32, 32);
-  var material = new THREE.MeshPhongMaterial({
+  var material = new THREE.MeshLambertMaterial({
     color: this.color,
     map: s.textures.moon
   });
 
   this.root = new THREE.Mesh(geometry, material);
-  // this.root.receiveShadow = true; // Shadows aren't performant on iOS
+
+  if (s.config.shadows) {
+    this.root.receiveShadow = true;
+  }
 
   // Use a slightly larger radius as CANNON's units don't perfectly match THREE's
   var hitBox = new CANNON.Sphere(this.radius + 10);

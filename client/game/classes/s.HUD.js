@@ -69,11 +69,11 @@ s.HUD.prototype.update = function() {
     // Since we set players to null when they leave, check if it's truthy
     if (otherPlayer) {
       this.drawTarget(otherPlayer.name, otherPlayer.ship.root, this.game.player.team === otherPlayer.ship.team ? s.HUD.friendlyIndicatorColor : s.HUD.enemyIndicatorColor, 34, 700);
-    }
 
-    if (otherPlayer.isTargetted) {
-      // @todo Don't hardcode the weapon class, get it from the player
-      this.drawLeadIndicator(s.game.player.root, otherPlayer.ship.root, s.Weapon.Plasma);
+      if (otherPlayer.isTargetted) {
+        // @todo Don't hardcode the weapon class, get it from the player
+        this.drawLeadIndicator(s.game.player.root, otherPlayer.ship.root, s.Weapon.Plasma);
+      }
     }
   }
 };

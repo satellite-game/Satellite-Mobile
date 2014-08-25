@@ -16,7 +16,11 @@ s.Ship = function(options) {
   this.materials.emissive = new THREE.Color(0x111111);
 
   this.root = new THREE.Mesh(geometry, this.materials);
-  // this.root.castShadow = true;
+
+  // Cast a shadow
+  if (s.config.shadows) {
+    this.root.castShadow = true;
+  }
 
   // Shield hit box
   // var shape = new CANNON.Sphere(40);
