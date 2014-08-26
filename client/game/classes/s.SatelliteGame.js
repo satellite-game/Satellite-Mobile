@@ -9,6 +9,8 @@ s.SatelliteGame.prototype = Object.create(s.Game.prototype);
 
 // Models that should be loaded
 s.SatelliteGame.prototype.models = [
+  'alien_ship_heavy',
+  'alien_ship_light',
   'human_ship_heavy',
   'human_ship_light',
   'human_space_station',
@@ -27,6 +29,10 @@ s.SatelliteGame.prototype.textures = [
   'human_ship_light_bump.jpg',
   'human_ship_heavy.jpg',
   'human_ship_heavy_bump.jpg',
+  'alien_ship_light_color.jpg',
+  'alien_ship_light_bump.jpg',
+  'alien_ship_heavy_color.jpg',
+  'alien_ship_heavy_bump.jpg',
   'human_building_tall_color.jpg',
   'human_building_tall_bump.jpg',
   'human_building_short_color.jpg',
@@ -132,6 +138,9 @@ s.SatelliteGame.prototype.initialize = function() {
     // Use hash as name, or just generate random player name
     name: window.location.hash || 'Player '+Date.now().toString().slice(-5),
     shipClass: 'human_ship_heavy',
+    // shipClass: 'human_ship_light',
+    // shipClass: 'alien_ship_light',
+    // shipClass: 'alien_ship_heavy',
     team: 'alliance', // @todo base on player selection
     camera: this.camera,
 
