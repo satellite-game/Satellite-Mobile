@@ -2,6 +2,8 @@ s.Moon = function(options) {
   s.GameObject.call(this, options);
 
   var geometry = new THREE.SphereGeometry(this.radius, 32, 32);
+
+  // @perf: THREE.MeshPhongMaterial` can have a 95% impact when up close
   var material = new THREE.MeshLambertMaterial({
     color: this.color,
     map: s.textures.moon
