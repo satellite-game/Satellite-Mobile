@@ -5,7 +5,7 @@ s.Explosion = function(options) {
   var spread = options.spread || size / 15;
   var geometry = new THREE.Geometry();
 
-  // @perf: iOS: More than 3 halves framerate camera is close
+  // @perf: iOS: More than 3 explosion sprites halves framerate camera is close
   for (var i = 0; i < 3; i++) {
     var vertex = new THREE.Vector3();
     vertex.x = Math.random() * spread - spread/2;

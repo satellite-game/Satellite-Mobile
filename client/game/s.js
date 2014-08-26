@@ -8,6 +8,7 @@ window.s = {
     sound: {
       enabled: true
     },
+    // @perf: Disable shadows as they have a 95% impact on iOS
     shadows: false
   },
 
