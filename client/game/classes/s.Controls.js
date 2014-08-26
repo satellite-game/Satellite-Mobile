@@ -21,7 +21,9 @@ s.Controls.prototype.destruct = function() {
 };
 
 s.Controls.prototype.update = function(time, delta) {
-  var now = new Date().getTime();
+  // Calculate the difference between the ideal framerate and the actual framerate
+  // This is used to avoid sluggish controls on slow devices
+  var frameRateFactor = (delta/1000) / (1/60);
 
   var root = this.player.root;
   var body = this.player.body;
@@ -75,9 +77,10 @@ s.Controls.prototype.update = function(time, delta) {
 
   // Apply speeds to values so ship behaves the same for each control type
   // Apply thrustScalar so the ship turns slower when under thrust
-  pitch = pitch * s.constants.ship.pitchSpeed / thrustScalar;
-  roll = roll * s.constants.ship.rollSpeed / thrustScalar;
-  yaw = yaw * s.constants.ship.yawSpeed / thrustScalar;
+  // Apply frameRateFactor so control is still fast at lower framerates
+  pitch = frameRateFactor * pitch * s.constants.ship.pitchSpeed / thrustScalar;
+  roll = frameRateFactor * roll * s.constants.ship.rollSpeed / thrustScalar;
+  yaw = frameRateFactor * yaw * s.constants.ship.yawSpeed / thrustScalar;
 
   // Apply values to physics simulation
   var angularVelocity = body.angularVelocity;
