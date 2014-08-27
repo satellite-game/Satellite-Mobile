@@ -1,16 +1,13 @@
 s.Player = function(options) {
-  s.Ship.call(this, options);
+  s.EventEmitter.call(this);
 
+  this.game = options.game;
   this.camera = options.camera;
-  this.name = options.name || '';
 
-  // Root camera to the player's position
-  this.root.add(this.camera);
+  this._viewModeIndex = 0;
 
   // Set default view mode
   this.setCameraViewMode();
-
-  this._viewModeIndex = 0;
 
   // Throttle camera view mode calls
   this.cycleCameraViewMode = s.util.throttle(this.cycleCameraViewMode, 250, { leading: true, trailing: false});
@@ -25,11 +22,73 @@ s.Player = function(options) {
     th: 0               // Thrust
   };
 
+  // Communication
+  this.client = new s.Client({
+    game: this.game, 
+    player: this
+  });
+
+  // HUD
+  this.HUD = new s.HUD({
+    game: this.game,
+    client: this.client,
+    player: this
+  });
+
+  // Fly controls
+  this.controls = new s.Controls({
+    game: this.game,
+    player: this,
+    camera: this.camera
+  });
+};
+
+s.Player.prototype = Object.create(s.EventEmitter.prototype);
+
+s.Player.prototype.joinMatch = function(matchId, playerName) {
+  this.client.joinMatch(matchId, playerName);
+  this.name = playerName;
+};
+
+s.Player.prototype.joinTeam = function(team, shipClass) {
+  if (this.ship) {
+    this.ship.destroy();
+  }
+
+  this.team = team;
+  this.shipClass = shipClass;
+
+  // Join the correct team
+  this.client.joinTeam(
+    team,
+    shipClass
+  );
+
+  // Create the ship
+  this.ship = new s.Ship({
+    game: this.game,
+    name: this.name,
+    team: team,
+    shipClass: shipClass,
+    position: s.SpaceStation.shipSpawn.position,
+    rotation: s.SpaceStation.shipSpawn.rotation
+  });
+
+  // Let controls manipulate the ship
+  this.controls.ship = this.ship;
+
+  // Bubble ship fire events
+  var self = this;
+  this.ship.on('fire', function(packet) {
+    self.trigger('fire', packet);
+  });
+
+  // Root camera to the player's position
+  this.ship.root.add(this.camera);
+
   // Set initial state
   this.getState();
 };
-
-s.Player.prototype = Object.create(s.Ship.prototype);
 
 s.Player.prototype.viewModes = [
   'chase',
@@ -39,42 +98,7 @@ s.Player.prototype.viewModes = [
 ];
 
 s.Player.prototype.fire = function() {
-  // Don't call superclass method to avoid overhead
-  // Fire some plasma
-  var now = s.game.now;
-  if (now - this.lastFireTime > s.Ship.fireInterval) {
-    this.root.updateMatrixWorld();
-
-    var leftPos = this.offsetGunLeft.clone().add(this.offsetBullet).applyMatrix4(this.root.matrixWorld);
-    var rightPos = this.offsetGunRight.clone().add(this.offsetBullet).applyMatrix4(this.root.matrixWorld);
-
-    new s.Weapon.Plasma({
-      game: s.game,
-      velocity: this.body.velocity,
-      position: leftPos,
-      rotation: this.root.quaternion,
-      team: this.team
-    });
-
-    new s.Weapon.Plasma({
-      game: s.game,
-      velocity: this.body.velocity,
-      position: rightPos,
-      rotation: this.root.quaternion,
-      team: this.team
-    });
-
-    s.Weapon.Plasma.sound.play();
-
-    this.lastFireTime = now;
-
-    this.trigger('fire', {
-      vl: this.body.velocity,
-      pos: [leftPos, rightPos],
-      rot: this.root.quaternion,
-      type: 'plasma'
-    });
-  }
+  this.ship.fire();
 };
 
 s.Player.prototype.restoreViewMode = function() {
@@ -117,35 +141,31 @@ s.Player.prototype.cycleCameraViewMode = function(previous) {
 };
 
 s.Player.prototype.getState = function() {
-  var pos = this.root.position;
-  var rot = this.root.quaternion;
-  var va = this.body.angularVelocity;
-  var vl = this.body.velocity;
+  if (this.ship) {
+    var pos = this.ship.root.position;
+    var rot = this.ship.root.quaternion;
+    var va = this.ship.body.angularVelocity;
+    var vl = this.ship.body.velocity;
 
-  this.state.pos[0] = pos.x;
-  this.state.pos[1] = pos.y;
-  this.state.pos[2] = pos.z;
+    this.state.pos[0] = pos.x;
+    this.state.pos[1] = pos.y;
+    this.state.pos[2] = pos.z;
 
-  this.state.rot[0] = rot.x;
-  this.state.rot[1] = rot.y;
-  this.state.rot[2] = rot.z;
-  this.state.rot[3] = rot.w;
+    this.state.rot[0] = rot.x;
+    this.state.rot[1] = rot.y;
+    this.state.rot[2] = rot.z;
+    this.state.rot[3] = rot.w;
 
-  this.state.vl[0] = vl.x;
-  this.state.vl[1] = vl.y;
-  this.state.vl[2] = vl.z;
+    this.state.vl[0] = vl.x;
+    this.state.vl[1] = vl.y;
+    this.state.vl[2] = vl.z;
 
-  this.state.va[0] = va.x;
-  this.state.va[1] = va.y;
-  this.state.va[2] = va.z;
+    this.state.va[0] = va.x;
+    this.state.va[1] = va.y;
+    this.state.va[2] = va.z;
 
-  this.state.th = this.thrustImpulse;
+    this.state.th = this.ship.thrustImpulse;
+  }
 
   return this.state;
-};
-
-s.Player.prototype.explode = function() {
-  s.Ship.prototype.explode.apply(this, arguments);
-
-  this.setState(s.SpaceStation.shipSpawn.position, s.SpaceStation.shipSpawn.rotation, new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0));
 };

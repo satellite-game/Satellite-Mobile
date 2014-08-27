@@ -21,12 +21,16 @@ s.Controls.prototype.destruct = function() {
 };
 
 s.Controls.prototype.update = function(time, delta) {
+  if (!this.ship) {
+    return;
+  }
+
   // Calculate the difference between the ideal framerate and the actual framerate
   // This is used to avoid sluggish controls on slow devices
   var frameRateFactor = (delta/1000) / (1/60);
 
-  var root = this.player.root;
-  var body = this.player.body;
+  var root = this.ship.root;
+  var body = this.ship.body;
 
   var pitch = 0;
   var roll = 0;
@@ -70,7 +74,7 @@ s.Controls.prototype.update = function(time, delta) {
   }
 
   // Expose thrust impulse for visuals
-  this.player.thrustImpulse = thrustImpulse;
+  this.ship.thrustImpulse = thrustImpulse;
 
   // A scalar used to control rate of turn based on thrust
   var thrustScalar = Math.abs(thrustImpulse)/s.constants.ship.forwardThrust + 1;
@@ -91,24 +95,28 @@ s.Controls.prototype.update = function(time, delta) {
   var newAngularVelocity = new THREE.Vector3(pitch, yaw, roll).applyMatrix4(rotationMatrix).add(angularVelocity);
   body.angularVelocity.set(newAngularVelocity.x, newAngularVelocity.y, newAngularVelocity.z);
 
-  var forceVector = new THREE.Vector3(0, 0, thrustImpulse * this.player.engineImpulse).applyMatrix4(rotationMatrix);
+  var forceVector = new THREE.Vector3(0, 0, thrustImpulse * this.ship.engineImpulse).applyMatrix4(rotationMatrix);
   var cannonVector = new CANNON.Vec3(forceVector.x, forceVector.y, forceVector.z);
   body.applyImpulse(cannonVector, body.position);
 
   // Tell the player to perform actions
   if (fire) {
-    this.player.fire();
+    // this.emit('fire');
+    this.ship.fire();
   }
 
   if (showBackCam) {
     // @todo animate along top
     // Show cam from behind
+    // this.emit('lookBack');
     this.player.setCameraViewMode('front');
   }
   else if (changeViewMode) {
+    // this.emit('cycleCameraViewMode');
     this.player.cycleCameraViewMode();
   }
   else {
+    // this.emit('restoreViewMode');
     this.player.restoreViewMode();
   }
 };

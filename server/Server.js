@@ -1,4 +1,5 @@
 var Match = require('./Match');
+var Player = require('./Player');
 
 // A map of IDs to Match instances
 var matches = {};
@@ -7,13 +8,24 @@ function endMatch(match) {
   delete matches[match.id];
 }
 
-function startMatch(player, data) {
+function createMatch(data) {
   var match = new Match({
+    id: data.id,
     name: data.name,
     type: data.type
   });
 
+  // Listen for end
   match.on('end', endMatch);
+
+  // Store reference
+  matches[match.id] = match;
+
+  return match;
+}
+
+function startMatch(player, data) {
+  var match = createMatch(data);
 
   // Automatically join the match
   match.join(player);
@@ -38,14 +50,17 @@ function listMatches(player) {
 function joinMatch(player, data) {
   var match = matches[data.matchId];
 
+  // Set name as provided
+  player.name = data.name;
+
   if (match) {
     match.join(player);
   }
   else {
     var message = 'Match does not exist';
-    console.error('Could not join match %s: ', data.matchId);
+    console.error('Could not join match %s: %s', data.matchId, message);
 
-    player.socket.emit('error', {
+    player.socket.emit('joinError', {
       message: 'Match '+data.match+' does not exist.'
     });
   }
@@ -77,6 +92,14 @@ module.exports = function(io) {
     socket.on('joinMatch', joinMatch.bind(null, player));
     socket.on('leaveMatch', handleLeaveMatch.bind(null, player));
 
-    socket.on('disconnect', handleDisconnect.bind(null, player));
+    socket.on('disconnect', handleLeaveMatch.bind(null, player));
+  });
+
+  // Create the default match
+  createMatch({
+    id: 'default',
+    name: 'Default Match',
+    type: 'deathmatch',
+    endWhenEmpty: false
   });
 };

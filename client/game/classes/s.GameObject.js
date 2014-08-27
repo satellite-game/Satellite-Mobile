@@ -28,11 +28,8 @@ s.GameObject = function(options) {
   // Flag to destruct on next tick
   this.isDestroyed = false;
 
-  // Flag to initialize on next tick
-  this.initialized = false;
-
-  // Initialize after call stack clears
-  setTimeout(this.init.bind(this), 0);
+  // Initialize on the next tick
+  this.game.nextTick(this.init.bind(this));
 };
 
 s.GameObject.prototype = Object.create(s.EventEmitter.prototype);

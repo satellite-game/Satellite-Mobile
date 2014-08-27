@@ -59,6 +59,6 @@ s.Weapon.Plasma.prototype.scale = new THREE.Vector3(50, 50, 1.0);
 s.Weapon.Plasma.prototype.impulse = 5000;
 
 s.Weapon.Plasma.prototype.colors = {
-  alliance: 0x157ADF,
-  rebel: 0xFF0000
+  human: 0x157ADF,
+  alien: 0xFF0000
 };

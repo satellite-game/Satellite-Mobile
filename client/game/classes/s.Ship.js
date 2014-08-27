@@ -5,12 +5,13 @@ s.Ship = function(options) {
   this.lastRetroThrustTime = 0;
   this.lastFireTime = 0;
   this.thrustImpulse = 0;
+  this.shipClass = options.shipClass;
 
   // Don't go away when we blow up
   this.options.destructOnExplode = false;
 
-  var geometry = s.models[options.shipClass].geometry;
-  this.materials = s.models[options.shipClass].materials[0];
+  var geometry = s.models[this.team+'_ship_'+this.shipClass].geometry;
+  this.materials = s.models[this.team+'_ship_'+this.shipClass].materials[0];
 
   // Be very lit up by default
   this.materials.emissive = new THREE.Color(0x111111);
@@ -106,13 +107,13 @@ s.Ship = function(options) {
 };
 
 s.Ship.gunGlowColors = {
-  alliance: 0x1A8CFF, // 0x335577
-  rebel: 0xFF0000 //  ??
+  human: 0x1A8CFF, // 0x335577
+  alien: 0xFF0000 //  ??
 };
 
 s.Ship.engineGlowColors = {
-  alliance: 0x335577, // 0x335577
-  rebel: 0xFF0000 //  ??
+  human: 0x335577, // 0x335577
+  alien: 0xFF0000 //  ??
 };
 
 s.Ship.engineFadeTime = 3000;
@@ -125,7 +126,7 @@ s.Ship.prototype.engineImpulse = 100;
 
 s.Ship.prototype.name = 'Ship';
 
-s.Ship.prototype.fire = function(packet) {
+s.Ship.prototype.spawnBullets = function(packet) {
   new s.Weapon.Plasma({
     game: s.game,
     velocity: packet.vl,
@@ -145,8 +146,29 @@ s.Ship.prototype.fire = function(packet) {
   });
 
   s.Weapon.Plasma.sound.play(packet.pos[0]);
+};
 
-  this.lastFireTime = s.game.now;
+s.Ship.prototype.fire = function(packet) {
+  var now = s.game.now;
+  if (now - this.lastFireTime > s.Ship.fireInterval) {
+    this.root.updateMatrixWorld();
+
+    var leftPos = this.offsetGunLeft.clone().add(this.offsetBullet).applyMatrix4(this.root.matrixWorld);
+    var rightPos = this.offsetGunRight.clone().add(this.offsetBullet).applyMatrix4(this.root.matrixWorld);
+
+    var packet = {
+      vl: this.body.velocity,
+      pos: [leftPos, rightPos],
+      rot: this.root.quaternion,
+      weapon: 'plasma' // @todo don't hardcode
+    };
+
+    this.spawnBullets(packet);
+
+    this.trigger('fire', packet);
+
+    this.lastFireTime = s.game.now;
+  }
 };
 
 s.Ship.prototype.update = function(now, delta) {

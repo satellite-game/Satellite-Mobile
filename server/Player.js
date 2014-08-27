@@ -1,6 +1,8 @@
 function Player(options) {
+  var player = this;
+
   // Store socket
-  this.socket = options.socket;
+  var socket = this.socket = options.socket;
 
   socket.on('joinTeam', handleJoinTeam);
   socket.on('leaveTeam', handleLeaveTeam);
@@ -10,24 +12,22 @@ function Player(options) {
   socket.on('fireWeapon', handleFire);
 
   function handleJoinTeam(data) {
-    this.team = data.team;
-    this.cls = data.cls;
-    this.name = data.name;
+    player.team = data.team;
+    player.cls = data.cls;
 
-    this.emit('joinTeam', {
-      name: this.name,
-      team: this.team,
-      cls: this.cls
+    player.emit('joinTeam', {
+      team: player.team,
+      cls: player.cls
     });
   }
 
   function handleLeaveTeam() {
-    this.team = null;
-    this.cls = null;
-    this.name = 'Unnamed';
+    player.team = null;
+    player.cls = null;
+    player.name = 'Unnamed';
 
     // Leave team
-    this.emit('leaveTeam');
+    player.emit('leaveTeam');
   }
 
   function handleState(data, interp) {
@@ -40,18 +40,18 @@ function Player(options) {
     packet.interp = typeof interp !== 'undefined' ? interp : true;
 
     // Notify players
-    this.emit('state', packet);
+    player.emit('state', packet);
   }
 
   function handleHitPlayer(data) {
-    this.emit('hitPlayer', {
+    player.emit('hitPlayer', {
       victim: data.victim,
       weapon: data.weapon
     });
   }
 
   function handleFire(data) {
-    this.emit('fireWeapon', {
+    player.emit('fireWeapon', {
       weapon: data.weapon,
       pos: data.pos,
       rot: data.rot,
@@ -62,10 +62,10 @@ function Player(options) {
   this.set(options);
 }
 
-Player.emit = function(event, data) {
+Player.prototype.emit = function(event, data) {
   // Check if we're in a match
   if (!this.match) {
-    console.error('Player tried to send %s before joining a match', event, data);
+    console.error('Player tried to send %s before joining a match', event);
     return;
   }
 
@@ -74,7 +74,7 @@ Player.emit = function(event, data) {
 };
 
 Player.prototype.toString = function() {
-  return this.name;
+  return this.name || this.socket.id;
 };
 
 Player.prototype.get = function() {

@@ -7,6 +7,9 @@ s.Game = function(options) {
   // Store functions that should be called before render
   this.hookedFuncs = [];
 
+  // Store functions that should be called once
+  this.nextTickFuncs = [];
+
   // Bind render function permenantly
   this.render = this.render.bind(this);
 
@@ -184,12 +187,12 @@ s.Game.prototype.handlePointerLockError = function() {
   this.pointerLocked = false;
 };
 
- // Size the renderer to fit the window
+// Size the renderer to fit the window
 s.Game.prototype.fitWindow = function() {
   this.setSize(window.innerWidth, window.innerHeight);
 };
 
- // Set the size of the renderer
+// Set the size of the renderer
 s.Game.prototype.setSize = function(width, height) {
   this.width = width;
   this.height = height;
@@ -200,19 +203,24 @@ s.Game.prototype.setSize = function(width, height) {
   }
 };
 
- // Add a callback to the rendering loop
+// Call the provided callback once on the next rendering
+s.Game.prototype.nextTick = function(callback) {
+  this.nextTickFuncs.push(callback);
+};
+
+// Add a callback to the rendering loop
 s.Game.prototype.hook = function(callback) {
   this.hookedFuncs.push(callback);
 };
 
- // Remove a callback from the rendering loop
+// Remove a callback from the rendering loop
 s.Game.prototype.unhook = function(callback) {
   var index = this.hookedFuncs.indexOf(callback);
   if (~index)
     this.hookedFuncs.splice(index, 1);
 };
 
- // Start rendering
+// Start rendering
 s.Game.prototype.start = function() {
   this.doRender = true;
   requestAnimationFrame(this.render);
@@ -223,12 +231,12 @@ s.Game.prototype.restart = function() {
   requestAnimationFrame(this.render);
 };
 
- // Stop rendering
+// Stop rendering
 s.Game.prototype.stop = function() {
   this.doRender = false;
 };
 
- // Perform render
+// Perform render
 s.Game.prototype.render = function(now) {
   // Store the current time
   this.now = now;
@@ -240,6 +248,14 @@ s.Game.prototype.render = function(now) {
 
     // Step the physics world
     this.world.step(delta/1000);
+
+    // Run each next tick function before rendering
+    this.nextTickFuncs.forEach(function(func) {
+      func(now, delta);
+    });
+
+    // Reset so they don't run twice
+    this.nextTickFuncs.length = 0;
 
     // Run each hooked function before rendering
     this.hookedFuncs.forEach(function(func) {

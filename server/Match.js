@@ -9,7 +9,9 @@ var EventEmitter = require('events').EventEmitter;
 */
 function Match(options) {
   this.name = options.name;
-  this.id = shortId.generate();
+  this.id = options.id || shortId.generate();
+
+  this.endWhenEmpty = typeof options.endWhenEmpty === 'boolean' ? options.endWhenEmpty : true;
 
   // @todo support different game types
   this.type = options.type;
@@ -54,8 +56,6 @@ Match.prototype.join = function(player) {
     console.error('Player %s tried to join match %s twice', player, this.id);
     return;
   }
-  this.players.push(player);
-
   // Store the match
   player.match = this;
 
@@ -74,10 +74,15 @@ Match.prototype.join = function(player) {
     player.socket.emit('state', otherPlayer.get('state'));
   });
 
-  // Broadcast join that player has joined
-  this.handle('joinMatch', player);
+  // Add to player list
+  this.players.push(player);
 
-  console.log('Player %s has joined match %s', player.name, this.id);
+  // Broadcast join that player has joined
+  this.handle('joinMatch', player, {
+    name: player.name
+  });
+
+  console.log('Player %s has joined match %s', player, this.id);
 
   this.emit('playerJoined', this, player);
 };
@@ -95,12 +100,15 @@ Match.prototype.leave = function(player) {
   }
   this.players.splice(index, 1);
 
-  console.log('%s has left %s', player.name, this.name);
+  // Notify that player has left
+  player.socket.broadcast.to(this.id).emit('leaveMatch', { id: player.socket.id });
+
+  console.log('Player %s has left match %s', player.socket.id, this.id);
 
   this.emit('playerLeft', this, player);
 
   // End the match if everyone left
-  if (match.players.length === 0) {
+  if (this.endWhenEmpty && this.players.length === 0) {
     this.end();
   }
 };

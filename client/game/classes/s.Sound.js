@@ -30,7 +30,7 @@ s.Sound.prototype.play = function(worldPosition, sprite, callback) {
 
     // Convert the vector to the player's local coordinates
     // This modifies worldPosition itself
-    localPosition = s.game.player.root.worldToLocal(worldPosition);
+    localPosition = s.game.player.ship.root.worldToLocal(worldPosition);
 
     // Apply rotation
     localPosition.applyMatrix4(this.matrix);

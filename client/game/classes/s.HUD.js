@@ -1,5 +1,7 @@
 s.HUD = function(options) {
   this.game = options.game;
+  this.client = options.client;
+  this.player = options.player;
 
   // Add crosshairs
   this.crosshairs = new THREE.Sprite(new THREE.SpriteMaterial({
@@ -64,11 +66,11 @@ s.HUD.prototype.update = function() {
   this.drawTarget(s.game.moonBase1.name, s.game.moonBase1.root, s.HUD.enemyIndicatorColor, 34, 5500);
 
   // Draw enemies
-  for (var id in this.game.client.players) {
-    var otherPlayer = this.game.client.players[id];
+  for (var id in this.client.players) {
+    var otherPlayer = this.client.players[id];
     // Since we set players to null when they leave, check if it's truthy
-    if (otherPlayer) {
-      this.drawTarget(otherPlayer.name, otherPlayer.ship.root, this.game.player.team === otherPlayer.ship.team ? s.HUD.friendlyIndicatorColor : s.HUD.enemyIndicatorColor, 34, 700);
+    if (otherPlayer && otherPlayer.ship) {
+      this.drawTarget(otherPlayer.name, otherPlayer.ship.root, this.player.team === otherPlayer.ship.team ? s.HUD.friendlyIndicatorColor : s.HUD.enemyIndicatorColor, 34, 700);
 
       if (otherPlayer.isTargetted) {
         // @todo Don't hardcode the weapon class, get it from the player
@@ -103,7 +105,7 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
 
   if (Math.abs(targetMeshNDC.x) <= 0.95 && Math.abs(targetMeshNDC.y) <= 0.95 && targetMeshNDC.z < 1) {
     targetMeshInSight = true;
-    distanceToTargetMesh = this.game.player.root.position.distanceTo(targetMesh.position);
+    distanceToTargetMesh = this.player.ship.root.position.distanceTo(targetMesh.position);
     squareSize = Math.round((this.width - distanceToTargetMesh/100)*s.HUD.squareSizeFactor);
   }
 
@@ -118,7 +120,7 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
     var directionalIndicatorAngle = Math.atan2(directionalIndicatorCenterY-this.centerY, directionalIndicatorCenterX-this.centerX)
 
     var targetIsBehindUs = targetMeshNDC.z > 1;
-    if (this.game.player.viewMode === 'front') {
+    if (this.player.viewMode === 'front') {
       targetIsBehindUs = !targetIsBehindUs;
       directionalIndicatorAngle += Math.PI;
     }

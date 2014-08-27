@@ -1,58 +1,74 @@
 s.Client = function(options) {
-  var players = this.players = {};
-  var socket = this.socket = io();
+  var game = this.game = options.game;
   var player = this.player = options.player;
+  
+  // Map of player IDs to player objects
+  var players = this.players = {};
 
-  player.on('fire', this.send.bind(this, 'fire'));
-  // player.on('hit', this.send.bind(this, 'hit'));
-  // player.on('killed', this.send.bind(this, 'killed'));
+  // Socket connection
+  var socket = this.socket = io();
 
-  socket.on('join', handleJoin);
+  player.on('fire', this.send.bind(this, 'fireWeapon'));
+
+  socket.on('joinMatch', handleJoinMatch);
+  socket.on('joinTeam', handleJoinTeam);
+  socket.on('fireWeapon', handleFireWeapon);
+  socket.on('hitPlayer', handleHitPlayer);
   socket.on('state', handleState);
-  socket.on('fire', handleFire);
-  socket.on('hit', handleHit);
   socket.on('killed', handleKilled);
-  socket.on('leave', handleLeave);
+  socket.on('leaveMatch', handleLeaveMatch);
 
-  // Join the default room
-  this.join('default');
+  // Bind to game loop
+  this.game.hook(this.update.bind(this));
 
-  function handleJoin(data) {
-    console.log('Player %s (%s) has joined', data.name, data.id);
+  function handleJoinMatch(data) {
+    console.log('Player %s has entered the match', data.name);
 
     players[data.id] = {
-      name: data.name,
-      ship: new s.Ship({
-        name: data.name,
-        shipClass: 'human_ship_heavy',
-        team: data.team || 'rebel',
-        game: s.game
-      })
+      id: data.id,
+      name: data.name
     };
+  }
+
+  function handleJoinTeam(data) {
+    var player = players[data.id];
+
+    console.log('Player %s has joined the the %s team as a %s', player.name, data.team, data.cls);
+
+    player.ship = new s.Ship({
+      shipClass: data.cls,
+      team: data.team,
+      game: game
+    });
   }
 
   function handleState(data) {
     var player = players[data.id];
 
     if (player) {
-      // console.log('Got state update from %s (%s)', data.name, data.id);
+      if (player.ship) {
+        // console.log('Got state update from %s (%s)', data.name, data.id);
 
-      // Set object state
-      player.ship.setStateFromPacket(data);
+        // Set object state
+        player.ship.setStateFromPacket(data);
 
-      // Apply other variables
-      player.ship.thrustImpulse = data.th;
+        // Apply other variables
+        player.ship.thrustImpulse = data.th;
+      }
+      else {
+        console.error('Got state update from player %s, but player does not have a ship', player.id);
+      }
     }
     else {
-      console.error('Got state update for player that doesn\'t exist: %s (%s)', data.name, data.id);
+      console.error('Got state update for player %s, but player does not exist', data.id);
     }
   }
 
-  function handleFire(data) {
+  function handleFireWeapon(data) {
     var player = players[data.id];
 
     if (player) {
-      // console.log('Got fire from %s (%s)', data.name, data.id);
+      console.log('Player %s fired %s', data.id, data.weapon);
 
       // Convert positions
       data.pos[0] = s.Client.packetItemToObj(data.pos[0]);
@@ -60,14 +76,14 @@ s.Client = function(options) {
       data.rot = s.Client.packetItemToObj(data.rot);
       data.vl = s.Client.packetItemToObj(data.vl);
 
-      player.ship.fire(data);
+      player.ship.spawnBullets(data);
     }
     else {
-      console.error('Got fire player that doesn\'t exist: %s (%s)', data.name, data.id);
+      console.error('Got fire from player %s, but player does not exist', data.id);
     }
   }
 
-  function handleHit(data) {
+  function handleHitPlayer(data) {
     // @todo flash HUD
   }
 
@@ -75,8 +91,8 @@ s.Client = function(options) {
     // @todo show message
   }
 
-  function handleLeave(data) {
-    console.log('Player %s (%s) has left', data.name, data.id);
+  function handleLeaveMatch(data) {
+    console.log('Player %s has left the match', data.id);
     var otherPlayer = players[data.id];
 
     if (otherPlayer) {
@@ -123,19 +139,29 @@ s.Client.packetItemToObj = function packetItemToObj(obj) {
   }
 };
 
-s.Client.prototype.join = function(matchName, playerName) {
+s.Client.prototype.joinMatch = function(matchId, playerName) {
   // @todo handle join failures
-  this.send('join', {
-    name: this.player.name,
-    matchName: matchName
+  this.send('joinMatch', {
+    matchId: matchId,
+    name: playerName
   });
-
-  this.matchName = matchName;
 };
 
-s.Client.leave = function() {
+s.Client.prototype.leaveTeam = function() {
+  this.send('leaveTeam');
+};
+
+s.Client.prototype.joinTeam = function() {
+  // @todo handle join failures
+  this.send('joinTeam', {
+    team: this.player.team,
+    cls: this.player.shipClass
+  });
+};
+
+s.Client.leaveMatch = function() {
   // @todo handle leave failures
-  this.send('leave', this.matchName);
+  this.send('leaveMatch', this.matchName);
 };
 
 s.Client.prototype.update = function(now, delta) {

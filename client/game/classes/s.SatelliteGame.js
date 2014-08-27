@@ -98,7 +98,7 @@ s.SatelliteGame.prototype.initialize = function() {
   // Add spacestation
   this.spaceStation = new s.SpaceStation({
     game: this,
-    team: 'alliance',
+    team: 'human',
     position: new THREE.Vector3(34909.57019523937, -3518.1015191242786, 6165.897081138204),
     rotation: new THREE.Quaternion(-0.2557681600381702, 0.7161396699284692, 0.2863470690590406, -0.5828653167814406)
   });
@@ -106,78 +106,47 @@ s.SatelliteGame.prototype.initialize = function() {
   // Add tall moon base
   this.moonBase1 = new s.BuildingTall({
     game: this,
-    team: 'rebel',
+    team: 'alien',
     position: new THREE.Vector3(-3202.4802401107377, 1894.8442691216867, 3839.9961391320685),
     rotation: new THREE.Quaternion(-0.17990696233627135, -0.45340581037032207, -0.37852982963312304, -0.786620508315977)
   });
 
   this.moonBase2 = new s.BuildingShort({
     game: this,
-    team: 'rebel',
+    team: 'alien',
     position: new THREE.Vector3(-3582.224014746993, 2110.7667637886925, 3387.119769191431),
     rotation: new THREE.Quaternion(-0.35407504525506794, -0.02522594297569987, -0.2368707669391499, -0.9043709161059235)
   });
 
   this.moonBase3 = new s.BuildingShort({
     game: this,
-    team: 'rebel',
+    team: 'alien',
     position: new THREE.Vector3(-3506.2446102564877, 1883.3176856045577, 3667.1759831868803),
     rotation: new THREE.Quaternion(-0.3447861720355756, -0.02279656928332127, -0.23711690056676846, -0.9079528553110975)
   });
 
-  // Add a hud
-  this.HUD = new s.HUD({
-    game: this,
-    client: this.client
-  });
-
   // Create the player
   var player = this.player = new s.Player({
-    HUD: this.HUD,
     game: this,
-    // Use hash as name, or just generate random player name
-    name: window.location.hash || 'Player '+Date.now().toString().slice(-5),
-    shipClass: 'human_ship_heavy',
-    // shipClass: 'human_ship_light',
-    // shipClass: 'alien_ship_light',
-    // shipClass: 'alien_ship_heavy',
-    team: 'alliance', // @todo base on player selection
-    camera: this.camera,
-
-    // On moon for shadow tuning
-    // position: new THREE.Vector3(4767.8224115044395, 4663.914119825157, 4713.0601690146505),
-    // rotation: new THREE.Quaternion(-0.6228059719058848, 0.4742439438123847, 0.1661230663448425,  -0.599673686219288)
-
-    // Further out for shadow tuning
-    position: new THREE.Vector3(12971.887711727039, 18890.552761886636, 12302.594927541113),
-    rotation: new THREE.Quaternion(-0.8456172507580183, -0.0951417149063118, 0.305721022086222, -0.4270997260121961)
-
-    // Inside docking bay
-    // position: s.SpaceStation.shipSpawn.position,
-    // position: this.spaceStation.root.position.clone().add(new THREE.Vector3(0,0,1000)),
-    // rotation: s.SpaceStation.shipSpawn.rotation
-    // rotation: this.spaceStation.root.quaternion.clone()
-    
-  });
-
-  this.hook(this.fadeLights.bind(this));
-
-  // Fly controls
-  this.controls = new s.Controls({
-    game: this,
-    player: this.player,
     camera: this.camera
   });
 
-  // Communication
-  this.client = new s.Client({
-    game: this, 
-    player: player
-  });
+  // Fade explosion lights
+  this.hook(this.fadeLights.bind(this));
 
-  this.hook(this.client.update.bind(this.client));
+  // Start the game
+  this.start();
+ 
+  // @temp get vars from hash
+  var name = window.location.hash || 'Player '+Date.now().toString().slice(-5);
+  var team = window.location.hash.indexOf('alien') !== -1 ? 'alien': 'human';
+  var shipClass = window.location.hash.indexOf('light') !== -1 ? 'light': 'heavy';
 
-  s.game.start();
+  // Join match
+  this.player.joinMatch('default', name);
+
+  // Join game
+  this.player.joinTeam(team, shipClass);
 };
 
 /**
