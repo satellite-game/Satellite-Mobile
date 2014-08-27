@@ -1,11 +1,18 @@
+var shortId = require('shortid');
+
+var EventEmitter = require('events').EventEmitter;
+
 /*
   Manage game logic
   Maintain a list of players and their positions
   Mainatin game state and broadcast changes
 */
-
 function Match(options) {
   this.name = options.name;
+  this.id = shortId.generate();
+
+  // @todo support different game types
+  this.type = options.type;
 
   // @todo support different maps
   // this.map = options.map;
@@ -13,42 +20,73 @@ function Match(options) {
   this.players = [];
 }
 
+Match.prototype = Object.create(EventEmitter.prototype);
+
 Match.prototype.start = function() {
-  // Hook into loop
+  // @todo Hook into loop
+  // @todo Stop when time is up
+
   // Emit start event
-  // Stop when time is up
+  this.emit('start', this);
 };
 
 Match.prototype.end = function() {
-  // Unhook
+  // @todo Unhook from loop
+
   // Emit end event
+  this.emit('end', this);
 };
 
-Match.prototype.calculateScore = function() {
-  // Loop through players, tally up score based on team
+Match.prototype.handle = function(eventName, player, data) {
+  if (!data) {
+    data = {};
+  }
+
+  data.id = player.socket.id;
+
+  player.socket.broadcast.to(this.id).emit(eventName, data);
 };
 
 Match.prototype.join = function(player) {
-  // Send map
-
-  // Broadcast join and initial position
-
-  // Add event listeners
-
   // Store player
   var index = this.players.indexOf(player);
   if (index !== -1) {
-    console.error('Player %s tried to join %s twice', player, this.name);
+    console.error('Player %s tried to join match %s twice', player, this.id);
+    return;
   }
   this.players.push(player);
 
-  console.log('%s has joined %s', player.name, this.name);
+  // Store the match
+  player.match = this;
+
+  // Join the room
+  player.socket.join(this.id);
+
+  // @todo Send map state
+
+  // Send player list
+  // @todo should this be sent as a list?
+  this.players.forEach(function(otherPlayer) {
+    player.socket.emit('joinMatch', otherPlayer.get('joinMatch'));
+
+    player.socket.emit('joinTeam', otherPlayer.get('joinTeam'));
+
+    player.socket.emit('state', otherPlayer.get('state'));
+  });
+
+  // Broadcast join that player has joined
+  this.handle('joinMatch', player);
+
+  console.log('Player %s has joined match %s', player.name, this.id);
+
+  this.emit('playerJoined', this, player);
 };
 
 Match.prototype.leave = function(player) {
-  // Send map
-  
-  // Broadcast leave
+  // Leave the room
+  player.socket.leave(this.id);
+
+  player.match = null;
 
   // Remove player
   var index = this.players.indexOf(player);
@@ -58,6 +96,13 @@ Match.prototype.leave = function(player) {
   this.players.splice(index, 1);
 
   console.log('%s has left %s', player.name, this.name);
+
+  this.emit('playerLeft', this, player);
+
+  // End the match if everyone left
+  if (match.players.length === 0) {
+    this.end();
+  }
 };
 
 module.exports = Match;

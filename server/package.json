@@ -11,6 +11,7 @@
   "dependencies": {
     "errorhandler": "^1.0.2",
     "express": "^4.4.2",
+    "shortid": "^2.0.1",
     "socket.io": "^1.0.6"
   }
 }

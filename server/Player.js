@@ -1,46 +1,33 @@
-var MatchManager = require('./MatchManager');
-
 function Player(options) {
-  var player = this;
+  // Store socket
+  this.socket = options.socket;
 
-  this.name = options.name || 'Unnamed';
-  var socket = this.socket = options.socket;
-
-  socket.on('join', handleJoin);
-
-  socket.on('leave', handleLeave);
-
-  socket.on('disconnect', handleDisconnect);
+  socket.on('joinTeam', handleJoinTeam);
+  socket.on('leaveTeam', handleLeaveTeam);
 
   socket.on('state', handleState);
+  socket.on('hitPlayer', handleHitPlayer);
+  socket.on('fireWeapon', handleFire);
 
-  socket.on('hit', handleHit);
+  function handleJoinTeam(data) {
+    this.team = data.team;
+    this.cls = data.cls;
+    this.name = data.name;
 
-  socket.on('killed', handleKilled);
-
-  socket.on('fire', handleFire);
-
-  function handleJoin(data) {
-    // Store name/state
-    player.set(data);
-
-    // Join a new room
-    if (MatchManager.join(data.matchName, player)) {
-
-      // Broadcast a move event, but don't interpolate
-      handleState(null, false);
-    }
+    this.emit('joinTeam', {
+      name: this.name,
+      team: this.team,
+      cls: this.cls
+    });
   }
 
-  function handleLeave() {
-    // Leave room
-    MatchManager.leave(player);
-  }
+  function handleLeaveTeam() {
+    this.team = null;
+    this.cls = null;
+    this.name = 'Unnamed';
 
-  function handleDisconnect() {
-    // @todo Destroy player object?
-    // Same as handling leave without the matchName
-    handleLeave();
+    // Leave team
+    this.emit('leaveTeam');
   }
 
   function handleState(data, interp) {
@@ -53,51 +40,50 @@ function Player(options) {
     packet.interp = typeof interp !== 'undefined' ? interp : true;
 
     // Notify players
-    socket.broadcast.to(player.matchName).emit('state', packet);
+    this.emit('state', packet);
   }
 
-  function handleHit(data) {
-    socket.broadcast.to(player.matchName).emit('hit', {
-      id: socket.id,
-      otherPlayerName: data.otherPlayerName,
-      yourName: player.name
-    });
-
-    socket.broadcast.to(player.matchName).emit('hit', {
-      id: socket.id,
-      otherPlayerName: data.otherPlayerName,
-      yourName: player.name
-    });
-  }
-
-  function handleKilled(data) {
-    socket.broadcast.to(player.matchName).emit('killed', {
-      id: socket.id,
-      killed: player.name,
-      killer: data.killer
+  function handleHitPlayer(data) {
+    this.emit('hitPlayer', {
+      victim: data.victim,
+      weapon: data.weapon
     });
   }
 
   function handleFire(data) {
-    socket.broadcast.to(player.matchName).emit('fire', {
-      id: socket.id,
-      name: player.name,
-      // type: data.type, // @todo support other weapon types
+    this.emit('fireWeapon', {
+      weapon: data.weapon,
       pos: data.pos,
       rot: data.rot,
       vl: data.vl
     });
   }
+
+  this.set(options);
 }
 
+Player.emit = function(event, data) {
+  // Check if we're in a match
+  if (!this.match) {
+    console.error('Player tried to send %s before joining a match', event, data);
+    return;
+  }
+
+  // Pass to the match
+  this.match.handle(event, this, data);
+};
+
 Player.prototype.toString = function() {
-  return this.name
+  return this.name;
 };
 
 Player.prototype.get = function() {
   return {
     id: this.socket.id,
     name: this.name,
+    team: this.team,
+    cls: this.cls,
+    weapon: this.weapon,
     pos: this.pos,
     rot: this.rot,
     va: this.va,
@@ -108,6 +94,9 @@ Player.prototype.get = function() {
 
 Player.prototype.set = function(data) {
   this.name = data.name || this.name;
+  this.team = data.team || this.team;
+  this.cls = data.cls || this.cls;
+  this.weapon = data.weapon || this.weapon;
   this.pos = data.pos || this.pos;
   this.rot = data.rot || this.rot;
   this.va = data.va || this.va;
@@ -116,4 +105,3 @@ Player.prototype.set = function(data) {
 };
 
 module.exports = Player;
-
