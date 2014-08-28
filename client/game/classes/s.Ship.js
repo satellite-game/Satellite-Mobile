@@ -107,13 +107,13 @@ s.Ship = function(options) {
 };
 
 s.Ship.gunGlowColors = {
-  human: 0x1A8CFF, // 0x335577
-  alien: 0xFF0000 //  ??
+  human: 0x1A8CFF,
+  alien: 0xAA0A00
 };
 
 s.Ship.engineGlowColors = {
-  human: 0x335577, // 0x335577
-  alien: 0xFF0000 //  ??
+  human: 0x335577,
+  alien: 0x440D00
 };
 
 s.Ship.engineFadeTime = 3000;

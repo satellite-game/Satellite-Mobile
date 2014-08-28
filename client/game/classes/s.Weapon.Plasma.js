@@ -44,6 +44,7 @@ s.Weapon.Plasma.prototype.handleCollision = function(event) {
   // Explosion animation
   new s.Explosion({
     game: this.game,
+    color: this.color,
     position: this.body.position
   });
 
@@ -60,5 +61,5 @@ s.Weapon.Plasma.prototype.impulse = 5000;
 
 s.Weapon.Plasma.prototype.colors = {
   human: 0x157ADF,
-  alien: 0xFF0000
+  alien: 0xDF1A00
 };

@@ -15,7 +15,7 @@ s.Explosion = function(options) {
   }
 
   var material = new THREE.ParticleSystemMaterial({
-    color: 0xFFFFFF,
+    color: options.color || 0xFFFFFF,
     size: size,
     map: s.textures.explosion,
     blending: THREE.AdditiveBlending,
