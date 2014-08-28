@@ -14,42 +14,15 @@ s.HUD = function(options) {
   this.game.camera.add(this.crosshairs);
   this.crosshairs.position.setZ(-30);
 
-  // Create canvas
-  this.canvas = document.createElement('canvas');
-
-  this.width = this.canvas.width = window.innerWidth;
-  this.height = this.canvas.height = window.innerHeight;
-
-  this.canvas.style.position = 'absolute';
-  this.canvas.style.top = 0;
-  this.canvas.style.left = 0;
-
-  this.ctx = this.canvas.getContext('2d');
-  document.body.appendChild(this.canvas);
-
   // Update on tick
   this.update = this.update.bind(this);
   this.game.hook(this.update);
-
-  // Set size when window size changed
-  this.fitWindow = this.fitWindow.bind(this);
-  $(window).on('resize', this.fitWindow);
-  this.fitWindow();
 };
 
-s.HUD.baseColor = 'rgba(0, 255, 0, 0.5)';
-
-// The height of the directional indicator (away from the circumference of the circle)
-s.HUD.directionalIndicatorHeight = 23;
-
-// The angular offset for the two sides of the directional indicator
-s.HUD.directionalIndicatorAngularWidth = Math.PI/24;
-
-s.HUD.friendlyIndicatorColor = 'rgba(0, 255, 0, 0.75)';
-s.HUD.enemyIndicatorColor = 'rgba(255, 143, 0, 0.75)';
-s.HUD.indicatorStroke = 'rgba(0, 0, 0, 0.5)';
-
-s.HUD.targetColor = 'rgba(255, 0, 0, 0.5)';
+s.HUD.baseColor = new THREE.Color('rgb(0, 180, 0)');
+s.HUD.friendlyIndicatorColor = new THREE.Color('rgb(0, 180, 0)');
+s.HUD.enemyIndicatorColor = new THREE.Color('rgb(255, 143, 0)');
+s.HUD.targetColor = new THREE.Color('rgb(180, 0, 0)');
 
 // The radius of the circle around which directional indicators should be drawn
 s.HUD.radius = 150;
@@ -57,20 +30,43 @@ s.HUD.radius = 150;
 // The size of the target square relative to distance
 s.HUD.squareSizeFactor = 0.02;
 
+s.HUD.arrowGeometry = new THREE.CylinderGeometry(0, 1, 2, 4, false);
+
+s.HUD.enemyIndicatorMaterial = new THREE.MeshBasicMaterial({
+  color: s.HUD.enemyIndicatorColor
+});
+
+s.HUD.friendlyIndicatorMaterial = new THREE.MeshBasicMaterial({
+  color: s.HUD.friendlyIndicatorColor
+});
+
+s.HUD.prototype.getMaterial = function(item) {
+  return this.player.team === item.team ? s.HUD.friendlyIndicatorMaterial : s.HUD.enemyIndicatorMaterial;
+};
+
+s.HUD.prototype.getColor = function(item) {
+  return this.player.team === item.team ? s.HUD.friendlyIndicatorColor : s.HUD.enemyIndicatorColor;
+};
+
 s.HUD.prototype.update = function() {
-  // Clear canvas
-  this.ctx.clearRect(0, 0, this.width, this.height);
+  for (var id in this.game.map) {
+    var item = this.game.map[id];
 
-  this.drawTarget(s.game.spaceStation.name, s.game.spaceStation.root, s.HUD.friendlyIndicatorColor, 34, 5500);
+    if (item.team === 'unaffiliated' || item.hp <= 0) {
+      // Skip unaffiliated or dead items
+      continue;
+    }
 
-  this.drawTarget(s.game.moonBase1.name, s.game.moonBase1.root, s.HUD.enemyIndicatorColor, 34, 5500);
+    // @todo don't hardcode distance/minBoxDistance
+    this.drawTarget(item.name, item.root, this.getColor(item), 34, 5500);
+  }
 
   // Draw enemies
   for (var id in this.client.players) {
     var otherPlayer = this.client.players[id];
     // Since we set players to null when they leave, check if it's truthy
     if (otherPlayer && otherPlayer.ship) {
-      this.drawTarget(otherPlayer.name, otherPlayer.ship.root, this.player.team === otherPlayer.ship.team ? s.HUD.friendlyIndicatorColor : s.HUD.enemyIndicatorColor, 34, 700);
+      this.drawTarget(otherPlayer.name, otherPlayer.ship.root, this.getColor(otherPlayer.ship), 34, 700);
 
       if (otherPlayer.isTargetted) {
         // @todo Don't hardcode the weapon class, get it from the player
@@ -80,22 +76,46 @@ s.HUD.prototype.update = function() {
   }
 };
 
-s.HUD.prototype.writeName = function(name, position, fillColor, textOffset) {
-  this.ctx.fillStyle = fillColor;
-  // @todo correctly center text
-  this.ctx.font = 'bold 14px Andale Mono';
-  var width = this.ctx.measureText(name).width;
-  this.ctx.fillText(name, position.x - width / 2, position.y + textOffset);
+s.HUD.prototype.createArrow = function(targetMesh) {
+  // Create the arrow mesh
+  var arrow = new THREE.Mesh(s.HUD.arrowGeometry, this.getMaterial(targetMesh));
+  arrow.position.set(0, 10, 0);
+
+  // Create the pivot plane
+  var pivot = new THREE.Object3D();
+  pivot.position.z = -100;
+  pivot.add(arrow)
+
+  this.game.camera.add(pivot);
+
+  return {
+    pivot: pivot,
+    arrow: arrow
+  };
 };
 
-s.HUD.prototype.fitWindow = function() {
-  this.width = this.canvas.width = window.innerWidth;
-  this.height = this.canvas.height = window.innerHeight;
-  this.centerX = this.width / 2;
-  this.centerY = this.height / 2;
+s.HUD.prototype.createBoundingBox = function(targetMesh) {
+  // Create a bounding box
+  var boundingBox = new THREE.BoxHelper(targetMesh);
+  boundingBox.material.color.set(this.getColor(targetMesh));
+
+  // Add it to the mesh itself
+  targetMesh.add(boundingBox);
+
+  // Store a reference so we can manipulate it
+  targetMesh.boundingBox = boundingBox;
+
+  return boundingBox;
 };
 
 s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromRadius, minBoxDistance) {
+  // Get an arrow
+  var arrow = targetMesh.arrow || this.createArrow(targetMesh);
+  targetMesh.arrow = arrow;
+
+  // Set arrow color
+  arrow.arrow.material.color = fillColor;
+
   var targetMeshInSight;
   var distanceToTargetMesh;
   var squareSize;
@@ -110,105 +130,55 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
   }
 
   // targetMesh targeting reticle and targeting box
-  if (!targetMeshInSight) {
-    var targetMesh2D = new THREE.Vector2(targetMeshNDC.x, targetMeshNDC.y);
-    targetMesh2D.multiplyScalar(1/targetMesh2D.length()).multiplyScalar(s.HUD.radius+distanceFromRadius);
+  if (targetMeshInSight) {
+    arrow.arrow.visible = false;
+  }
+  else {
+    arrow.arrow.visible = true;
 
-    var directionalIndicatorCenterX = targetMesh2D.x+this.centerX
-    var directionalIndicatorCenterY = -(targetMesh2D.y-this.centerY);
     // Calculate angle away from center
-    var directionalIndicatorAngle = Math.atan2(directionalIndicatorCenterY-this.centerY, directionalIndicatorCenterX-this.centerX)
+    var directionalIndicatorAngle = Math.atan2(-targetMeshNDC.y, -targetMeshNDC.x)
 
     var targetIsBehindUs = targetMeshNDC.z > 1;
-    if (this.player.viewMode === 'front') {
-      targetIsBehindUs = !targetIsBehindUs;
+
+    // Rotate the angle if the target is behind us
+    if (targetIsBehindUs) {
       directionalIndicatorAngle += Math.PI;
     }
 
-    if (targetIsBehindUs) {
-      var contextRotation = directionalIndicatorAngle + Math.PI/2;
-      // Target is behind us
-      this.ctx.beginPath();
-
-      // Move to center
-      this.ctx.translate(this.centerX, this.centerY);
-
-      // Rotate around axis
-      this.ctx.rotate(contextRotation);
-
-      // Draw half circle
-      this.ctx.arc(0, s.HUD.radius, 10, 0, Math.PI, false);
-      this.ctx.fillStyle = fillColor;
-      this.ctx.fill();
-      this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = s.HUD.indicatorStroke;
-
-      this.ctx.stroke();
-
-      // Move back
-      this.ctx.rotate(-contextRotation);
-      this.ctx.translate(-this.centerX, -this.centerY);
-    }
-    else {
-      // Target is in front of us
-      this.ctx.beginPath();
-
-      // Calculate the tip of the triangle
-      var directionalIndicatorTopX = this.centerX + (s.HUD.radius + s.HUD.directionalIndicatorHeight) * Math.cos(directionalIndicatorAngle);
-      var directionalIndicatorTopY = this.centerY + (s.HUD.radius + s.HUD.directionalIndicatorHeight) * Math.sin(directionalIndicatorAngle);
-
-      // Calculate the first vertex of the triangle, on the circumference
-      var directionalIndicatorSide1X = this.centerX + s.HUD.radius * Math.cos(directionalIndicatorAngle + s.HUD.directionalIndicatorAngularWidth);
-      var directionalIndicatorSide1Y = this.centerY + s.HUD.radius * Math.sin(directionalIndicatorAngle + s.HUD.directionalIndicatorAngularWidth);
-
-      // Calculate the divot in the triangle, between the circumference and the tip
-      var directionalIndicatorDivotX = this.centerX + (s.HUD.radius + s.HUD.directionalIndicatorHeight/2) * Math.cos(directionalIndicatorAngle);
-      var directionalIndicatorDivotY = this.centerY + (s.HUD.radius + s.HUD.directionalIndicatorHeight/2) * Math.sin(directionalIndicatorAngle);
-
-      // Calculate the second vertex of the triangle, on the circumference
-      var directionalIndicatorSide2X = this.centerX + s.HUD.radius * Math.cos(directionalIndicatorAngle - s.HUD.directionalIndicatorAngularWidth);
-      var directionalIndicatorSide2Y = this.centerY + s.HUD.radius * Math.sin(directionalIndicatorAngle - s.HUD.directionalIndicatorAngularWidth);
-
-      // Move to tip
-      this.ctx.moveTo(directionalIndicatorTopX, directionalIndicatorTopY);
-
-      // Line to point 1
-      this.ctx.lineTo(directionalIndicatorSide1X, directionalIndicatorSide1Y);
-
-      // Line to divot
-      this.ctx.lineTo(directionalIndicatorDivotX, directionalIndicatorDivotY);
-
-      // Line to point 2
-      this.ctx.lineTo(directionalIndicatorSide2X, directionalIndicatorSide2Y);
-
-      // Line back to tip
-      this.ctx.lineTo(directionalIndicatorTopX, directionalIndicatorTopY);
-
-      this.ctx.fillStyle = fillColor;
-      this.ctx.fill();
-      this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = s.HUD.indicatorStroke;
-      this.ctx.stroke();
-    }
+    // Rotate the arrow to point
+    arrow.pivot.rotation.z = directionalIndicatorAngle + Math.PI/2;
   }
 
   // Draw square around object
+  var boundingBox = targetMesh.boundingBox || this.createBoundingBox(targetMesh);
   if (targetMeshInSight && distanceToTargetMesh > minBoxDistance) {
-    var targetSquarePosition = targetMeshNDC.clone();
-    targetSquarePosition.x =  (this.width  + targetSquarePosition.x*this.width )/2;
-    targetSquarePosition.y = -(-this.height + targetSquarePosition.y*this.height)/2;
+    boundingBox.visible = true;
 
-    this.ctx.strokeStyle = fillColor;
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeRect(targetSquarePosition.x-squareSize, targetSquarePosition.y-squareSize, squareSize*2, squareSize*2);
+    /*
+    // Get the 2D bounding box
+    targetMesh.updateMatrixWorld();
+    var verticies = boundingBox.geometry.vertices.slice(0).map(function(vector) {
+      return targetMesh.localToWorld(vector.clone());
+    });
 
-    if (name) {
-      var textOffset = squareSize * 2;
-      this.writeName(name, targetSquarePosition, fillColor, textOffset);
-    }
-    else {
-      console.warn('s.HUD: Name not defined for mesh');
-    }
+    var box2 = s.util.compute2DBoundingBox(verticies);
+
+    // Get screen coords
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    var bl = s.util.getScreenCoordsFromNDC(box2.min.x, box2.min.y, width, height);
+    var tr = s.util.getScreenCoordsFromNDC(box2.max.x, box2.max.y, width, height);
+
+    var squareWidth = (tr.x - bl.x)+'px';
+    var squareHeight = (bl.y - tr.y)+'px';
+    var squareTop = tr.y+'px';
+    var squareLeft = bl.x+'px';
+    */
+  }
+  else {
+    boundingBox.visible = false;
   }
 };
 

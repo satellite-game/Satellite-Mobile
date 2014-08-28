@@ -193,6 +193,21 @@ s.util.getNDC = function(x, y, width, height) {
 };
 
 /**
+  Get the screen coordinates of a given normalized device coordinate
+
+  @param {Number} x  2D x NDC
+  @param {Number} y  2D y NDC
+  @param {Number} width  Width of screen
+  @param {Number} height  Height of screen
+*/
+s.util.getScreenCoordsFromNDC = function(x, y, width, height) {
+  return {
+    x: (x*width + width)/2,
+    y: -(y*height - height)/2
+  };
+};
+
+/**
   Get 2D coordinates from a Vector3
 
   @param {THREE.Vector3} objVector  Vector representing the object position
@@ -204,8 +219,8 @@ s.util.get2DCoords = function(objVector, width, height) {
 
   var vector2D = split.projector.projectVector(vector3D, this.camera);
 
-  vector2D.y = -(vector2D.y*height - height)/2;
   vector2D.x = (vector2D.x*width + width)/2;
+  vector2D.y = -(vector2D.y*height - height)/2;
 
   return vector2D;
 };
@@ -235,4 +250,30 @@ s.util.throttle = function(func, wait) {
 
     return null;
   };
+};
+
+s.util.compute2DBoundingBox = function(verticies) {
+  // NDC coordinates
+  var xMax = -Infinity;
+  var xMin = Infinity;
+  var yMax = -Infinity;
+  var yMin = Infinity;
+
+  for (var i = 0; i < verticies.length; i++) {
+    var vertex = verticies[i];
+
+    // Get the 2D position in NDC (Normalized Device Coordinates) of the vertex
+    var ndc = s.projector.projectVector(vertex, s.game.camera);
+
+    xMax = Math.max(xMax, ndc.x);
+    xMin = Math.min(xMin, ndc.x);
+
+    yMax = Math.max(yMax, ndc.y);
+    yMin = Math.min(yMin, ndc.y);
+  }
+
+  return new THREE.Box2(
+    new THREE.Vector2(xMin, yMin),
+    new THREE.Vector2(xMax, yMax)
+  );
 };

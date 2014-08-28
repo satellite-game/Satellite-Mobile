@@ -29,7 +29,7 @@ s.Player = function(options) {
   });
 
   // HUD
-  this.HUD = new s.HUD({
+  this.hud = new s.HUD({
     game: this.game,
     client: this.client,
     player: this
