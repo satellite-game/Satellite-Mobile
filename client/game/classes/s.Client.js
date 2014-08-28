@@ -10,6 +10,8 @@ s.Client = function(options) {
 
   player.on('fire', this.send.bind(this, 'fireWeapon'));
 
+  socket.on('map', handleMap);
+
   socket.on('joinMatch', handleJoinMatch);
   socket.on('joinTeam', handleJoinTeam);
   socket.on('fireWeapon', handleFireWeapon);
@@ -20,6 +22,17 @@ s.Client = function(options) {
 
   // Bind to game loop
   this.game.hook(this.update.bind(this));
+
+  function handleMap(map) {
+    for (var id in map) {
+      var item = map[id];
+
+      item.pos = s.Client.packetItemToObj(item.pos);
+      item.rot = s.Client.packetItemToObj(item.rot);
+    }
+
+    game.setMap(map);
+  }
 
   function handleJoinMatch(data) {
     console.log('Player %s has entered the match', data.name);

@@ -90,40 +90,7 @@ s.SatelliteGame.prototype.initialize = function() {
   this.addSkybox();
   this.addDust();
 
-  // Add moon
-  this.moon = new s.Moon({
-    game: this
-  });
-
-  // Add spacestation
-  this.spaceStation = new s.SpaceStation({
-    game: this,
-    team: 'human',
-    position: new THREE.Vector3(34909.57019523937, -3518.1015191242786, 6165.897081138204),
-    rotation: new THREE.Quaternion(-0.2557681600381702, 0.7161396699284692, 0.2863470690590406, -0.5828653167814406)
-  });
-
-  // Add tall moon base
-  this.moonBase1 = new s.BuildingTall({
-    game: this,
-    team: 'alien',
-    position: new THREE.Vector3(-3202.4802401107377, 1894.8442691216867, 3839.9961391320685),
-    rotation: new THREE.Quaternion(-0.17990696233627135, -0.45340581037032207, -0.37852982963312304, -0.786620508315977)
-  });
-
-  this.moonBase2 = new s.BuildingShort({
-    game: this,
-    team: 'alien',
-    position: new THREE.Vector3(-3582.224014746993, 2110.7667637886925, 3387.119769191431),
-    rotation: new THREE.Quaternion(-0.35407504525506794, -0.02522594297569987, -0.2368707669391499, -0.9043709161059235)
-  });
-
-  this.moonBase3 = new s.BuildingShort({
-    game: this,
-    team: 'alien',
-    position: new THREE.Vector3(-3506.2446102564877, 1883.3176856045577, 3667.1759831868803),
-    rotation: new THREE.Quaternion(-0.3447861720355756, -0.02279656928332127, -0.23711690056676846, -0.9079528553110975)
-  });
+  this.map = {};
 
   // Create the player
   var player = this.player = new s.Player({
@@ -147,6 +114,44 @@ s.SatelliteGame.prototype.initialize = function() {
 
   // Join game
   this.player.joinTeam(team, shipClass);
+};
+
+/**
+  Include the map
+*/
+s.SatelliteGame.prototype.setMap = function(map) {
+  var item;
+  var id;
+
+  // Remove the old map
+  for (id in this.map) {
+    item = this.map[id];
+    item.destruct();
+  }
+
+  // Reset the map
+  this.map = {};
+  for (id in map) {
+    item = map[id];
+    var Class = s[item.cls];
+
+    if (!Class) {
+      console.error('Invalid map item class: %s', item.cls);
+      continue;
+    }
+
+    var instance = new Class({
+      game: this,
+      name: item.name,
+      id: item.id,
+      team: item.team,
+      hp: item.hp,
+      position: item.pos,
+      rotation: item.rot
+    });
+
+    this.map[id] = instance;
+  }
 };
 
 /**

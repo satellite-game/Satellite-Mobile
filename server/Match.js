@@ -1,5 +1,5 @@
 var shortId = require('shortid');
-
+var Maps = require('./maps');
 var EventEmitter = require('events').EventEmitter;
 
 /*
@@ -16,10 +16,10 @@ function Match(options) {
   // @todo support different game types
   this.type = options.type;
 
-  // @todo support different maps
-  // this.map = options.map;
-
   this.players = [];
+
+  // Load the map
+  this.loadMap(options.map);
 }
 
 Match.prototype = Object.create(EventEmitter.prototype);
@@ -38,6 +38,17 @@ Match.prototype.end = function() {
   // Emit end event
   this.emit('end', this);
 };
+
+Match.prototype.loadMap = function(mapName) {
+  var map = Maps[mapName];
+
+  if (!map) {
+    console.error('Map %s not found', mapName);
+    return;
+  }
+
+  this.map = map;
+}
 
 Match.prototype.handle = function(eventName, player, data) {
   if (!data) {
@@ -63,6 +74,7 @@ Match.prototype.join = function(player) {
   player.socket.join(this.id);
 
   // @todo Send map state
+  player.socket.emit('map', this.map);
 
   // Send player list
   // @todo should this be sent as a list?

@@ -12,7 +12,9 @@ function createMatch(data) {
   var match = new Match({
     id: data.id,
     name: data.name,
-    type: data.type
+    type: data.type,
+    map: data.map,
+    endWhenEmpty: data.endWhenEmpty
   });
 
   // Listen for end
@@ -99,7 +101,8 @@ module.exports = function(io) {
   createMatch({
     id: 'default',
     name: 'Default Match',
-    type: 'deathmatch',
+    map: 'invasion',
+    type: 'invasion',
     endWhenEmpty: false
   });
 };
