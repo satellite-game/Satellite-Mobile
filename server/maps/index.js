@@ -4,9 +4,9 @@ var path = require('path');
 // Just export all the maps in the folder
 fs.readdirSync(__dirname).forEach(function(file) {
   var extension = path.extname(file);
-  var basename = path.basename(file, '.js');
+  var basename = path.basename(file, extension);
 
-  if (basename !== 'index' && extension === '.js') {
+  if (extension === '.json') {
     exports[basename] = require('./'+file);
   }
 });

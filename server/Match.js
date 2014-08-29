@@ -94,6 +94,9 @@ Match.prototype.join = function(player) {
     name: player.name
   });
 
+  // Tell the player they have joined the match
+  player.socket.emit('matchJoined');
+
   console.log('Player %s has joined match %s', player, this.id);
 
   this.emit('playerJoined', this, player);

@@ -44,6 +44,10 @@ function Player(options) {
   }
 
   function handleHitPlayer(data) {
+    if (!data) {
+      console.error('Got hit packet from player %s with no data!', player);
+      return;
+    }
     player.emit('hitPlayer', {
       victim: data.victim,
       weapon: data.weapon
@@ -51,6 +55,10 @@ function Player(options) {
   }
 
   function handleFire(data) {
+    if (!data) {
+      console.error('Got fire packet from player %s with no data!', player);
+      return;
+    }
     player.emit('fireWeapon', {
       weapon: data.weapon,
       pos: data.pos,
