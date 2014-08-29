@@ -4,12 +4,17 @@ function Player(options) {
   // Store socket
   var socket = this.socket = options.socket;
 
+  // Store ID for easy access
+  this.id = socket.id;
+
   socket.on('joinTeam', handleJoinTeam);
   socket.on('leaveTeam', handleLeaveTeam);
 
   socket.on('state', handleState);
-  socket.on('hitPlayer', handleHitPlayer);
+  socket.on('weaponHit', handleWeaponHit);
   socket.on('fireWeapon', handleFire);
+
+  this.hp = 100;
 
   function handleJoinTeam(data) {
     player.team = data.team;
@@ -43,14 +48,16 @@ function Player(options) {
     player.emit('state', packet);
   }
 
-  function handleHitPlayer(data) {
+  function handleWeaponHit(data) {
     if (!data) {
-      console.error('Got hit packet from player %s with no data!', player);
+      console.error('Got player hit packet from player %s with no data!', player);
       return;
     }
-    player.emit('hitPlayer', {
-      victim: data.victim,
-      weapon: data.weapon
+
+    player.emit('weaponHit', {
+      targetId: data.targetId,
+      weapon: data.weapon,
+      amount: 10 // @todo don't hardcode
     });
   }
 
@@ -73,7 +80,7 @@ function Player(options) {
 Player.prototype.emit = function(event, data) {
   // Check if we're in a match
   if (!this.match) {
-    console.error('Player tried to send %s before joining a match', event);
+    console.error('Player %s tried to send %s before joining a match', this, event);
     return;
   }
 
@@ -83,6 +90,17 @@ Player.prototype.emit = function(event, data) {
 
 Player.prototype.toString = function() {
   return this.name || this.socket.id;
+};
+
+Player.prototype.takeHit = function(amount, attacker) {
+  this.hp -= amount;
+};
+
+Player.prototype.respawn = function() {
+  this.hp = 100;
+
+  // @todo server provides spawn location
+  this.socket.emit('respawn');
 };
 
 Player.prototype.get = function() {

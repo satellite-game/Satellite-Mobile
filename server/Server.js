@@ -10,6 +10,7 @@ function endMatch(match) {
 
 function createMatch(data) {
   var match = new Match({
+    io: io,
     id: data.id,
     name: data.name,
     type: data.type,
@@ -78,7 +79,11 @@ function handleLeaveMatch(player) {
   player.match.leave(player);
 }
 
-module.exports = function(io) {
+var io;
+module.exports = function(_io) {
+  // Store a reference to Socket.io
+  io = _io;
+
   io.sockets.on('connection', function(socket) {
     var ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address.address;;
     console.log('New connection from %s', ip);

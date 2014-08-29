@@ -8,22 +8,32 @@ s.Client = function(options) {
   // Socket connection
   var socket = this.socket = io();
 
-  player.on('fire', this.send.bind(this, 'fireWeapon'));
+  // Rebroadcast events
+  player.on('fireWeapon', this.send.bind(this, 'fireWeapon'));
+  player.on('weaponHit', this.send.bind(this, 'weaponHit'));
 
   socket.on('map', handleMap);
 
   socket.on('joinMatch', handleJoinMatch);
   socket.on('joinTeam', handleJoinTeam);
   socket.on('fireWeapon', handleFireWeapon);
-  socket.on('hitPlayer', handleHitPlayer);
   socket.on('state', handleState);
-  socket.on('killed', handleKilled);
+  socket.on('respawn', handleRespawn);
   socket.on('leaveMatch', handleLeaveMatch);
 
-  socket.on('matchJoined', function() {
+  socket.on('playerHit', handlePlayerHit);
+  socket.on('itemHit', handleItemHit);
+
+  socket.on('playerDestroyed', handlePlayerDestroyed);
+  socket.on('itemDestroyed', handleItemDestroyed);
+
+  socket.on('matchJoined', function(data) {
     var name = window.location.hash || 'Player '+Date.now().toString().slice(-5);
     var team = window.location.hash.indexOf('alien') !== -1 ? 'alien': 'human';
     var shipClass = window.location.hash.indexOf('light') !== -1 ? 'light': 'heavy';
+
+    // Store the server's ID for us
+    player.id = data.id;
 
     // Join game
     player.joinTeam(team, shipClass);
@@ -65,6 +75,7 @@ s.Client = function(options) {
     console.log('Player %s has joined the the %s team as a %s', player.name, data.team, data.cls);
 
     player.ship = new s.Ship({
+      id: data.id,
       shipClass: data.cls,
       team: data.team,
       game: game
@@ -97,7 +108,7 @@ s.Client = function(options) {
     var player = players[data.id];
 
     if (player) {
-      console.log('Player %s fired %s', data.id, data.weapon);
+      // console.log('Player %s fired %s', data.id, data.weapon);
 
       // Convert positions
       data.pos[0] = s.Client.packetItemToObj(data.pos[0]);
@@ -112,12 +123,59 @@ s.Client = function(options) {
     }
   }
 
-  function handleHitPlayer(data) {
-    // @todo flash HUD
+  function handlePlayerHit(data) {
+    // console.log('Player got hit!', data);
+    if (data.targetId === player.id) {
+      // @todo flash HUD
+      // player.hud.flash();
+
+      // Update HP
+      // @todo do this with a method so we can react
+      player.ship.hp = data.hp;
+    }
+    else {
+      var targetPlayer = players[data.targetId];
+
+      if (targetPlayer) {
+        // Update HP
+        targetPlayer.hp = data.hp;
+      }
+      else {
+        console.error('Got hit for untracked player %s', data.targetId);
+      }
+    }
   }
 
-  function handleKilled(data) {
-    // @todo show message
+  function handleItemHit(data) {
+    // console.log('Map item got hit!', data);
+    // Update HP
+    s.game.map.items[data.targetId].hp = data.hp;
+  }
+
+  function handlePlayerDestroyed(data) {
+    // Do nothing, they'll respawn automatically
+    // @todo when to HP updates happen?
+    console.log('Player was destroyed!', data);
+  }
+
+  function handleItemDestroyed(data) {
+    // Find item in map
+    // Call destruct
+    console.log('Map item was destroyed!', data);
+    s.game.map.items[data.targetId].explode();
+  }
+
+  function handleRespawn(data) {
+    // Reset HP
+    player.ship.hp = player.constructor.prototype.hp;
+
+    // Respawn
+    player.ship.setState(
+      s.game.map.spawn[player.team].pos,
+      s.game.map.spawn[player.team].rot,
+      new THREE.Vector3(),
+      new THREE.Vector3()
+    );
   }
 
   function handleLeaveMatch(data) {

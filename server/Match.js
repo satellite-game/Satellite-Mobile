@@ -8,6 +8,7 @@ var EventEmitter = require('events').EventEmitter;
   Mainatin game state and broadcast changes
 */
 function Match(options) {
+  this.io = options.io;
   this.name = options.name;
   this.id = options.id || shortId.generate();
 
@@ -47,6 +48,9 @@ Match.prototype.loadMap = function(mapName) {
     return;
   }
 
+  // Copy the map
+  this.map = JSON.parse(JSON.stringify(map));
+
   this.map = map;
 }
 
@@ -55,10 +59,81 @@ Match.prototype.handle = function(eventName, player, data) {
     data = {};
   }
 
-  data.id = player.socket.id;
+  // Add ID to every packet
+  data.id = player.id;
 
-  player.socket.broadcast.to(this.id).emit(eventName, data);
+  if (eventName === 'weaponHit') {
+    var targetId = data.targetId;
+
+    // Find out if it's an item or a player
+    var targetItem = this.map.items[targetId];
+    var targetPlayer = this.getPlayer(targetId);
+    if (targetItem) {
+      // @todo make an instance and give takeHit method
+      targetItem.hp -= 10;
+      if (targetItem.hp <= 0) {
+        console.log('Item %s was destroyed', targetId);
+
+        this.io.to(this.id).emit('itemDestroyed', {
+          attackerId: targetItem.id,
+          targetId: targetId
+        });
+      }
+      else {
+        console.log('Item %s was hit, hp is now %d', targetId, targetItem.hp);
+
+        this.io.to(this.id).emit('itemHit', {
+          attackerId: player.id,
+          targetId: targetId,
+          hp: targetItem.hp
+        });
+      }
+    }
+    else if (targetPlayer) {
+      targetPlayer.takeHit(10, player.id);
+      if (targetPlayer.hp <= 0) {
+        console.log('Player %s was killed', targetPlayer);
+
+        this.io.to(this.id).emit('playerDestroyed', {
+          attackerId: player.id,
+          targetId: targetId
+        });
+
+        // Respawn the player
+        targetPlayer.respawn();
+      }
+      else {
+        console.log('Player %s was hit, hp is now %d', targetPlayer, targetPlayer.hp);
+
+        this.io.to(this.id).emit('playerHit', {
+          attackerId: player.id,
+          targetId: targetId,
+          hp: targetPlayer.hp
+        });
+      }
+    }
+    else {
+      console.error('Got hit on untracked entity '+targetId);
+    }
+  }
+  else {
+    // Re-broadcast to the entire match
+    player.socket.broadcast.to(this.id).emit(eventName, data);
+  }
 };
+
+Match.prototype.getPlayer = function(id) {
+  // Store player
+  var foundPlayer = null;
+  this.players.some(function(player) {
+    if (player.id === id) {
+      foundPlayer = player;
+      return true;
+    }
+  });
+
+  return foundPlayer;
+}
 
 Match.prototype.join = function(player) {
   // Store player
@@ -94,8 +169,10 @@ Match.prototype.join = function(player) {
     name: player.name
   });
 
-  // Tell the player they have joined the match
-  player.socket.emit('matchJoined');
+  // Tell the player they have joined the match and give them their ID
+  player.socket.emit('matchJoined', {
+    id: player.id
+  });
 
   console.log('Player %s has joined match %s', player, this.id);
 
@@ -116,9 +193,9 @@ Match.prototype.leave = function(player) {
   this.players.splice(index, 1);
 
   // Notify that player has left
-  player.socket.broadcast.to(this.id).emit('leaveMatch', { id: player.socket.id });
+  player.socket.broadcast.to(this.id).emit('leaveMatch', { id: player.id });
 
-  console.log('Player %s has left match %s', player.socket.id, this.id);
+  console.log('Player %s has left match %s', player.id, this.id);
 
   this.emit('playerLeft', this, player);
 

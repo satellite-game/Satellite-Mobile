@@ -56,6 +56,7 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
     this.ship.destroy();
   }
 
+  // Store team and ship class
   this.team = team;
   this.shipClass = shipClass;
 
@@ -68,6 +69,7 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
   // Create the ship
   this.ship = new s.Ship({
     game: this.game,
+    id: this.id,
     name: this.name,
     team: team,
     shipClass: shipClass,
@@ -78,11 +80,26 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
   // Let controls manipulate the ship
   this.controls.ship = this.ship;
 
-  // Bubble ship fire events
+  // Bubble ship fire / hit events
   var self = this;
-  this.ship.on('fire', function(packet) {
-    self.trigger('fire', packet);
+  this.ship.on('fireWeapon', function(packet) {
+    self.trigger('fireWeapon', packet);
   });
+
+  this.ship.on('weaponHit', function(event) {
+    var body = event['with'];
+    if (body && body.instance) {
+      // console.log('Plasma hit '+body.instance.id);
+
+      self.trigger('weaponHit', {
+        targetId: body.instance.id,
+        weapon: 'plasma' // @todo don't hardcode
+      });
+    }
+    else {
+      console.error('Hit something without an instance', event);
+    }
+  })
 
   // Root camera to the player's position
   this.ship.root.add(this.camera);

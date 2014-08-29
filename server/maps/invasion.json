@@ -12,17 +12,20 @@
   "items": {
     "Moon": {
       "cls": "Moon",
+      "hp": 500000,
       "pos": [0, 0, 0],
       "rot": [0, 0, 0, 0]
     },
     "Space Station": {
       "cls": "SpaceStation",
+      "hp": 2500,
       "team": "alien",
       "pos": [34909.57019523937, -3518.1015191242786, 6165.897081138204],
       "rot": [-0.2557681600381702, 0.7161396699284692, 0.2863470690590406, -0.5828653167814406]
     },
     "Moon Base Tall": {
       "team": "human",
+      "hp": 100,
       "cls": "BuildingTall",
       "pos": [
         1023.2265625,
@@ -38,6 +41,7 @@
     },
     "Moon Base Tall (1)": {
       "team": "human",
+      "hp": 100,
       "cls": "BuildingTall",
       "pos": [
         801.945068359375,
@@ -54,6 +58,7 @@
     "Moon Base Short": {
       "team": "human",
       "cls": "BuildingShort",
+      "hp": 50,
       "pos": [
         804.5003662109375,
         482.0627136230469,
@@ -69,6 +74,7 @@
     "Moon Base Short (1)": {
       "team": "human",
       "cls": "BuildingShort",
+      "hp": 50,
       "pos": [
         1032.1612548828125,
         476.2353210449219,
@@ -84,6 +90,7 @@
     "Moon Base Short (2)": {
       "team": "human",
       "cls": "BuildingShort",
+      "hp": 50,
       "pos": [
         1206.7926025390625,
         483.9630126953125,
@@ -99,6 +106,7 @@
     "Moon Base Short (3)": {
       "team": "human",
       "cls": "BuildingShort",
+      "hp": 50,
       "pos": [
         628.9730834960938,
         474.3741760253906,
@@ -114,6 +122,7 @@
     "Moon Base Short (4)": {
       "team": "human",
       "cls": "BuildingShort",
+      "hp": 50,
       "pos": [
         793.3660888671875,
         14.292743682861328,
@@ -129,6 +138,7 @@
     "Moon Base Short (5)": {
       "team": "human",
       "cls": "BuildingShort",
+      "hp": 50,
       "pos": [
         1018.8707275390625,
         9.964994430541992,
@@ -144,6 +154,7 @@
     "Moon Base Short (6)": {
       "team": "human",
       "cls": "BuildingShort",
+      "hp": 50,
       "pos": [
         1194.705810546875,
         17.559709548950195,
@@ -159,6 +170,7 @@
     "Moon Base Short (7)": {
       "team": "human",
       "cls": "BuildingShort",
+      "hp": 50,
       "pos": [
         618.6632690429688,
         6.621133327484131,

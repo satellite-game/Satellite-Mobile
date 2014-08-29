@@ -1,6 +1,8 @@
 s.Ship = function(options) {
   s.GameObject.call(this, options);
 
+  this.handleWeaponHit = this.handleWeaponHit.bind(this);
+
   this.lastThrustTime = 0;
   this.lastRetroThrustTime = 0;
   this.lastFireTime = 0;
@@ -132,7 +134,7 @@ s.Ship.prototype.engineImpulse = 100;
 s.Ship.prototype.name = 'Ship';
 
 s.Ship.prototype.spawnBullets = function(packet) {
-  new s.Weapon.Plasma({
+  var leftPlasma = new s.Weapon.Plasma({
     game: s.game,
     velocity: packet.vl,
     position: packet.pos[0],
@@ -141,7 +143,7 @@ s.Ship.prototype.spawnBullets = function(packet) {
     // @todo player object?
   });
 
-  new s.Weapon.Plasma({
+  var rightPlasma = new s.Weapon.Plasma({
     game: s.game,
     velocity: packet.vl,
     position: packet.pos[1],
@@ -150,7 +152,13 @@ s.Ship.prototype.spawnBullets = function(packet) {
     // @todo player object?
   });
 
+  leftPlasma.on('collide', this.handleWeaponHit);
+
   s.Weapon.Plasma.sound.play(packet.pos[0]);
+};
+
+s.Ship.prototype.handleWeaponHit = function(event) {
+  this.trigger('weaponHit', event);
 };
 
 s.Ship.prototype.fire = function(packet) {
@@ -170,7 +178,7 @@ s.Ship.prototype.fire = function(packet) {
     };
     this.spawnBullets(packet);
 
-    this.trigger('fire', packet);
+    this.trigger('fireWeapon', packet);
 
     this.lastFireTime = s.game.now;
   }

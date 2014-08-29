@@ -133,10 +133,15 @@ s.SatelliteGame.prototype.setMap = function(map) {
       continue;
     }
 
+    // Don't add destroyed items
+    if (item.hp <= 0) {
+      continue;
+    }
+
     var instance = new Class({
       game: this,
       name: item.name,
-      id: item.id,
+      id: id,
       team: item.team,
       hp: item.hp,
       position: item.pos,

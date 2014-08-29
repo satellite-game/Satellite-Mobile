@@ -22,6 +22,9 @@ s.GameObject = function(options) {
   // Store team name
   this.team = options.team;
 
+  // Store id
+  this.id = options.id;
+
   // Store options
   this.options = options;
 
@@ -127,19 +130,21 @@ s.GameObject.prototype.init = function() {
       this.body.angularVelocity.set(this.options.angularVelocity.x, this.options.angularVelocity.y, this.options.angularVelocity.z);
     }
 
-    // @todo: do we need to remove this listener when destructed?
-    this.body.addEventListener('collide', this.handleCollision.bind(this));
+    if (this.handleCollision) {
+      // @todo: do we need to remove this listener when destructed?
+      this.body.addEventListener('collide', this.handleCollision.bind(this));
+    }
   }
 
   this.add();
 };
 
-s.GameObject.prototype.handleCollision = function(event) {
-  var target = event['with'];
-  if (target.instance && target.instance.damage) {
-    this.takeHit(target.instance.damage);
-  }
-};
+// s.GameObject.prototype.handleCollision = function(event) {
+//   var target = event['with'];
+//   if (target.instance && target.instance.damage) {
+//     this.takeHit(target.instance.damage);
+//   }
+// };
 
 s.GameObject.prototype.destruct = function() {
   // Unhook from the rendering loop
