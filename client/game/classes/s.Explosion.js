@@ -37,6 +37,7 @@ s.Explosion = function(options) {
 };
 
 s.Explosion.prototype = Object.create(s.GameObject.prototype);
+s.Explosion.prototype.constructor = s.Explosion;
 
 s.Explosion.prototype.init = function() {
   s.GameObject.prototype.init.call(this);

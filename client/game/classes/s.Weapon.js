@@ -8,6 +8,7 @@ s.Weapon = function(options) {
 };
 
 s.Weapon.prototype = Object.create(s.GameObject.prototype);
+s.Weapon.prototype.constructor = s.Weapon;
 
 s.Weapon.prototype.destruct = function() {
   clearTimeout(this._flightTimeout);

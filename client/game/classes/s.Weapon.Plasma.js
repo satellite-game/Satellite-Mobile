@@ -41,6 +41,7 @@ s.Weapon.Plasma.sound = new s.Sound({
 });
 
 s.Weapon.Plasma.prototype = Object.create(s.Weapon.prototype);
+s.Weapon.Plasma.prototype.constructor = s.Weapon.Plasma;
 
 s.Weapon.Plasma.prototype.handleCollision = function(event) {
   // Explosion animation

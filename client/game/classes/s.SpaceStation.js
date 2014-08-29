@@ -19,7 +19,10 @@ s.SpaceStation = function(options) {
   this.init();
 };
 
+s.SpaceStation.className = 'SpaceStation';
+
 s.SpaceStation.prototype = Object.create(s.GameObject.prototype);
+s.SpaceStation.prototype.constructor = s.SpaceStation;
 
 s.SpaceStation.prototype.name = 'Space Station';
 

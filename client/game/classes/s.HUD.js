@@ -49,8 +49,9 @@ s.HUD.prototype.getColor = function(item) {
 };
 
 s.HUD.prototype.update = function() {
-  for (var id in this.game.map) {
-    var item = this.game.map[id];
+  var items = this.game.map.items;
+  for (var id in items) {
+    var item = items[id];
 
     if (item.team === 'unaffiliated' || item.hp <= 0) {
       // Skip unaffiliated or dead items

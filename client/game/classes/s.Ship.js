@@ -39,10 +39,10 @@ s.Ship = function(options) {
   var mass = this.mass; // Fixed body
   var body = this.body = new CANNON.RigidBody(mass, shape);
 
-  var cube = new THREE.BoxHelper();
-  cube.material.color.setRGB(1, 0, 0);
-  cube.scale.set(50, 20, 50);
-  this.root.add(cube);
+  // var cube = new THREE.BoxHelper();
+  // cube.material.color.setRGB(1, 0, 0);
+  // cube.scale.set(50, 20, 50);
+  // this.root.add(cube);
 
   // Slow down/bleed off rolling
   body.angularDamping = s.constants.ship.angularDamping;
@@ -124,6 +124,7 @@ s.Ship.engineFadeTime = 3000;
 s.Ship.fireInterval = 125;
 
 s.Ship.prototype = Object.create(s.GameObject.prototype);
+s.Ship.prototype.constructor = s.Ship;
 
 s.Ship.prototype.mass = 100;
 s.Ship.prototype.engineImpulse = 100;

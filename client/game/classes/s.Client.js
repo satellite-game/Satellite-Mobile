@@ -20,12 +20,28 @@ s.Client = function(options) {
   socket.on('killed', handleKilled);
   socket.on('leaveMatch', handleLeaveMatch);
 
+  socket.on('matchJoined', function() {
+    var name = window.location.hash || 'Player '+Date.now().toString().slice(-5);
+    var team = window.location.hash.indexOf('alien') !== -1 ? 'alien': 'human';
+    var shipClass = window.location.hash.indexOf('light') !== -1 ? 'light': 'heavy';
+
+    // Join game
+    player.joinTeam(team, shipClass);
+  });
+
   // Bind to game loop
   this.game.hook(this.update.bind(this));
 
   function handleMap(map) {
-    for (var id in map) {
-      var item = map[id];
+    var items = map.items;
+
+    map.spawn.human.pos = s.Client.packetItemToObj(map.spawn.human.pos);
+    map.spawn.human.rot = s.Client.packetItemToObj(map.spawn.human.rot);
+    map.spawn.alien.pos = s.Client.packetItemToObj(map.spawn.alien.pos);
+    map.spawn.alien.rot = s.Client.packetItemToObj(map.spawn.alien.rot);
+
+    for (var id in items) {
+      var item = items[id];
 
       item.pos = s.Client.packetItemToObj(item.pos);
       item.rot = s.Client.packetItemToObj(item.rot);

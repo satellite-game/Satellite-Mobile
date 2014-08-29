@@ -25,11 +25,15 @@ s.GameObject = function(options) {
   // Store options
   this.options = options;
 
+  // Use passed HP or default
+  this.hp = typeof options.hp !== 'undefined' ? options.hp : this.hp;
+
   // Flag to destruct on next tick
   this.isDestroyed = false;
 };
 
 s.GameObject.prototype = Object.create(s.EventEmitter.prototype);
+s.GameObject.prototype.constructor = s.GameObject;
 
 s.GameObject.prototype.toString = function() { return this.name; };
 
@@ -97,7 +101,9 @@ s.GameObject.prototype.init = function() {
       this.root.quaternion.copy(this.options.rotation);
     }
 
+    // Store team and name on object itself
     this.root.name = this.toString();
+    this.root.team = this.team;
   }
 
   if (this.body) {

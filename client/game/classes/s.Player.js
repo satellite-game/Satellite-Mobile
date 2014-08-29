@@ -44,6 +44,7 @@ s.Player = function(options) {
 };
 
 s.Player.prototype = Object.create(s.EventEmitter.prototype);
+s.Player.prototype.constructor = s.Player;
 
 s.Player.prototype.joinMatch = function(matchId, playerName) {
   this.client.joinMatch(matchId, playerName);
@@ -70,8 +71,8 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
     name: this.name,
     team: team,
     shipClass: shipClass,
-    position: s.SpaceStation.shipSpawn.position,
-    rotation: s.SpaceStation.shipSpawn.rotation
+    position: s.game.map.spawn[team].pos,
+    rotation: s.game.map.spawn[team].rot
   });
 
   // Let controls manipulate the ship

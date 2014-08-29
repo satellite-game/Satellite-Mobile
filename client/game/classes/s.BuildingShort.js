@@ -20,6 +20,9 @@ s.BuildingShort = function(options) {
   this.init();
 };
 
-s.BuildingShort.prototype = Object.create(s.GameObject.prototype);
+s.BuildingShort.className = 'BuildingShort';
 
-s.BuildingShort.prototype.nane = 'Moon Base (small)';
+s.BuildingShort.prototype = Object.create(s.GameObject.prototype);
+s.BuildingShort.prototype.constructor = s.BuildingShort;
+
+s.BuildingShort.prototype.name = 'Moon Base Short';

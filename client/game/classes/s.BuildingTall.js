@@ -19,6 +19,9 @@ s.BuildingTall = function(options) {
   this.init();
 };
 
-s.BuildingTall.prototype = Object.create(s.GameObject.prototype);
+s.BuildingTall.className = 'BuildingTall';
 
-s.BuildingTall.prototype.name = 'Moon Base (large)';
+s.BuildingTall.prototype = Object.create(s.GameObject.prototype);
+s.BuildingTall.prototype.constructor = s.BuildingTall;
+
+s.BuildingTall.prototype.name = 'Moon Base Tall';

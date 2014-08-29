@@ -6,6 +6,7 @@ s.SatelliteGame = function() {
 };
 
 s.SatelliteGame.prototype = Object.create(s.Game.prototype);
+s.SatelliteGame.prototype.constructor = s.SatelliteGame;
 
 // Models that should be loaded
 s.SatelliteGame.prototype.models = [
@@ -103,17 +104,9 @@ s.SatelliteGame.prototype.initialize = function() {
 
   // Start the game
   this.start();
- 
-  // @temp get vars from hash
-  var name = window.location.hash || 'Player '+Date.now().toString().slice(-5);
-  var team = window.location.hash.indexOf('alien') !== -1 ? 'alien': 'human';
-  var shipClass = window.location.hash.indexOf('light') !== -1 ? 'light': 'heavy';
 
   // Join match
   this.player.joinMatch('default', name);
-
-  // Join game
-  this.player.joinTeam(team, shipClass);
 };
 
 /**
@@ -124,15 +117,15 @@ s.SatelliteGame.prototype.setMap = function(map) {
   var id;
 
   // Remove the old map
-  for (id in this.map) {
-    item = this.map[id];
+  for (id in this.map.items) {
+    item = this.map.items[id];
     item.destruct();
   }
 
-  // Reset the map
-  this.map = {};
-  for (id in map) {
-    item = map[id];
+  // Use the new map
+  this.map = map;
+  for (id in map.items) {
+    item = map.items[id];
     var Class = s[item.cls];
 
     if (!Class) {
@@ -150,7 +143,8 @@ s.SatelliteGame.prototype.setMap = function(map) {
       rotation: item.rot
     });
 
-    this.map[id] = instance;
+    // Replace info with instance
+    map.items[id] = instance;
   }
 };
 

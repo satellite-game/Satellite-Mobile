@@ -27,7 +27,10 @@ s.Moon = function(options) {
   this.init();
 };
 
+s.Moon.className = 'Moon';
+
 s.Moon.prototype = Object.create(s.GameObject.prototype);
+s.Moon.prototype.constructor = s.Moon;
 
 s.Moon.prototype.name = 'Moon';
 
