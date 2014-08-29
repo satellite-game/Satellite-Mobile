@@ -31,6 +31,8 @@ s.Weapon.Plasma = function(options) {
   //   emissive: new THREE.Color(this.color)
   // }));
   // this.root.add(sphere);
+
+  this.init();
 };
 
 s.Weapon.Plasma.sound = new s.Sound({

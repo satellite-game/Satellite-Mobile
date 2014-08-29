@@ -32,6 +32,8 @@ s.Explosion = function(options) {
 
   this.startTime = null;
   this.animationTime = 1000;
+
+  this.init();
 };
 
 s.Explosion.prototype = Object.create(s.GameObject.prototype);

@@ -3,6 +3,8 @@ s.Weapon = function(options) {
 
   // Destory projectile after 4 secs
   this._flightTimeout = setTimeout(this.destruct.bind(this), this.flightTime);
+
+  // Let subclasses call init()
 };
 
 s.Weapon.prototype = Object.create(s.GameObject.prototype);

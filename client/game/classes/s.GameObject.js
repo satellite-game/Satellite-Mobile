@@ -27,9 +27,6 @@ s.GameObject = function(options) {
 
   // Flag to destruct on next tick
   this.isDestroyed = false;
-
-  // Initialize on the next tick
-  this.game.nextTick(this.init.bind(this));
 };
 
 s.GameObject.prototype = Object.create(s.EventEmitter.prototype);
@@ -88,6 +85,7 @@ s.GameObject.prototype.explode = function() {
 };
 
 s.GameObject.prototype.init = function() {
+  // Set team to unaffiliated if not provided or set by other constructors
   this.team = this.options.team || 'unaffiliated';
 
   if (this.root) {

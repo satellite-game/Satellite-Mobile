@@ -39,10 +39,10 @@ s.Ship = function(options) {
   var mass = this.mass; // Fixed body
   var body = this.body = new CANNON.RigidBody(mass, shape);
 
-  // var cube = new THREE.BoxHelper();
-  // cube.material.color.setRGB(1, 0, 0);
-  // cube.scale.set(50, 20, 50);
-  // this.root.add(cube);
+  var cube = new THREE.BoxHelper();
+  cube.material.color.setRGB(1, 0, 0);
+  cube.scale.set(50, 20, 50);
+  this.root.add(cube);
 
   // Slow down/bleed off rolling
   body.angularDamping = s.constants.ship.angularDamping;
@@ -66,7 +66,9 @@ s.Ship = function(options) {
   var zOff = 18.5;
   this.offsetGunLeft = new THREE.Vector3(xOff, -yOff, zOff);
   this.offsetGunRight = new THREE.Vector3(-xOff, -yOff, zOff);
-  this.offsetBullet = new THREE.Vector3(0, 0, 100);
+
+  this.offsetBulletLeft = new THREE.Vector3(xOff, -yOff, zOff + 100);
+  this.offsetBulletRight = new THREE.Vector3(-xOff, -yOff, zOff + 100);
 
   // Engine glow
   this.engineFlames = [];
@@ -104,6 +106,8 @@ s.Ship = function(options) {
   this.gunGlow = new THREE.PointLight(this.gunGlowMaterial.color, 1, 250);
   this.gunGlow.position.set(0, 6, 20);
   this.root.add(this.gunGlow);
+
+  this.init();
 };
 
 s.Ship.gunGlowColors = {
@@ -151,10 +155,11 @@ s.Ship.prototype.spawnBullets = function(packet) {
 s.Ship.prototype.fire = function(packet) {
   var now = s.game.now;
   if (now - this.lastFireTime > s.Ship.fireInterval) {
-    this.root.updateMatrixWorld();
+    // @todo this doesn't seem to be required
+    // this.root.updateMatrixWorld();
 
-    var leftPos = this.offsetGunLeft.clone().add(this.offsetBullet).applyMatrix4(this.root.matrixWorld);
-    var rightPos = this.offsetGunRight.clone().add(this.offsetBullet).applyMatrix4(this.root.matrixWorld);
+    var leftPos = this.offsetBulletLeft.clone().applyMatrix4(this.root.matrixWorld);
+    var rightPos = this.offsetBulletRight.clone().applyMatrix4(this.root.matrixWorld);
 
     var packet = {
       vl: this.body.velocity,
@@ -162,7 +167,6 @@ s.Ship.prototype.fire = function(packet) {
       rot: this.root.quaternion,
       weapon: 'plasma' // @todo don't hardcode
     };
-
     this.spawnBullets(packet);
 
     this.trigger('fire', packet);

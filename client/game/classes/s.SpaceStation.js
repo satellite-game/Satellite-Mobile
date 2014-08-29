@@ -15,6 +15,8 @@ s.SpaceStation = function(options) {
   // cube.material.color.setRGB(1, 0, 0);
   // cube.scale.set(500, 220, 850);
   // this.root.add(cube);
+
+  this.init();
 };
 
 s.SpaceStation.prototype = Object.create(s.GameObject.prototype);

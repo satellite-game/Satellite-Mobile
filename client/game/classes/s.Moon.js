@@ -23,6 +23,8 @@ s.Moon = function(options) {
 
   // Create rigid body
   this.body = new CANNON.RigidBody(mass, hitBox);
+
+  this.init();
 };
 
 s.Moon.prototype = Object.create(s.GameObject.prototype);

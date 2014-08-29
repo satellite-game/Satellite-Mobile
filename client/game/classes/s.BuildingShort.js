@@ -16,6 +16,8 @@ s.BuildingShort = function(options) {
   // cube.material.color.setRGB(1, 0, 0);
   // cube.scale.set(100, 100, 100);
   // this.root.add(cube);
+
+  this.init();
 };
 
 s.BuildingShort.prototype = Object.create(s.GameObject.prototype);
