@@ -21,7 +21,7 @@ window.s = {
       backwardThrust: 15,
 
       linearDamping: 0.5,
-      angularDamping: 0.99
+      angularDamping: 0.999
     }
   },
 

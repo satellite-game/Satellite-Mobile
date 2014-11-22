@@ -127,7 +127,7 @@ s.Ship.engineGlowColors = {
 };
 
 s.Ship.engineFadeTime = 3000;
-s.Ship.fireInterval = 125;
+s.Ship.fireInterval = 130;
 
 s.Ship.prototype = Object.create(s.GameObject.prototype);
 s.Ship.prototype.constructor = s.Ship;
