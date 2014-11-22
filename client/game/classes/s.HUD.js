@@ -49,6 +49,10 @@ s.HUD.prototype.getColor = function(item) {
 };
 
 s.HUD.prototype.update = function() {
+  if (!this.player) {
+    return;
+  }
+
   var items = this.game.map.items;
   for (var id in items) {
     var item = items[id];
