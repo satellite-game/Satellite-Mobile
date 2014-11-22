@@ -1,6 +1,13 @@
 s.Ship = function(options) {
   s.GameObject.call(this, options);
 
+  // Don't go away when we blow up
+  this.destructOnExplode = false;
+
+  // Initialize extra state variables
+  this.state.th = 0;
+
+  // We'll use this as an event listener for bullets we fire
   this.handleWeaponHit = this.handleWeaponHit.bind(this);
 
   this.lastThrustTime = 0;
@@ -8,9 +15,6 @@ s.Ship = function(options) {
   this.lastFireTime = 0;
   this.thrustImpulse = 0;
   this.shipClass = options.shipClass;
-
-  // Don't go away when we blow up
-  this.options.destructOnExplode = false;
 
   var geometry = s.models[this.team+'_ship_'+this.shipClass].geometry;
   this.materials = s.models[this.team+'_ship_'+this.shipClass].materials[0];
@@ -264,6 +268,14 @@ s.Ship.prototype.update = function(now, delta) {
     this.rightGunFlare.scale.set(0, 0, 0);
   }
 };
+
+s.Ship.prototype.getStatePacket = function() {
+  s.GameObject.prototype.getStatePacket.call(this);
+
+  this.state.th = this.thrustImpulse;
+
+  return this.state
+}
 
 s.Ship.prototype.explode = function() {
   s.GameObject.prototype.explode.apply(this, arguments);

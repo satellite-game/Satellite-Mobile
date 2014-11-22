@@ -12,16 +12,6 @@ s.Player = function(options) {
   // Throttle camera view mode calls
   this.cycleCameraViewMode = s.util.throttle(this.cycleCameraViewMode, 250, { leading: true, trailing: false});
 
-  // State packet
-  // We'll re-use this object and its arrays to avoid constant object allocation/deallocation
-  this.state = {
-    pos: [0, 0, 0],     // Position vector
-    rot: [0, 0, 0, 0],  // Rotation quaternion
-    va: [0, 0, 0],      // Angular velocity vector
-    vl: [0, 0, 0],      // Linear velocity vector
-    th: 0               // Thrust
-  };
-
   // Communication
   this.client = new s.Client({
     game: this.game, 
@@ -105,7 +95,7 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
   this.ship.root.add(this.camera);
 
   // Set initial state
-  this.getState();
+  this.ship.getStatePacket();
 };
 
 s.Player.prototype.viewModes = [
@@ -156,34 +146,4 @@ s.Player.prototype.cycleCameraViewMode = function(previous) {
 
   // Restore view mode, which resets the view mode to the current index in the cycle
   this.restoreViewMode();
-};
-
-s.Player.prototype.getState = function() {
-  if (this.ship) {
-    var pos = this.ship.root.position;
-    var rot = this.ship.root.quaternion;
-    var va = this.ship.body.angularVelocity;
-    var vl = this.ship.body.velocity;
-
-    this.state.pos[0] = pos.x;
-    this.state.pos[1] = pos.y;
-    this.state.pos[2] = pos.z;
-
-    this.state.rot[0] = rot.x;
-    this.state.rot[1] = rot.y;
-    this.state.rot[2] = rot.z;
-    this.state.rot[3] = rot.w;
-
-    this.state.vl[0] = vl.x;
-    this.state.vl[1] = vl.y;
-    this.state.vl[2] = vl.z;
-
-    this.state.va[0] = va.x;
-    this.state.va[1] = va.y;
-    this.state.va[2] = va.z;
-
-    this.state.th = this.ship.thrustImpulse;
-  }
-
-  return this.state;
 };

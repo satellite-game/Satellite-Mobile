@@ -12,6 +12,7 @@ s.Client = function(options) {
   player.on('fireWeapon', this.send.bind(this, 'fireWeapon'));
   player.on('weaponHit', this.send.bind(this, 'weaponHit'));
 
+  // Listen to events coming from the server
   socket.on('map', handleMap);
 
   socket.on('joinMatch', handleJoinMatch);
@@ -27,7 +28,12 @@ s.Client = function(options) {
   socket.on('playerDestroyed', handlePlayerDestroyed);
   socket.on('itemDestroyed', handleItemDestroyed);
 
-  socket.on('matchJoined', function(data) {
+  socket.on('matchJoined', handleMatchJoined);
+
+  // Bind to game loop
+  this.game.hook(this.update.bind(this));
+
+  function handleMatchJoined(data) {
     var name = window.location.hash || 'Player '+Date.now().toString().slice(-5);
     var team = window.location.hash.indexOf('alien') !== -1 ? 'alien': 'human';
     var shipClass = window.location.hash.indexOf('light') !== -1 ? 'light': 'heavy';
@@ -37,10 +43,7 @@ s.Client = function(options) {
 
     // Join game
     player.joinTeam(team, shipClass);
-  });
-
-  // Bind to game loop
-  this.game.hook(this.update.bind(this));
+  }
 
   function handleMap(map) {
     var items = map.items;
@@ -234,8 +237,9 @@ s.Client.prototype.joinMatch = function(matchId, playerName) {
   });
 };
 
-s.Client.prototype.leaveTeam = function() {
-  this.send('leaveTeam');
+s.Client.prototype.leaveMatch = function() {
+  // @todo handle leave failures
+  this.send('leaveMatch', this.matchName);
 };
 
 s.Client.prototype.joinTeam = function() {
@@ -246,13 +250,20 @@ s.Client.prototype.joinTeam = function() {
   });
 };
 
-s.Client.leaveMatch = function() {
-  // @todo handle leave failures
-  this.send('leaveMatch', this.matchName);
+s.Client.prototype.leaveTeam = function() {
+  this.send('leaveTeam');
+
+  // Get rid of the ship object
+  this.ship.destruct();
+
+  this.ship = null;
 };
 
 s.Client.prototype.update = function(now, delta) {
-  this.send('state', this.player.getState());
+  if (this.player.ship) {
+    // Don't update if we don't have a ship
+    this.send('state', this.player.ship.getStatePacket());
+  }
 };
 
 s.Client.prototype.send = function(eventName, data) {

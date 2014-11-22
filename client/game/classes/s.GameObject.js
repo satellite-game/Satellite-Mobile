@@ -28,8 +28,19 @@ s.GameObject = function(options) {
   // Store options
   this.options = options;
 
+  this.destructOnExplode = !!options.destructOnExplode;
+
   // Use passed HP or default
   this.hp = typeof options.hp !== 'undefined' ? options.hp : this.hp;
+
+  // State packet
+  // We'll re-use this object and its arrays to avoid constant object allocation/deallocation
+  this.state = {
+    pos: [0, 0, 0],     // Position vector
+    rot: [0, 0, 0, 0],  // Rotation quaternion
+    va: [0, 0, 0],      // Angular velocity vector
+    vl: [0, 0, 0]       // Linear velocity vector
+  };
 
   // Flag to destruct on next tick
   this.isDestroyed = false;
@@ -84,7 +95,7 @@ s.GameObject.prototype.explode = function() {
     position: position
   });
 
-  if (this.options.destructOnExplode !== false) {
+  if (this.destructOnExplode !== false) {
     setTimeout(function() {
       self.destructOnNextTick();
     }, 500);
@@ -268,6 +279,32 @@ s.GameObject.prototype.setState = function(pos, rot, av, lv) {
       this.body.angularVelocity.set(av.x, av.y, av.z);
     }
   }
+};
+
+s.GameObject.prototype.getStatePacket = function() {
+  var pos = this.root.position;
+  var rot = this.root.quaternion;
+  var va = this.body.angularVelocity;
+  var vl = this.body.velocity;
+
+  this.state.pos[0] = pos.x;
+  this.state.pos[1] = pos.y;
+  this.state.pos[2] = pos.z;
+
+  this.state.rot[0] = rot.x;
+  this.state.rot[1] = rot.y;
+  this.state.rot[2] = rot.z;
+  this.state.rot[3] = rot.w;
+
+  this.state.vl[0] = vl.x;
+  this.state.vl[1] = vl.y;
+  this.state.vl[2] = vl.z;
+
+  this.state.va[0] = va.x;
+  this.state.va[1] = va.y;
+  this.state.va[2] = va.z;
+
+  return this.state;
 };
 
 s.GameObject.prototype.lookAt = function(worldPosVec3) {
