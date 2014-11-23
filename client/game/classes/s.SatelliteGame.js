@@ -244,7 +244,7 @@ s.SatelliteGame.prototype.addDust = function() {
     geometry.vertices.push(vertex);
   }
 
-  var material = new THREE.ParticleBasicMaterial({
+  var material = new THREE.PointCloudMaterial({
     size: size,
     map: starSprite,
     blending: THREE.AdditiveBlending,
@@ -252,7 +252,7 @@ s.SatelliteGame.prototype.addDust = function() {
     transparent: true
   });
 
-  this.dust = new THREE.ParticleSystem(geometry, material);
+  this.dust = new THREE.PointCloud(geometry, material);
 
   this.scene.add(this.dust);
 };

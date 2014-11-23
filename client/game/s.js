@@ -28,9 +28,6 @@ window.s = {
   init: function() {
     console.log('Satellite starting...');
 
-    // Create a projector for 2D <-> 3D calculations
-    s.projector = new THREE.Projector();
-
     // Create a model loader
     s.loader = new THREE.JSONLoader();
 

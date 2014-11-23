@@ -107,7 +107,7 @@ s.HUD.prototype.createBoundingBox = function(targetMesh) {
   boundingBox.material.color.set(this.getColor(targetMesh));
 
   // Add it to the mesh itself
-  targetMesh.add(boundingBox);
+  this.game.scene.add(boundingBox);
 
   // Store a reference so we can manipulate it
   targetMesh.boundingBox = boundingBox;
@@ -128,7 +128,7 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
   var squareSize;
 
   // Get the 2D position in NDC (Normalized Device Coordinates) of the target
-  var targetMeshNDC = s.projector.projectVector(targetMesh.position.clone(), s.game.camera);
+  var targetMeshNDC = targetMesh.position.clone().project(s.game.camera);
 
   if (Math.abs(targetMeshNDC.x) <= 0.95 && Math.abs(targetMeshNDC.y) <= 0.95 && targetMeshNDC.z < 1) {
     targetMeshInSight = true;
