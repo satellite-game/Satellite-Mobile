@@ -49,7 +49,9 @@ s.HUD.prototype.getColor = function(item) {
 };
 
 s.HUD.prototype.update = function() {
-  if (!this.player) {
+  // The HUD may be called before the player is created
+  // In that case, do nothing
+  if (!this.player || !this.player.ship) {
     return;
   }
 
