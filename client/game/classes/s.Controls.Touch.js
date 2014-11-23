@@ -5,8 +5,9 @@ s.Controls.Touch = function() {
   this.fire = false;
 
   // Joysticks
-  var joyWidth = 240;
+  var joyWidth = window.innerWidth / 3.5;
   var joyOptions = {
+    // binary: true, // Don't calculate joystick position along a continuum (8 position joystick)
     width: joyWidth,
     deadZone: joyWidth * 0.25,
     margin: joyWidth * 0.15
@@ -16,15 +17,16 @@ s.Controls.Touch = function() {
   this.leftStick = new s.Controls.Touch.Joystick(joyOptions);
 
   // Buttons
-  var buttonWidth = 96;
+  var buttonWidth = joyWidth * 0.40;
   var buttonOptions = {
     width: buttonWidth,
     margin: buttonWidth * 0.025
   };
 
+  var fireButtonWidth = joyWidth * 0.50
   this.fireButton = new s.Controls.Touch.Button({
-    width: 128,
-    margin: 128 * 0.025,
+    width: fireButtonWidth,
+    margin: fireButtonWidth * 0.025,
     fill: 'rgba(255, 0, 0, 0.5)',
     color: 'red'
   });

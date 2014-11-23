@@ -23,6 +23,10 @@ s.Controls.Touch.Joystick = function(options) {
 };
 
 s.Controls.Touch.Joystick.prototype.rescaleJoyTouch = function(value) {
+  if (this.binary) {
+    return value > 0.5 / 2 ? 1 : -1;
+  }
+
   var sign = value/Math.abs(value);
   value = Math.abs(value);
   if (value > this.inputRange.min && value < this.inputRange.max) {
@@ -40,6 +44,7 @@ s.Controls.Touch.Joystick.prototype.configure = function(options) {
   this.width = options.width || this.width || 240;
   this.deadZone = options.deadZone || this.deadZone || this.width * 0.10; // 10% of width
   this.margin = options.margin || this.margin || this.width * 0.15; // 15% of width
+  this.binary = options.binary || this.binary || false;
 
   // Calculated
   this.inputRange = { min: this.deadZone / this.width * 2, max: 1.0};

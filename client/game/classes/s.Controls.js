@@ -12,8 +12,11 @@ s.Controls = function(options) {
   this.controlMethod = hasTouch ? 'touch' : 'keyboard';
 
   // Create interpreters for controllers
-  this.touch = new s.Controls.Touch();
   this.keyboard = new s.Controls.Keyboard();
+
+  if (hasTouch) {
+    this.touch = new s.Controls.Touch();
+  }
 };
 
 s.Controls.prototype.destruct = function() {
