@@ -73,6 +73,11 @@ s.Client = function(options) {
   }
 
   function handleJoinTeam(data) {
+    if (!data.team || !data.cls) {
+      console.error('Got invalid join packet:', data);
+      return;
+    }
+
     var player = players[data.id];
 
     console.log('Player %s has joined the the %s team as a %s', player.name, data.team, data.cls);
