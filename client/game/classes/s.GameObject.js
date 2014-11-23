@@ -95,11 +95,15 @@ s.GameObject.prototype.explode = function() {
     position: position
   });
 
-  if (this.destructOnExplode !== false) {
-    setTimeout(function() {
-      self.destructOnNextTick();
-    }, 500);
-  }
+  // Dissapear after a delay
+  // if (this.destructOnExplode !== false) {
+  //   setTimeout(function() {
+  //     self.destructOnNextTick();
+  //   }, 500);
+  // }
+
+  // Dissapear immediately
+  this.destruct();
 };
 
 s.GameObject.prototype.init = function() {
