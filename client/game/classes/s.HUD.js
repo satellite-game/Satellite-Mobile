@@ -59,7 +59,7 @@ s.HUD.prototype.update = function() {
   for (var id in items) {
     var item = items[id];
 
-    if (item.team === 'unaffiliated' || item.hp <= 0) {
+    if (!item || item.hp <= 0 || item.team === 'unaffiliated') {
       // Skip unaffiliated or dead items
       continue;
     }

@@ -116,14 +116,21 @@ s.SatelliteGame.prototype.setMap = function(map) {
   var item;
   var id;
 
+  console.log('Setting up map with %d items', Object.keys(map.items).length);
+
   // Remove the old map
   for (id in this.map.items) {
     item = this.map.items[id];
-    item.destruct();
+    if (item) {
+      // Don't try to destruct items we blew away already
+      item.destruct();
+    }
   }
 
   // Use the new map
   this.map = map;
+
+  // Add each map object
   for (id in map.items) {
     item = map.items[id];
     var Class = s[item.cls];
@@ -135,6 +142,7 @@ s.SatelliteGame.prototype.setMap = function(map) {
 
     // Don't add destroyed items
     if (item.hp <= 0) {
+      console.log('Skipping %s', item.cls);
       continue;
     }
 

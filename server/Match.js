@@ -17,10 +17,9 @@ function Match(options) {
   // @todo support different game types
   this.type = options.type;
 
-  this.players = [];
+  this.mapName = options.mapName;
 
-  // Load the map
-  this.loadMap(options.map);
+  this.players = [];
 }
 
 Match.prototype = Object.create(EventEmitter.prototype);
@@ -28,6 +27,9 @@ Match.prototype = Object.create(EventEmitter.prototype);
 Match.prototype.start = function() {
   // @todo Hook into loop
   // @todo Stop when time is up
+
+  // Load the map
+  this.loadMap(this.mapName);
 
   // Emit start event
   this.emit('start', this);
@@ -38,6 +40,12 @@ Match.prototype.end = function() {
 
   // Emit end event
   this.emit('end', this);
+};
+
+Match.prototype.restart = function() {
+  this.emit('restart', this);
+
+  this.start();
 };
 
 Match.prototype.loadMap = function(mapName) {
@@ -51,8 +59,61 @@ Match.prototype.loadMap = function(mapName) {
   // Copy the map
   this.map = JSON.parse(JSON.stringify(map));
 
-  this.map = map;
-}
+  // Send map
+  this.io.to(this.id).emit('map', this.map);
+};
+
+Match.prototype.checkWinState = function() {
+  var alienItemCount = 0;
+  var humanItemCount = 0;
+
+  var gameOver;
+  var winReason = '';
+
+  // Check if the moon was destroyed
+  if (this.map.items.Moon.hp <= 0) {
+    winReason = 'Moon was destroyed.';
+  }
+
+  // Check for human or alien items
+  var item;
+  for (var itemName in this.map.items) {
+    item = this.map.items[itemName];
+
+    if (item.hp > 0) {
+      if (item.team === 'human') {
+        humanItemCount++;
+      }
+      else if (item.team === 'alien') {
+        alienItemCount++;
+      }
+    }
+  }
+
+  // If no more items remain
+  if (!alienItemCount) {
+    winReason = 'Aliens were defeated.';
+    gameOver = true;
+  }
+  else if (!humanItemCount) {
+    winReason = 'Humans were defeated.';
+    gameOver = true;
+  }
+
+  if (gameOver) {
+    console.log('Game over: %s', winReason);
+
+    this.io.to(this.id).emit('gameOver', {
+      reason: winReason
+    });
+
+    this.restart();
+  }
+  else {
+    console.log('%d human items remain', humanItemCount);
+    console.log('%d alien items remain', alienItemCount);
+  }
+};
 
 Match.prototype.handle = function(eventName, player, data) {
   if (!data) {
@@ -78,6 +139,8 @@ Match.prototype.handle = function(eventName, player, data) {
           attackerId: targetItem.id,
           targetId: targetId
         });
+
+        this.checkWinState();
       }
       else {
         console.log('Item %s was hit, hp is now %d', targetId, targetItem.hp);
@@ -101,6 +164,8 @@ Match.prototype.handle = function(eventName, player, data) {
 
         // Respawn the player
         targetPlayer.respawn();
+
+        this.checkWinState();
       }
       else {
         console.log('Player %s was hit, hp is now %d', targetPlayer, targetPlayer.hp);

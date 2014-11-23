@@ -19,6 +19,7 @@ s.Client = function(options) {
   socket.on('joinTeam', handleJoinTeam);
   socket.on('fireWeapon', handleFireWeapon);
   socket.on('state', handleState);
+  socket.on('gameOver', handleGameOver);
   socket.on('respawn', handleRespawn);
   socket.on('leaveMatch', handleLeaveMatch);
 
@@ -167,10 +168,20 @@ s.Client = function(options) {
   }
 
   function handleItemDestroyed(data) {
-    // Find item in map
-    // Call destruct
     console.log('Map item was destroyed!', data);
+
+    // Explode & destruct
     s.game.map.items[data.targetId].explode();
+
+    // Remove from item list
+    s.game.map.items[data.targetId] = null;
+  }
+
+  function handleGameOver(data) {
+    console.warn('Game over: %s', data.reason);
+
+    // Respawn
+    handleRespawn(data);
   }
 
   function handleRespawn(data) {

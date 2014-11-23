@@ -167,6 +167,18 @@ s.GameObject.prototype.destruct = function() {
     this.game.unhook(this.update);
   }
 
+  // Remove the arrow from the HUD
+  if (this.root.arrow) {
+    // this.arrow is an object with pivot and arrow properties
+    // The arrow is a child of pivot
+    this.root.arrow.pivot.parent.remove(this.root.arrow.pivot);
+  }
+
+  // Remove the bounding box
+  if (this.root.boundingBox) {
+    this.root.boundingBox.parent.remove(this.root.boundingBox);
+  }
+
   // Remove from physics simulation
   if (this.body) {
     this.game.world.remove(this.body);

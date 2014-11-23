@@ -14,7 +14,7 @@ function createMatch(data) {
     id: data.id,
     name: data.name,
     type: data.type,
-    map: data.map,
+    mapName: data.map,
     endWhenEmpty: data.endWhenEmpty
   });
 
@@ -23,6 +23,9 @@ function createMatch(data) {
 
   // Store reference
   matches[match.id] = match;
+
+  // Start the match
+  match.start();
 
   return match;
 }
