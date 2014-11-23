@@ -23,7 +23,11 @@ s.Weapon.Plasma = function(options) {
   // Cannon.js
   var shape = new CANNON.Sphere(5);
   var mass = this.mass;
-  var body = this.body = new CANNON.RigidBody(mass, shape);
+
+  this.body = new CANNON.Body({
+    mass: mass
+  });
+  this.body.addShape(shape);
 
   // var sphere = new THREE.Mesh(new THREE.SphereGeometry(5), new THREE.MeshLambertMaterial({
   //   wireframe: false,

@@ -9,7 +9,11 @@ s.BuildingTall = function(options) {
   // Cannon.js
   var shape = new CANNON.Box(new CANNON.Vec3(100, 500, 100));
   var mass = 0; // Fixed body
-  var body = this.body = new CANNON.RigidBody(mass, shape);
+
+  this.body = new CANNON.Body({
+    mass: mass
+  });
+  this.body.addShape(shape);
 
   // var cube = new THREE.BoxHelper();
   // cube.material.color.setRGB(1, 0, 0);

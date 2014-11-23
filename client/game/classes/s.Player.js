@@ -77,7 +77,7 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
   });
 
   this.ship.on('weaponHit', function(event) {
-    var body = event['with'];
+    var body = event.body;
     if (body && body.instance) {
       // console.log('Plasma hit '+body.instance.id);
 

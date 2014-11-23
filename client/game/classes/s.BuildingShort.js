@@ -9,7 +9,11 @@ s.BuildingShort = function(options) {
   // Cannon.js
   var shape = new CANNON.Box(new CANNON.Vec3(100, 100, 100));
   var mass = 0; // Fixed body
-  var body = this.body = new CANNON.RigidBody(mass, shape);
+
+  this.body = new CANNON.Body({
+    mass: mass
+  });
+  this.body.addShape(shape);
 
   // Hitbox
   // var cube = new THREE.BoxHelper();

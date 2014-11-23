@@ -204,8 +204,13 @@ s.GameObject.prototype.update = function() {
   else {
     if (this.body) {
       // Copy coordinates from Cannon.js to Three.js
-      this.body.position.copy(this.root.position);
-      this.body.quaternion.copy(this.root.quaternion);
+      this.root.position.copy(this.body.position);
+
+      // Cannot use THREE.Quaternion#copy() as it expected _ prefixed vars
+      this.root.quaternion.x = this.body.quaternion.x;
+      this.root.quaternion.y = this.body.quaternion.y;
+      this.root.quaternion.z = this.body.quaternion.z;
+      this.root.quaternion.w = this.body.quaternion.w;
     }
   }
 };

@@ -32,7 +32,10 @@ s.Ship = function(options) {
   // Shield hit box
   // var shape = new CANNON.Sphere(40);
   // var mass = 0;
-  // var body = this.body = new CANNON.RigidBody(mass, shape);
+  // var body = this.body = new CANNON.Body({
+  //   mass: mass
+  // });
+  // this.body.addShape(shape);
   // var sphere = new THREE.Mesh(new THREE.SphereGeometry(40), new THREE.MeshBasicMaterial({
   //   wireframe: true,
   //   color: 'red'
@@ -42,8 +45,12 @@ s.Ship = function(options) {
   // Ship hitbox
   // var shipShape = new CANNON.Box(new CANNON.Vec3(40, 10, 40)); // Tight
   var shape = new CANNON.Box(new CANNON.Vec3(50, 20, 50)); // Loose
-  var mass = this.mass; // Fixed body
-  var body = this.body = new CANNON.RigidBody(mass, shape);
+  var mass = this.mass;
+
+  var body = this.body = new CANNON.Body({
+    mass: mass
+  });
+  this.body.addShape(shape);
 
   // var cube = new THREE.BoxHelper();
   // cube.material.color.setRGB(1, 0, 0);

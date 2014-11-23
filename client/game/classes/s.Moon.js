@@ -21,8 +21,10 @@ s.Moon = function(options) {
   // Fixed body
   var mass = 0;
 
-  // Create rigid body
-  this.body = new CANNON.RigidBody(mass, hitBox);
+  this.body = new CANNON.Body({
+    mass: mass
+  });
+  this.body.addShape(hitBox);
 
   this.init();
 };
