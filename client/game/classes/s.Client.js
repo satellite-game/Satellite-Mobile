@@ -1,4 +1,5 @@
 s.Client = function(options) {
+  var self = this;
   var game = this.game = options.game;
   var player = this.player = options.player;
   
@@ -23,6 +24,8 @@ s.Client = function(options) {
   socket.on('respawn', handleRespawn);
   socket.on('leaveMatch', handleLeaveMatch);
 
+  socket.on('noMatch', handleNoMatch);
+
   socket.on('playerHit', handlePlayerHit);
   socket.on('itemHit', handleItemHit);
 
@@ -33,6 +36,14 @@ s.Client = function(options) {
 
   // Bind to game loop
   this.game.hook(this.update.bind(this));
+
+  function handleNoMatch(data) {
+    // Just join the default match for now
+    self.joinMatch('default', player.name);
+
+    // Respawn immediately
+    handleRespawn();
+  }
 
   function handleMatchJoined(data) {
     var name = window.location.hash || 'Player '+Date.now().toString().slice(-5);

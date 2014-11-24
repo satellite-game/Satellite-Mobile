@@ -81,6 +81,10 @@ Player.prototype.emit = function(event, data) {
   // Check if we're in a match
   if (!this.match) {
     console.error('Player %s tried to send %s before joining a match', this, event);
+
+    // Tell the client to join the match
+    this.socket.emit('noMatch');
+
     return;
   }
 

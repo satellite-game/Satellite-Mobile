@@ -43,7 +43,7 @@ s.Player.prototype.joinMatch = function(matchId, playerName) {
 
 s.Player.prototype.joinTeam = function(team, shipClass) {
   if (this.ship) {
-    this.ship.destroy();
+    this.ship.destruct();
   }
 
   // Store team and ship class
