@@ -11,6 +11,28 @@ s.Moon = function(options) {
 
   this.root = new THREE.Mesh(geometry, material);
 
+  // Create inner atmosphere
+  // var innerAtmosphereGeometry = geometry.clone();
+  // var innerAtmosphereMaterial = THREEx.createAtmosphereMaterial();
+  // innerAtmosphereMaterial.uniforms.glowColor.value = new THREE.Color('white');
+  // innerAtmosphereMaterial.uniforms.power.value = 6;
+  // var innerAtomsphereMesh = new THREE.Mesh(innerAtmosphereGeometry, innerAtmosphereMaterial);
+  // innerAtomsphereMesh.scale.multiplyScalar(1.01);
+  // this.root.add(innerAtomsphereMesh);
+  // this.innerAtmosphereMaterial = innerAtmosphereMaterial;
+
+  // Create outer atmosphere
+  var atompsphereGeometry = geometry.clone();
+  var atmosphereMaterial = THREEx.createAtmosphereMaterial();
+  atmosphereMaterial.side = THREE.BackSide;
+  atmosphereMaterial.uniforms.coeficient.value = 0.5;
+  atmosphereMaterial.uniforms.power.value = 10;
+  atmosphereMaterial.uniforms.glowColor.value = new THREE.Color(0.75, 0, 0);
+  var atomsphereMesh = new THREE.Mesh(atompsphereGeometry, atmosphereMaterial);
+  atomsphereMesh.scale.multiplyScalar(1.1);
+  this.root.add(atomsphereMesh);
+  this.atmosphereMaterial = atmosphereMaterial;
+
   if (s.config.shadows) {
     this.root.receiveShadow = true;
   }
