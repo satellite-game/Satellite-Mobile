@@ -14,7 +14,7 @@ s.Explosion = function(options) {
     geometry.vertices.push(vertex);
   }
 
-  var material = new THREE.PointCloudMaterial({
+  var material = s.Explosion.material = s.Explosion.material || new THREE.PointCloudMaterial({
     color: options.color || 0xFFFFFF,
     size: size,
     map: s.textures.explosion,
@@ -23,12 +23,9 @@ s.Explosion = function(options) {
     transparent: true
   });
 
-  this.root = new THREE.Object3D();
-
-  var particles = this.particles = new THREE.PointCloud(geometry, material);
-  // particles.sortParticles = false;
-  // particles.frustrumCulled = false;
-  this.root.add(particles);
+  this.root = new THREE.PointCloud(geometry, material);
+  // this.root.sortParticles = false;
+  // this.root.frustrumCulled = false;
 
   this.startTime = null;
   this.animationTime = 1000;
@@ -59,13 +56,14 @@ s.Explosion.prototype.update = function() {
 
   if (scale) {
     // Don't try to set 0 scale
-    this.particles.scale.set(scale, scale, scale);
+    this.root.scale.set(scale, scale, scale);
   }
 
-  this.particles.material.opacity = 1 - proportionalProgress;
+  // We can't do this since we're reusing material :-\
+  // this.root.material.opacity = 1 - proportionalProgress;
 
   // Destroy after animation complete
   if (progress > this.animationTime) {
-    this.destruct();
+    this.destructOnNextTick();
   }
 };

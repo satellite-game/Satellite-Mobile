@@ -103,7 +103,7 @@ s.GameObject.prototype.explode = function() {
   // }
 
   // Dissapear immediately
-  this.destruct();
+  this.destructOnNextTick();
 };
 
 s.GameObject.prototype.init = function() {
@@ -166,27 +166,26 @@ s.GameObject.prototype.destruct = function() {
   if (this.update) {
     this.game.unhook(this.update);
   }
+  // Remove from the scene
+  if (this.root) {
+    this.game.scene.remove(this.root);
 
-  // Remove the arrow from the HUD
-  if (this.root.arrow) {
-    // this.arrow is an object with pivot and arrow properties
-    // The arrow is a child of pivot
-    this.root.arrow.pivot.parent.remove(this.root.arrow.pivot);
-  }
+    // Remove the arrow from the HUD
+    if (this.root.arrow) {
+      // this.arrow is an object with pivot and arrow properties
+      // The arrow is a child of pivot
+      this.root.arrow.pivot.parent.remove(this.root.arrow.pivot);
+    }
 
-  // Remove the bounding box
-  if (this.root.boundingBox) {
-    this.root.boundingBox.parent.remove(this.root.boundingBox);
+    // Remove the bounding box
+    if (this.root.boundingBox) {
+      this.root.boundingBox.parent.remove(this.root.boundingBox);
+    }
   }
 
   // Remove from physics simulation
   if (this.body) {
     this.game.world.remove(this.body);
-  }
-
-  // Remove from the scene
-  if (this.root) {
-    this.game.scene.remove(this.root);
   }
 };
 
