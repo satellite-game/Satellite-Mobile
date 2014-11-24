@@ -15,8 +15,8 @@ window.s = {
   constants: {
     ship: {
       rollSpeed: Math.PI/8,
-      pitchSpeed: Math.PI/32,
-      yawSpeed: Math.PI/32,
+      pitchSpeed: Math.PI/24,
+      yawSpeed: Math.PI/24,
       forwardThrust: 25,
       backwardThrust: 15,
 
