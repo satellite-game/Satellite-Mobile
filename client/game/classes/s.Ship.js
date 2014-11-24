@@ -164,6 +164,7 @@ s.Ship.prototype.spawnBullets = function(packet) {
   });
 
   leftPlasma.on('collide', this.handleWeaponHit);
+  rightPlasma.on('collide', this.handleWeaponHit);
 
   s.Weapon.Plasma.sound.play(packet.pos[0]);
 };

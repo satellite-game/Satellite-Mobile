@@ -130,6 +130,10 @@ Match.prototype.handle = function(eventName, player, data) {
     var targetItem = this.map.items[targetId];
     var targetPlayer = this.getPlayer(targetId);
     if (targetItem) {
+      if (!targetItem.hp) {
+        return;
+      }
+
       // @todo make an instance and give takeHit method
       targetItem.hp -= 10;
       if (targetItem.hp <= 0) {
@@ -153,6 +157,10 @@ Match.prototype.handle = function(eventName, player, data) {
       }
     }
     else if (targetPlayer) {
+      if (!targetPlayer.hp) {
+        return;
+      }
+
       targetPlayer.takeHit(10, player.id);
       if (targetPlayer.hp <= 0) {
         console.log('Player %s was killed', targetPlayer);
