@@ -17,6 +17,19 @@ s.HUD = function(options) {
   // Update on tick
   this.update = this.update.bind(this);
   this.game.hook(this.update);
+
+  var planeGeo = new THREE.PlaneBufferGeometry(250, 250);
+  var planeMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color('green'),
+    transparent: true,
+    opacity: 0
+  });
+
+  this.hudPlane = new THREE.Mesh(planeGeo, planeMat);
+  this.hudPlane.visible = false;
+  this.hudPlane.position.z = -100;
+
+  this.game.camera.add(this.hudPlane);
 };
 
 s.HUD.baseColor = new THREE.Color('rgb(0, 180, 0)');
@@ -83,6 +96,29 @@ s.HUD.prototype.update = function() {
   }
 };
 
+s.HUD.prototype.createBox = function(targetMesh) {
+  // @todo cache material?
+  var material = new THREE.LineBasicMaterial({
+    color: this.getColor(targetMesh)
+  });
+
+  // Create the box mesh
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(new THREE.Vector3(-1,  0,   0));
+  geometry.vertices.push(new THREE.Vector3(  0,  1,  0));
+  geometry.vertices.push(new THREE.Vector3( 1,  0,   0));
+  geometry.vertices.push(new THREE.Vector3(  0,  -1, 0));
+  geometry.vertices.push(new THREE.Vector3(-1,  0,   0));
+
+  var line = new THREE.Line(geometry, material);
+  line.position.z = this.hudPlane.position.z;
+  this.game.camera.add(line);
+
+  targetMesh.box = line;
+
+  return line;
+};
+
 s.HUD.prototype.createArrow = function(targetMesh) {
   // Create the arrow mesh
   var arrow = new THREE.Mesh(s.HUD.arrowGeometry, this.getMaterial(targetMesh));
@@ -95,30 +131,20 @@ s.HUD.prototype.createArrow = function(targetMesh) {
 
   this.game.camera.add(pivot);
 
-  return {
+  var arrowInfo = {
     pivot: pivot,
     arrow: arrow
   };
-};
 
-s.HUD.prototype.createBoundingBox = function(targetMesh) {
-  // Create a bounding box
-  var boundingBox = new THREE.BoxHelper(targetMesh);
-  boundingBox.material.color.set(this.getColor(targetMesh));
+  // Store on the mesh
+  targetMesh.arrow = arrowInfo;
 
-  // Add it to the mesh itself
-  this.game.scene.add(boundingBox);
-
-  // Store a reference so we can manipulate it
-  targetMesh.boundingBox = boundingBox;
-
-  return boundingBox;
+  return arrowInfo;
 };
 
 s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromRadius, minBoxDistance) {
   // Get an arrow
   var arrow = targetMesh.arrow || this.createArrow(targetMesh);
-  targetMesh.arrow = arrow;
 
   // Set arrow color
   arrow.arrow.material.color = fillColor;
@@ -157,35 +183,43 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
     arrow.pivot.rotation.z = directionalIndicatorAngle + Math.PI/2;
   }
 
-  // Draw square around object
-  var boundingBox = targetMesh.boundingBox || this.createBoundingBox(targetMesh);
+  // "2D box"
+  var box = targetMesh.box || this.createBox(targetMesh);
+
+  // Draw square around object in 3D
   if (targetMeshInSight && distanceToTargetMesh > minBoxDistance) {
-    boundingBox.visible = true;
+    box.visible = true;
 
-    /*
-    // Get the 2D bounding box
+    var camera = this.game.camera;
+
+    // Make sure matricies are up to date
+    // Without this, target reticles will lag behind
+    // @tod this doesn't seem to work
+    camera.parent.updateMatrixWorld();
     targetMesh.updateMatrixWorld();
-    var verticies = boundingBox.geometry.vertices.slice(0).map(function(vector) {
-      return targetMesh.localToWorld(vector.clone());
-    });
 
-    var box2 = s.util.compute2DBoundingBox(verticies);
+    // Get the camera position in world coordinates
+    var cameraPosition = camera.parent.localToWorld(camera.position.clone());
+    var targetPosition = targetMesh.position.clone();
 
-    // Get screen coords
-    var width = window.innerWidth;
-    var height = window.innerHeight;
+    // Cast a ray from the camera to the target
+    var raycaster = new THREE.Raycaster(cameraPosition, targetPosition.sub(cameraPosition).normalize());
+    var intersects = raycaster.intersectObject(this.hudPlane, true);
 
-    var bl = s.util.getScreenCoordsFromNDC(box2.min.x, box2.min.y, width, height);
-    var tr = s.util.getScreenCoordsFromNDC(box2.max.x, box2.max.y, width, height);
+    if (intersects.length) {
+      var intersection = intersects[0];
 
-    var squareWidth = (tr.x - bl.x)+'px';
-    var squareHeight = (bl.y - tr.y)+'px';
-    var squareTop = tr.y+'px';
-    var squareLeft = bl.x+'px';
-    */
+      // Get the position of the intersection in local coordinates
+      var intersectionVector = intersection.point.clone();
+      intersection.object.worldToLocal(intersectionVector);
+
+      // Move the box accordingly
+      box.position.x = intersectionVector.x;
+      box.position.y = intersectionVector.y;
+    }
   }
   else {
-    boundingBox.visible = false;
+    box.visible = false;
   }
 };
 
