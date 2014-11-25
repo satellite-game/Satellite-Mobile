@@ -104,11 +104,11 @@ s.HUD.prototype.createBox = function(targetMesh) {
 
   // Create the box mesh
   var geometry = new THREE.Geometry();
-  geometry.vertices.push(new THREE.Vector3(-1,  0,   0));
-  geometry.vertices.push(new THREE.Vector3(  0,  1,  0));
-  geometry.vertices.push(new THREE.Vector3( 1,  0,   0));
-  geometry.vertices.push(new THREE.Vector3(  0,  -1, 0));
-  geometry.vertices.push(new THREE.Vector3(-1,  0,   0));
+  geometry.vertices.push(new THREE.Vector3(-1,  0,  0));
+  geometry.vertices.push(new THREE.Vector3( 0,  1,  0));
+  geometry.vertices.push(new THREE.Vector3( 1,  0,  0));
+  geometry.vertices.push(new THREE.Vector3( 0, -1,  0));
+  geometry.vertices.push(new THREE.Vector3(-1,  0,  0));
 
   var line = new THREE.Line(geometry, material);
   line.position.z = this.hudPlane.position.z;
@@ -207,6 +207,10 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
     var intersects = raycaster.intersectObject(this.hudPlane, true);
 
     if (intersects.length) {
+      // Calculate the distance
+      var distance = this.player.ship.root.position.distanceTo(targetMesh.position);
+      var distanceFactor = 12000/distance;
+
       var intersection = intersects[0];
 
       // Get the position of the intersection in local coordinates
@@ -216,6 +220,7 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
       // Move the box accordingly
       box.position.x = intersectionVector.x;
       box.position.y = intersectionVector.y;
+      box.scale.set(distanceFactor, distanceFactor, distanceFactor);
     }
   }
   else {
