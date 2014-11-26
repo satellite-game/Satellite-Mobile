@@ -262,6 +262,9 @@ s.Game.prototype.render = function(now) {
       func(now, delta);
     });
 
+    // Update Tween animations
+    TWEEN.update(now);
+
     this.renderer.render(this.scene, this.camera);
 
     // Request the next frame to be rendered

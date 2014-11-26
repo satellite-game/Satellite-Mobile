@@ -1,4 +1,6 @@
 s.Client = function(options) {
+  s.EventEmitter.call(this);
+
   var self = this;
   var game = this.game = options.game;
   var player = this.player = options.player;
@@ -46,15 +48,10 @@ s.Client = function(options) {
   }
 
   function handleMatchJoined(data) {
-    var name = window.location.hash || 'Player '+Date.now().toString().slice(-5);
-    var team = window.location.hash.indexOf('alien') !== -1 ? 'alien': 'human';
-    var shipClass = window.location.hash.indexOf('light') !== -1 ? 'light': 'heavy';
-
     // Store the server's ID for us
     player.id = data.id;
 
-    // Join game
-    player.joinTeam(team, shipClass);
+    self.trigger('matchJoined', data);
   }
 
   function handleMap(map) {
@@ -255,6 +252,9 @@ s.Client.packetItemToObj = function packetItemToObj(obj) {
     return obj;
   }
 };
+
+s.Client.prototype = Object.create(s.EventEmitter.prototype);
+s.Client.prototype.constructor = s.Client;
 
 s.Client.prototype.joinMatch = function(matchId, playerName) {
   // @todo handle join failures

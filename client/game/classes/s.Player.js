@@ -91,8 +91,9 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
     }
   })
 
-  // Root camera to the player's position
+  // Root camera to the player's position and reset position
   this.ship.root.add(this.camera);
+  this.setCameraViewMode(this.viewMode);
 
   // Set initial state
   this.ship.getStatePacket();

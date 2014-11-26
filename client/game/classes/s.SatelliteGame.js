@@ -93,20 +93,42 @@ s.SatelliteGame.prototype.initialize = function() {
 
   this.map = {};
 
+  // Fade explosion lights
+  this.hook(this.fadeLights.bind(this));
+
+  // Create the ship chooser
+  var shipChooser = this.shipChooser = new s.ShipChooser({
+    game: this
+  });
+
+  shipChooser.on('shipSelected', function(event) {
+    // Join game
+    player.joinTeam(event.team, event.cls);
+
+    // Get rid of the ship chooser
+    shipChooser.destruct();
+  });
+
   // Create the player
   var player = this.player = new s.Player({
     game: this,
     camera: this.camera
   });
 
-  // Fade explosion lights
-  this.hook(this.fadeLights.bind(this));
+  // Join the default match
+  this.player.joinMatch('default', name);
+
+  // Position the camera
+  // this.camera.position.set(10000, 10000, 10000);
+  // this.camera.lookAt(new THREE.Vector3(20000, 300000, 375000));
+
+  this.camera.position.set(20000, 20000, 20000);
+  this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+  this.scene.add(this.camera);
 
   // Start the game
   this.start();
-
-  // Join match
-  this.player.joinMatch('default', name);
 };
 
 /**

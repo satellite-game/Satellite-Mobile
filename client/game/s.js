@@ -12,6 +12,11 @@ window.s = {
     shadows: false
   },
 
+  ships: {
+    human: ['light', 'heavy'],
+    alien: ['light', 'heavy']
+  },
+
   constants: {
     ship: {
       rollSpeed: Math.PI/8,
