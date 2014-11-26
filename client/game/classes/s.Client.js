@@ -212,7 +212,7 @@ s.Client = function(options) {
     console.log('Player %s has left the match', data.id);
     var otherPlayer = players[data.id];
 
-    if (otherPlayer) {
+    if (otherPlayer && otherPlayer.ship) {
       otherPlayer.ship.destructOnNextTick();
 
       players[data.id] = null;
