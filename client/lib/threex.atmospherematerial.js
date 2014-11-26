@@ -12,7 +12,7 @@ THREEx.createAtmosphereMaterial = function(){
     'void main(){',
     ' vVertexNormal = normalize(normalMatrix * normal);',
 
-    ' vVertexWorldPosition  = (modelMatrix * vec4(position, 1.0)).xyz;',
+    ' vVertexWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;',
 
     ' // set gl_Position',
     ' gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
@@ -21,18 +21,24 @@ THREEx.createAtmosphereMaterial = function(){
     ].join('\n')
   var fragmentShader  = [
     'uniform vec3 glowColor;',
-    'uniform float  coeficient;',
-    'uniform float  power;',
+    'uniform float coeficient;',
+    'uniform float cutoff;',
+    'uniform float power;',
 
     'varying vec3 vVertexNormal;',
     'varying vec3 vVertexWorldPosition;',
 
     'void main(){',
-    ' vec3 worldCameraToVertex= vVertexWorldPosition - cameraPosition;',
+    ' vec3 worldCameraToVertex = vVertexWorldPosition - cameraPosition;',
     ' vec3 viewCameraToVertex = (viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;',
-    ' viewCameraToVertex  = normalize(viewCameraToVertex);',
-    ' float intensity   = pow(coeficient + dot(vVertexNormal, viewCameraToVertex), power);',
-    ' gl_FragColor    = vec4(glowColor, intensity);',
+    ' viewCameraToVertex = normalize(viewCameraToVertex);',
+    ' float cosTheta = dot(vVertexNormal, viewCameraToVertex);',
+    ' float intensity = pow(coeficient + cosTheta, power);',
+    // Attempt to stop drawing of the shader when looking up
+    ' if (cosTheta > cutoff) {',
+    '   intensity = 0.0;',
+    ' }',
+    ' gl_FragColor= vec4(glowColor, intensity);',
     '}',
   ].join('\n')
 
@@ -43,6 +49,10 @@ THREEx.createAtmosphereMaterial = function(){
       coeficient  : {
         type  : "f", 
         value : 1.0
+      },
+      cutoff  : {
+        type  : "f", 
+        value : 0.5
       },
       power   : {
         type  : "f",

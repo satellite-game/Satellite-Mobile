@@ -27,11 +27,14 @@ s.Moon = function(options) {
   atmosphereMaterial.side = THREE.BackSide;
   atmosphereMaterial.uniforms.coeficient.value = 0.5;
   atmosphereMaterial.uniforms.power.value = 10;
+  atmosphereMaterial.uniforms.cutoff.value = 0.5;
   atmosphereMaterial.uniforms.glowColor.value = new THREE.Color(0.75, 0, 0);
   var atomsphereMesh = new THREE.Mesh(atompsphereGeometry, atmosphereMaterial);
   atomsphereMesh.scale.multiplyScalar(1.1);
   this.root.add(atomsphereMesh);
   this.atmosphereMaterial = atmosphereMaterial;
+
+  THREEx.addAtmosphereMaterial2DatGui(atmosphereMaterial);
 
   if (s.config.shadows) {
     this.root.receiveShadow = true;
