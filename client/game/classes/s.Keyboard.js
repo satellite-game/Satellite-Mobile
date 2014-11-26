@@ -25,7 +25,8 @@ s.Keyboard.prototype.keys = {
   'e'       : 69,
   'backtick': 192,
   'shift'   : 16,
-  'tilde'   : 192
+  'tilde'   : 192,
+  'enter'   : 13
 };
 
 s.Keyboard.prototype.keysInv = {

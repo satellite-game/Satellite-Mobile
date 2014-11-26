@@ -1,6 +1,8 @@
 s.ShipChooser = function(options) {
   s.EventEmitter.call(this);
 
+  var self = this;
+
   this.game = options.game;
 
   this.keyboard = new s.Keyboard();
@@ -61,6 +63,16 @@ s.ShipChooser = function(options) {
     .onUpdate(function() {
        root.position.x = this.x;
        root.position.y = this.y;
+
+       // Fade opacity
+       for (var i = 0; i < self.teams.length; i++) {
+        var teamShips = self.teams[i];
+        for (var j = 0; j < teamShips.length; j++) {
+          var otherShip = teamShips[j];
+          var opacity = 1 - (root.position.z + root.position.clone().negate().sub(otherShip.position).length())/self.shipDistance*1.5;
+          otherShip.material.opacity = opacity;
+        }
+      }
     });
 
   this.game.hook(this.update);
@@ -114,17 +126,6 @@ s.ShipChooser.prototype.positionGroup = function() {
   this.tween.to({ x: x, y: y }, 500).start();
 
   var curShip = this.curShip = this.teams[this.curTeamIndex][this.curShipIndex];
-
-  // Adjust opacity
-  for (var i = 0; i < this.teams.length; i++) {
-    var teamShips = this.teams[i];
-    for (var j = 0; j < teamShips.length; j++) {
-      var otherShip = teamShips[j];
-      otherShip.material.opacity = 0.5;
-    }
-  }
-
-  curShip.material.opacity = 1;
 };
 
 s.ShipChooser.prototype.update = function(time, diff) {
@@ -140,7 +141,7 @@ s.ShipChooser.prototype.update = function(time, diff) {
   else if (this.keyboard.pressed('down')) {
     this.nextShip();
   }
-  else if (this.keyboard.pressed('space')) {
+  else if (this.keyboard.pressed('space') || this.keyboard.pressed('enter')) {
     if (!this.shipSelected) {
       this.shipSelected = true;
       this.trigger('shipSelected', {

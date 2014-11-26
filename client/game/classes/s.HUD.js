@@ -11,7 +11,10 @@ s.HUD = function(options) {
     color: 0x00FF00
   }));
 
-  this.game.camera.add(this.crosshairs);
+  this.hudItems = new THREE.Group();
+  this.game.camera.add(this.hudItems);
+
+  this.hudItems.add(this.crosshairs);
   this.crosshairs.position.setZ(-30);
 
   // Update on tick
@@ -52,6 +55,14 @@ s.HUD.enemyIndicatorMaterial = new THREE.MeshBasicMaterial({
 s.HUD.friendlyIndicatorMaterial = new THREE.MeshBasicMaterial({
   color: s.HUD.friendlyIndicatorColor
 });
+
+s.HUD.prototype.hide = function() {
+  this.hudItems.visible = false;
+};
+
+s.HUD.prototype.show = function() {
+  this.hudItems.visible = true;
+};
 
 s.HUD.prototype.getMaterial = function(item) {
   return this.player.team === item.team ? s.HUD.friendlyIndicatorMaterial : s.HUD.enemyIndicatorMaterial;
@@ -129,7 +140,7 @@ s.HUD.prototype.createArrow = function(targetMesh) {
   pivot.position.z = -100;
   pivot.add(arrow)
 
-  this.game.camera.add(pivot);
+  this.hudItems.add(pivot);
 
   var arrowInfo = {
     pivot: pivot,

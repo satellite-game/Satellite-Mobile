@@ -119,11 +119,11 @@ s.SatelliteGame.prototype.initialize = function() {
   this.player.joinMatch('default', name);
 
   // Position the camera
-  // this.camera.position.set(10000, 10000, 10000);
-  // this.camera.lookAt(new THREE.Vector3(20000, 300000, 375000));
-
   this.camera.position.set(20000, 20000, 20000);
   this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+  // Hide the HUD for now
+  this.player.hud.hide();
 
   this.scene.add(this.camera);
 

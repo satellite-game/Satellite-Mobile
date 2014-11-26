@@ -89,7 +89,10 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
     else {
       console.error('Hit something without an instance', event);
     }
-  })
+  });
+
+  // Show the HUD
+  this.hud.show();
 
   // Root camera to the player's position and reset position
   this.ship.root.add(this.camera);
