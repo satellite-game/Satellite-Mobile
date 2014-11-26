@@ -180,7 +180,7 @@ s.MapEditor = function() {
     var mouseNDC = s.util.getNDC(event.pageX, event.pageY, window.innerWidth, window.innerHeight);
 
     var vector = new THREE.Vector3(mouseNDC.x, mouseNDC.y, 1);
-    s.projector.unprojectVector(vector, game.camera);
+    vector.unproject(game.camera);
 
     var cameraPos = game.player.ship.root.localToWorld(game.camera.position.clone());
 
@@ -199,7 +199,7 @@ s.MapEditor = function() {
     var mouseNDC = s.util.getNDC(event.pageX, event.pageY, window.innerWidth, window.innerHeight);
 
     var vector = new THREE.Vector3(mouseNDC.x, mouseNDC.y, 1);
-    s.projector.unprojectVector(vector, game.camera);
+    vector.unproject(game.camera);
 
     var cameraPos = game.player.ship.root.localToWorld(game.camera.position.clone());
 
