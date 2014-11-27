@@ -215,7 +215,7 @@ s.HUD.prototype.drawTarget = function(name, targetMesh, fillColor, distanceFromR
 
     // Cast a ray from the camera to the target
     var raycaster = new THREE.Raycaster(cameraPosition, targetPosition.sub(cameraPosition).normalize());
-    var intersects = raycaster.intersectObject(this.hudPlane, true);
+    var intersects = raycaster.intersectObject(this.hudPlane);
 
     if (intersects.length) {
       // Calculate the distance

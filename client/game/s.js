@@ -13,8 +13,8 @@ window.s = {
   },
 
   ships: {
-    human: ['light', 'heavy'],
-    alien: ['light', 'heavy']
+    human: ['heavy', 'light'],
+    alien: ['heavy', 'light']
   },
 
   constants: {

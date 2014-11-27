@@ -77,13 +77,14 @@ s.Player.prototype.joinTeam = function(team, shipClass) {
   });
 
   this.ship.on('weaponHit', function(event) {
+    console.log('Triggering a weapon hit!');
     var body = event.body;
     if (body && body.instance) {
       // console.log('Plasma hit '+body.instance.id);
 
       self.trigger('weaponHit', {
         targetId: body.instance.id,
-        weapon: 'plasma' // @todo don't hardcode
+        weapon: event.weapon || 'plasma' // @todo don't hardcode
       });
     }
     else {

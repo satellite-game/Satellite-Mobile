@@ -7,8 +7,11 @@ s.Ship = function(options) {
   // Initialize extra state variables
   this.state.th = 0;
 
+  // @todo don't hardcode
+  this.weapon = 'laser';
+
   // We'll use this as an event listener for bullets we fire
-  this.handleWeaponHit = this.handleWeaponHit.bind(this);
+  this.handlePlasmaHit = this.handlePlasmaHit.bind(this);
 
   this.lastThrustTime = 0;
   this.lastRetroThrustTime = 0;
@@ -120,6 +123,21 @@ s.Ship = function(options) {
   this.gunGlow.position.set(0, 6, 20);
   this.root.add(this.gunGlow);
 
+  // Create laser instances
+  if (this.weapon === 'laser') {
+    this.leftLaser = new s.Weapon.Laser({
+      team: this.team,
+      position: this.offsetGunLeft
+    });
+    this.root.add(this.leftLaser.root);
+
+    this.rightLaser = new s.Weapon.Laser({
+      team: this.team,
+      position: this.offsetGunRight
+    });
+    this.root.add(this.rightLaser.root);
+  }
+
   this.init();
 };
 
@@ -163,36 +181,62 @@ s.Ship.prototype.spawnBullets = function(packet) {
     // @todo player object?
   });
 
-  leftPlasma.on('collide', this.handleWeaponHit);
-  rightPlasma.on('collide', this.handleWeaponHit);
+  leftPlasma.on('collide', this.handlePlasmaHit);
+  rightPlasma.on('collide', this.handlePlasmaHit);
 
   s.Weapon.Plasma.sound.play(packet.pos[0]);
 };
 
-s.Ship.prototype.handleWeaponHit = function(event) {
+s.Ship.prototype.handlePlasmaHit = function(event) {
+  event.weapon = 'plasma';
   this.trigger('weaponHit', event);
 };
 
 s.Ship.prototype.fire = function(packet) {
   var now = s.game.now;
-  if (now - this.lastFireTime > s.Ship.fireInterval) {
-    // @todo this doesn't seem to be required
-    // this.root.updateMatrixWorld();
+  if (this.weapon === 'plasma') {
+    if (now - this.lastFireTime > s.Ship.fireInterval) {
+      // @todo this doesn't seem to be required
+      // this.root.updateMatrixWorld();
 
-    var leftPos = this.offsetBulletLeft.clone().applyMatrix4(this.root.matrixWorld);
-    var rightPos = this.offsetBulletRight.clone().applyMatrix4(this.root.matrixWorld);
+      var leftPos = this.offsetBulletLeft.clone().applyMatrix4(this.root.matrixWorld);
+      var rightPos = this.offsetBulletRight.clone().applyMatrix4(this.root.matrixWorld);
 
+      var packet = {
+        vl: this.body.velocity,
+        pos: [leftPos, rightPos],
+        rot: this.root.quaternion,
+        weapon: 'plasma'
+      };
+      this.spawnBullets(packet);
+
+      this.trigger('fireWeapon', packet);
+
+      this.lastFireTime = s.game.now;
+    }
+  }
+  else if (this.weapon === 'laser') {
     var packet = {
-      vl: this.body.velocity,
-      pos: [leftPos, rightPos],
-      rot: this.root.quaternion,
-      weapon: 'plasma' // @todo don't hardcode
+      weapon: 'laser'
     };
-    this.spawnBullets(packet);
 
-    this.trigger('fireWeapon', packet);
+    this.leftLaser.root.visible = true;
+    this.rightLaser.root.visible = true;
 
-    this.lastFireTime = s.game.now;
+    this.trigger('showLaser', packet);
+
+    this.firingLaser = true;
+  }
+};
+
+s.Ship.prototype.stopFiring = function() {
+  if (this.weapon === 'laser') {
+    this.leftLaser.root.visible = false;
+    this.rightLaser.root.visible = false;
+
+    this.trigger('hideLaser');
+
+    this.firingLaser = false;
   }
 };
 
@@ -261,6 +305,10 @@ s.Ship.prototype.update = function(now, delta) {
     showGunLights = true;
     gunLightFadeScale = 1 - timeSinceLastRetroThrust / s.Ship.fireInterval;
   }
+  else if (this.firingLaser) {
+    showGunLights = true;
+    gunLightFadeScale = 1;
+  }
 
   if (showGunLights) {
     // Light in the front
@@ -274,6 +322,43 @@ s.Ship.prototype.update = function(now, delta) {
     // Hide them
     this.leftGunFlare.scale.set(0, 0, 0);
     this.rightGunFlare.scale.set(0, 0, 0);
+  }
+
+  if (this.firingLaser) {
+    var camera = s.game.camera;
+    var cameraPosition = camera.parent.localToWorld(camera.position.clone());
+
+    var itemsAndPlayers = [];
+    for (var id in s.game.player.client.players) {
+      var player = s.game.player.client.players[id];
+      if (player) {
+        itemsAndPlayers.push(player.ship.root);
+      }
+    }
+
+    // Fire a ray for the left laser
+    var from = this.root.localToWorld(this.offsetGunLeft.clone());
+    var to = this.root.localToWorld(this.leftLaser.root.position.clone());
+    var dir = to.sub(cameraPosition).normalize()
+    var raycaster = new THREE.Raycaster(from, dir);
+    var intersects = raycaster.intersectObjects(itemsAndPlayers, true);
+
+    // Check for intersection with game objects
+    if (intersects.length) {
+      var intersection = intersects[0];
+      var mesh = intersection.object;
+
+      if (mesh === this.previousLaserHitMesh) {
+        self.trigger('weaponHit', {
+          body: mesh,
+          time: delta,
+          weapon: 'laser'
+        });
+      }
+
+      // Store mesh
+      this.previousLaserHitMesh = mesh;
+    }
   }
 };
 

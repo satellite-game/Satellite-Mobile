@@ -5,7 +5,7 @@ s.Weapon.Plasma = function(options) {
   this.color = this.colors[options.team];
 
   // A 3D root object
-  this.root = new THREE.Object3D();
+  this.root = new THREE.Group();
 
   // With a sprite in it
   var sprite = new THREE.Sprite(new THREE.SpriteMaterial({

@@ -122,6 +122,9 @@ s.GameObject.prototype.init = function() {
     // Store team and name on object itself
     this.root.name = this.toString();
     this.root.team = this.team;
+
+    // Store instance for laser hits
+    this.root.instance = this;
   }
 
   if (this.body) {

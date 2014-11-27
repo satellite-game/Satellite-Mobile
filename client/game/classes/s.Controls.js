@@ -107,6 +107,9 @@ s.Controls.prototype.update = function(time, delta) {
     // this.emit('fire');
     this.ship.fire();
   }
+  else {
+    this.ship.stopFiring();
+  }
 
   if (showBackCam) {
     // @todo animate along top
