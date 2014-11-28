@@ -331,7 +331,7 @@ s.Ship.prototype.update = function(now, delta) {
     var itemsAndPlayers = [];
     for (var id in s.game.player.client.players) {
       var player = s.game.player.client.players[id];
-      if (player) {
+      if (player && player.ship) {
         itemsAndPlayers.push(player.ship.root);
       }
     }

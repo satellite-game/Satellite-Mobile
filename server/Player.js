@@ -57,7 +57,7 @@ function Player(options) {
     player.emit('weaponHit', {
       targetId: data.targetId,
       weapon: data.weapon,
-      amount: 10 // @todo don't hardcode
+      time: data.time
     });
   }
 

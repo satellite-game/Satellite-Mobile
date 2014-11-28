@@ -1,6 +1,7 @@
 var shortId = require('shortid');
 var Maps = require('./maps');
 var EventEmitter = require('events').EventEmitter;
+var config = require('./config');
 
 /*
   Manage game logic
@@ -126,6 +127,23 @@ Match.prototype.handle = function(eventName, player, data) {
   if (eventName === 'weaponHit') {
     var targetId = data.targetId;
 
+    var weaponInfo = config.weapons[data.weapon];
+
+    if (!config.weapons[data.weapon]) {
+      console.error('Got hit with unrecognized weapon: %s', data.weapon);
+      return;
+    }
+
+    var hitHp = weaponInfo.hp;
+    var time = weaponInfo.time;
+
+    if (time) {
+      if (!data.time) {
+        console.error('Got hit for weapon that has time parameter, but packet had no time', data);
+      }
+      hitHp = (hitHp / time) * data.time;
+    }
+
     // Find out if it's an item or a player
     var targetItem = this.map.items[targetId];
     var targetPlayer = this.getPlayer(targetId);
@@ -135,7 +153,8 @@ Match.prototype.handle = function(eventName, player, data) {
       }
 
       // @todo make an instance and give takeHit method
-      targetItem.hp -= 10;
+      targetItem.hp -= hitHp;
+
       if (targetItem.hp <= 0) {
         console.log('Item %s was destroyed', targetId);
 
@@ -161,7 +180,7 @@ Match.prototype.handle = function(eventName, player, data) {
         return;
       }
 
-      targetPlayer.takeHit(10, player.id);
+      targetPlayer.takeHit(hitHp, player.id);
       if (targetPlayer.hp <= 0) {
         console.log('Player %s was killed', targetPlayer);
 
